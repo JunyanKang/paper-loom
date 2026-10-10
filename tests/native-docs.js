@@ -26,7 +26,7 @@ for(const lang of ['zh','en']){
  L.voice.dismissPanel(reader);images.push(await capture(rd.documentElement,'floating-'+lang));
  L.voice.showPanel(reader);images.push(await capture(rd.documentElement,'listening-'+lang));L.voice.dismissPanel(reader);
  L.showHome(reader,rd);await U.pageQueue;await ui.waitMotion();images.push(await capture(ui.panel,'home-'+lang));L.voice.dismissPanel(reader);await ui.waitMotion();
- await L.showSettings(null,d);let f=d.querySelector('.cl-settings');f._plSelect('voice');await wait(700);images.push(await capture(f,'voices-'+lang));f._clClose();await wait(350);
+ await L.showSettings(null,d);let f=d.querySelector('.cl-settings');f._plSelect('voice');await wait(700);images.push(await capture(f,'voices-'+lang));f._plSelect('appearance');await wait(300);images.push(await capture(f,'appearance-'+lang));f._clClose();await wait(350);
  const dialog=U.dialog(rd,lang==='zh'?'引文与稍后读':'References & reading list');await U.pageQueue;
  const record={title:titles[0],year:'2026',author:'Maya Chen; Oliver Reed; Sofia Martin',authors:combos[0].map(i=>({given:people[i][0],family:people[i][1]})),journal:'Paper Loom demonstration library',abstract:parent.getField('abstractNote'),verified:false};
  const card=U.card(rd,record,reader,{context:{parentID:parent.id},detailed:true});dialog.root.append(card);await wait(250);U.abstractPopover(rd,card,card.querySelector('.cl-title'),()=>record);await wait(150);const summary=card.querySelector('.cl-summary');if(summary){summary.tabIndex=-1;summary.focus();summary.dispatchEvent(new rd.defaultView.KeyboardEvent('keydown',{key:'Tab',bubbles:true}));}await wait(400);images.push(await capture(rd.documentElement,'references-'+lang));rd._clAbstract?.close(true);dialog.close();await wait(400);

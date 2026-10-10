@@ -352,7 +352,7 @@ var PaperVoice = {
     if(this.caption)try{this.applyCaptionTypography(this.caption.box);this.positionTranslation(this.caption);}catch(_){this.caption=null;}
     for(const reader of Zotero.Reader._readers)try{for(const box of reader._iframeWindow?.document.querySelectorAll('.pv-selection-translation')||[])this.applyCaptionTypography(box);}catch(_){}
   },
-  surfaceOpacity() {return 1-Math.max(0,Math.min(40,Number(this.get('surfaceTransparency',0))||0))/100;},
+  surfaceOpacity() {return 1-Math.max(0,Math.min(80,Number(this.get('surfaceTransparency',0))||0))/100;},
   async setCaptionPlacement(value) {
     if(!['above','below'].includes(value))return;
     this.set('captionPlacement',value);Services.prefs.savePrefFile(null);this.syncSettings();
@@ -361,7 +361,7 @@ var PaperVoice = {
     if(value==='above'){const match=this.findSentence(c.reader,c.unit);if(match)await this.focusReadingPosition(match);}
     if(this.caption===c)this.positionTranslation(c);
   },
-  setSurfaceTransparency(value) {this.set('surfaceTransparency',Math.max(0,Math.min(40,Math.round(Number(value)||0))));this.syncSettings();if(this.caption)this.caption.box.style.setProperty('--pv-caption-opacity',String(this.surfaceOpacity()));},
+  setSurfaceTransparency(value) {this.set('surfaceTransparency',Math.max(0,Math.min(80,Math.round(Number(value)||0))));this.syncSettings();if(this.caption)this.caption.box.style.setProperty('--pv-caption-opacity',String(this.surfaceOpacity()));},
   settingsVoiceLanguage() {return this.get('readTranslation',false)?(this.translationVoiceLanguage()||this.speechLanguage()):this.speechLanguage();},
   settingsVoice() {const language=this.settingsVoiceLanguage();return this.get('readTranslation',false)?this.get('voiceFor_'+language,PaperVoiceCore.voices.find(v=>v.language===language).id):this.get('voice','af_heart');},
   setReadTranslation(enabled) {
@@ -409,7 +409,6 @@ var PaperVoice = {
       if(find('provider'))find('provider').value=this.get('translationProvider','tencenttransmart');
       if(action?.('configureLLM')){action('configureLLM').hidden=this.get('translationProvider','tencenttransmart')!=='llm';find('llmSummary').textContent=this.t('配置大模型')+' · '+this.llmConfig().name;}
       if(find('target'))find('target').value=this.get('translationTarget','zh-Hans');
-      find('voiceSummary').textContent=PaperVoiceCore.voices.find(v=>v.id===this.settingsVoice())?.label||'声音设置';
     }
     this.updatePanels();
   },
@@ -674,9 +673,10 @@ var PaperVoice = {
     }catch(_){this.engineFolderError=true;return false;}
     finally{this.engineFolderTesting=false;if(!this.dead)this.syncSettings();}
   },
-  async testEngineFolder(path) {
+  async testEngineFolder(path,{cancelled=()=>false}={}) {
     // Isolated from the playback worker: a failed candidate cannot stop reading
     // or replace the last working path. Validate synthesis, not just filenames.
+    if(cancelled())throw new Error('Voice test cancelled');
     const required=['worker.py','models/kokoro-v1.0.onnx','models/voices-v1.0.bin',Zotero.isWin?'python/python.exe':'python/bin/python3'];
     for(const name of required)if(!(await IOUtils.exists(PathUtils.join(path,...name.split('/')))))throw new Error('Incomplete voices');
     const { Subprocess }=ChromeUtils.importESModule('resource://gre/modules/Subprocess.sys.mjs');
@@ -685,7 +685,7 @@ var PaperVoice = {
       const timeout=new Promise((_,reject)=>{timer=this.host.setTimeout(()=>{expired=true;proc?.kill();reject(new Error('Voice test timed out'));},120000);});
       const test=(async()=>{
         proc=await Subprocess.call({command:PathUtils.join(path,...required[3].split('/')),arguments:['-E','-s','-B','-X','utf8',PathUtils.join(path,'worker.py')],environment:this.workerEnvironment(),stderr:'pipe'});
-        if(expired||this.dead){proc.kill();throw new Error('Voice test cancelled');}
+        if(expired||this.dead||cancelled()){proc.kill();throw new Error('Voice test cancelled');}
         this.engineTestProcess=proc;
         (async()=>{try{while(await proc.stderr.readString()) {}}catch(_){}})();
         let buffer='',requested=false;

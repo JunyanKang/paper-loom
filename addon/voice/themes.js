@@ -13,12 +13,15 @@ var PaperVoiceThemes = {
     {id:'botanical',name:'靛蓝',paper:'#172c49',surface:'#223c5f',ink:'#f2f6fd',muted:'#ceddf4',accent:'#b7d6fb',soft:'#2d4769',line:'#4b6484',focus:'#b7d6fb',highlight:'#8caedd40',art:'indigo.jpg',mask:.52,dark:true},
     {id:'aurora',name:'极光',paper:'#14292d',surface:'#1d383e',ink:'#ecf9f6',muted:'#c2e2dc',accent:'#8adccb',soft:'#29464b',line:'#426469',focus:'#8adccb',highlight:'#71c2ae3c',art:'aurora.jpg',mask:.55,dark:true}
   ],
+  globalBackgrounds:[{id:'mist',theme:'tidal',name:'雾蓝',art:'global-mist.svg'},{id:'sand',theme:'porcelain',name:'暖沙',art:'global-sand.svg'},{id:'grove',theme:'inkstone',name:'林间',art:'global-grove.svg'},{id:'night',theme:'midnight',name:'夜空',art:'global-night.svg'}],
+  globalBackground(){return this.globalBackgrounds.find(b=>b.id===this.get('globalBackground',''));},
+  setGlobalBackground(id){const preset=this.globalBackgrounds.find(b=>b.id===id);if(!preset)return;this.set('theme',preset.theme);this.set('themeImageEnabled',false);this.set('globalBackground',id);this.syncSettings();},
   theme() {return this.themes.find(t=>t.id===this.get('theme','tidal'))||this.themes.find(t=>t.id==='tidal');},
-  themeImage() {return this.get('themeImageEnabled',false)&&this.customThemeImage?this.customThemeImage:(this.theme().art?this.assetURI+'themes/'+this.theme().art:'');},
-  setTheme(id) {if(!this.themes.some(t=>t.id===id))return;this.set('theme',id);this.set('themeImageEnabled',false);this.syncSettings();},
+  themeImage() {return this.get('themeImageEnabled',false)&&this.customThemeImage?this.customThemeImage:(this.globalBackground()?.art?this.assetURI+'themes/'+this.globalBackground().art:this.theme().art?this.assetURI+'themes/'+this.theme().art:'');},
+  setTheme(id) {if(!this.themes.some(t=>t.id===id))return;this.set('globalBackground','');this.set('theme',id);this.set('themeImageEnabled',false);this.syncSettings();},
   applyTheme(root,caption=false) {
     const t=this.theme(),image=this.themeImage(),rgb=t.paper.match(/\w\w/g).map(x=>parseInt(x,16)).join(','),reduced=root.ownerDocument.defaultView.matchMedia('(prefers-reduced-transparency: reduce)').matches;
-    root.dataset.theme=t.id;root.dataset.themeTone=t.dark?'dark':'light';
+    root.dataset.backgroundMode=(this.get('themeImageEnabled',false)&&this.customThemeImage)||this.globalBackground()?'global':'theme';root.dataset.theme=t.id;root.dataset.themeTone=t.dark?'dark':'light';
     for(const key of ['paper','surface','ink','muted','accent','soft','line','focus','highlight'])root.style.setProperty('--pv-'+key,t[key]);
     // Apply user transparency to the entire decorative layer, never to text or controls.
     const custom=this.get('themeImageEnabled',false)&&!!this.customThemeImage;
@@ -30,7 +33,7 @@ var PaperVoiceThemes = {
     root.style.setProperty('--pv-small-shadow',t.dark?'0 5px 16px #080d1838,0 1px 3px #080d1826':'0 5px 16px #1827381a,0 1px 3px #18273812');
     root.style.setProperty('--pv-art',image&&!reduced?`url("${image}")`:'none');
     root.style.setProperty('--pv-art-opacity',String(alpha));
-    root.style.setProperty('--pv-image-mask',`rgba(${rgb},${caption ? .97 : custom ? .94 : t.mask})`);
+    root.style.setProperty('--pv-image-mask',`rgba(${rgb},${caption ? .97 : custom||this.globalBackground() ? .70 : t.mask})`);
     root.style.setProperty('--pv-text-halo','none');
     root.style.setProperty('--pv-icon-filter',t.dark?'brightness(0) invert(.92)':'brightness(0) opacity(.78)');
     root.style.setProperty('--pv-primary-ink',t.dark?t.paper:'#ffffff');
@@ -41,12 +44,11 @@ var PaperVoiceThemes = {
   },
   syncTheme(root) {
     this.applyTheme(root);
-    for(const b of root.querySelectorAll('[data-theme-choice]')){const selected=b.dataset.themeChoice===this.theme().id&&!this.get('themeImageEnabled',false);b.setAttribute('aria-pressed',String(selected));b.tabIndex=b.dataset.themeChoice===this.theme().id?0:-1;}
+    for(const b of root.querySelectorAll('[data-theme-choice]')){const selected=b.dataset.themeChoice===this.theme().id&&!this.get('themeImageEnabled',false)&&!this.globalBackground();b.setAttribute('aria-pressed',String(selected));b.tabIndex=b.dataset.themeChoice===this.theme().id?0:-1;}
     if(root._pvLastTheme!==this.theme().id){root._pvLastTheme=this.theme().id;root._pvRevealTheme?.();}
     const find=name=>root.querySelector(`[data-field="${name}"]`),image=this.customThemeImage;
-    if(find('customBackground')){find('customBackground').hidden=!image;find('customBackground').setAttribute('aria-pressed',String(!!image&&this.get('themeImageEnabled',false)));}
-    if(find('removeBackground'))find('removeBackground').hidden=!image;
-    const row=root.querySelector('.pv-background-row');if(row)row.dataset.hasImage=String(!!image);
+    for(const b of root.querySelectorAll('[data-global-background]'))b.setAttribute('aria-pressed',String(b.dataset.globalBackground===this.get('globalBackground','')&&!this.get('themeImageEnabled',false)));
+    const custom=find('customBackground');if(custom){custom.dataset.hasImage=String(!!image);custom.setAttribute('aria-pressed',String(!!image&&this.get('themeImageEnabled',false)));custom.setAttribute('aria-label',this.t(image?'删除背景图片':'导入背景图片'));const preview=custom.querySelector('.pv-theme-swatch');preview.style.backgroundImage=image?`url("${image}")`:'none';}
     if(this.caption)this.applyTheme(this.caption.box,true);
     for(const selection of this.selectionContexts?.values?.()||[]){
       const card=selection.button?.closest('.pv-selection-card');

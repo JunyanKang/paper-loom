@@ -16,7 +16,7 @@ var LoomRuntime = {
     this.emit(await IOUtils.exists(command)?'installed':'idle',await IOUtils.exists(command)?'已找到离线声音，可试听或检查。':this.platform.supported?'可在这里安装离线声音。':this.platform.reason);
   },
   subscribe(fn){this.listeners.add(fn);fn(this.state);return ()=>this.listeners.delete(fn);},
-  emit(phase,message,progress=this.state.progress) {this.state={phase,message,progress};for(const fn of this.listeners)try{fn(this.state);}catch(e){Zotero.logError(e);}},
+  emit(phase,message,progress=this.state.progress) {if(['installed','ready'].includes(phase))this.installed=true;else if(phase==='idle')this.installed=false;this.state={phase,message,progress,updatedAt:this.state.phase===phase&&this.state.message===message?this.state.updatedAt:Date.now()};for(const fn of this.listeners)try{fn(this.state);}catch(e){Zotero.logError(e);}},
   check(job){if(this.dead||job.cancelled)throw Error('下载已取消，已完成的分片会保留。');},
   async hash(path) {
     const stream=Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
@@ -28,7 +28,7 @@ var LoomRuntime = {
   async install() {
     if(this.job)return this.job.promise;
     if(!this.catalog)throw Error(this.platform.reason);
-    const job={cancelled:false};this.job=job;
+    const job={kind:'install',cancelled:false};this.job=job;
     job.promise=this.run(job).catch(e=>{this.emit(job.cancelled?'cancelled':'error',e.message,0);throw e;}).finally(()=>{if(this.job===job)this.job=null;this.cancelDownload=null;this.emit(this.state.phase,this.state.message);});
     return job.promise;
   },
@@ -49,7 +49,7 @@ var LoomRuntime = {
             for(let attempt=0;attempt<3;attempt++) {
               this.check(job);
               try {
-                await Zotero.HTTP.download(part.url,partial,{timeout:180000,cancellerReceiver:cancel=>{this.cancelDownload=cancel;if(job.cancelled)cancel();},onProgress:n=>{if(n>part.bytes){this.cancelDownload?.();return;}this.emit('downloading','正在下载'+(pkg.name.startsWith('voices')?'声音文件':'声音引擎')+' · '+Math.round((completed+n)/1024**2)+' / '+Math.round(total/1024**2)+' MB',Math.min(.68,(completed+n)/total*.68));}});
+                await Zotero.HTTP.download(part.url,partial,{timeout:180000,cancellerReceiver:cancel=>{this.cancelDownload=cancel;if(job.cancelled)cancel();},onProgress:n=>{if(n>part.bytes){this.cancelDownload?.();return;}this.emit('downloading','正在下载 · '+Math.round((completed+n)/1024**2)+' / '+Math.round(total/1024**2)+' MB',Math.min(.68,(completed+n)/total*.68));}});
                 this.check(job);
                 if(!await this.valid(partial,part))throw Error('分片校验失败，请重试。');
                 await IOUtils.move(partial,path,{noOverwrite:false});lastError=null;break;
@@ -57,7 +57,7 @@ var LoomRuntime = {
             }
             if(lastError)throw lastError;
           }
-          completed+=part.bytes;this.emit('downloading','已下载 '+Math.round(completed/1024**2)+' / '+Math.round(total/1024**2)+' MB',completed/total*.68);
+          completed+=part.bytes;this.emit('downloading','正在下载 · '+Math.round(completed/1024**2)+' / '+Math.round(total/1024**2)+' MB',completed/total*.68);
         }
         this.emit('verifying','正在校验声音包…',.70);
         const assembling=archive+'.partial';await IOUtils.write(assembling,new Uint8Array());
@@ -96,7 +96,7 @@ var LoomRuntime = {
       const worker=await (await Zotero.getMainWindow().fetch(this.owner.rootURI+'shared/worker.py')).text();
       await IOUtils.writeUTF8(PathUtils.join(staging,'engine','worker.py'),worker);
       this.emit('testing','正在实际合成声音，确认可以使用…',.94);
-      await this.owner.voice.testEngineFolder(PathUtils.join(staging,'engine'));
+      await this.owner.voice.testEngineFolder(PathUtils.join(staging,'engine'),{cancelled:()=>job.cancelled||this.dead});
       this.check(job);
       const destination=PathUtils.join(this.root,'engines',id);
       await IOUtils.move(staging,destination);staging=null;
@@ -110,10 +110,16 @@ var LoomRuntime = {
     }finally{if(staging)await IOUtils.remove(staging,{recursive:true,ignoreAbsent:true});}
   },
   async diagnose() {
-    if(this.job||this.state.phase==='testing')throw Error('请先等待当前检查或下载完成。');
-    this.emit('testing','正在检查当前声音并实际合成…',0);
-    try{await this.owner.voice.testEngineFolder(this.owner.voice.engineRoot());this.emit('ready','声音检查通过，已成功生成测试音频。',1);return true;}
-    catch(e){this.emit('error','声音不可用：'+e.message,0);throw e;}
+    if(this.job)throw Error('请先等待当前检查或下载完成。');
+    const job={kind:'check',cancelled:false};this.job=job;
+    job.promise=(async()=>{
+      this.emit('testing','正在检查声音…',0);
+      await this.owner.voice.testEngineFolder(this.owner.voice.engineRoot(),{cancelled:()=>job.cancelled||this.dead});
+      if(job.cancelled||this.dead)throw Error('声音检查已取消');
+      this.emit('ready','声音检查通过',1);return true;
+    })().catch(e=>{this.emit(job.cancelled?'cancelled':'error',job.cancelled?'声音检查已取消':'声音检查未通过，请修复声音。',0);throw e;})
+      .finally(()=>{if(this.job===job)this.job=null;this.emit(this.state.phase,this.state.message);});
+    return job.promise;
   },
   async stop(){this.dead=true;this.cancel();await this.job?.promise.catch(()=>{});this.listeners.clear();}
 };

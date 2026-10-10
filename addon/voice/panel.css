@@ -194,7 +194,7 @@
 .pv-theme-choices .pv-theme-swatch{height:48px;padding:10px 8px 23px;gap:4px;border-radius:10px;isolation:isolate;overflow:hidden;box-shadow:inset 0 0 0 1px #7d878922}
 .pv-theme-swatch::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--pv-swatch-mask);pointer-events:none}
 .pv-theme-choices button>span+span{margin-top:5px;overflow:hidden;text-overflow:ellipsis;line-height:16px}
-.pv-theme-choices button[aria-pressed=true] .pv-theme-swatch::after{right:4px;top:4px;bottom:auto;background:var(--pv-swatch-accent);color:var(--pv-swatch-ink)}
+.pv-theme-choices button[aria-pressed=true] .pv-theme-swatch::after{left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);background:var(--pv-swatch-accent);color:var(--pv-swatch-ink)}
 .pv-theme-choices button:hover .pv-theme-swatch{box-shadow:inset 0 0 0 1px var(--pv-swatch-accent)}
 .pv-shell[data-theme] .pv-settings-tabs,.pv-shell[data-theme] .pv-mode-options{background:color-mix(in srgb,var(--pv-ink) 5%,transparent)}
 .pv-shell[data-theme] .pv-settings-tabs button[aria-selected=true],.pv-shell[data-theme] .pv-mode-options button[aria-pressed=true]{background:var(--pv-surface);color:var(--pv-accent);box-shadow:0 2px 6px color-mix(in srgb,var(--pv-ink) 8%,transparent)}
@@ -299,3 +299,19 @@
 .pv-nav-popover{padding:0;pointer-events:none}.pv-nav-card{display:contents}.pv-nav-scopes{position:absolute;bottom:calc(100% + 5px);right:-5px;box-sizing:border-box;width:41px;padding:5px 5px 2px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;pointer-events:auto;scrollbar-width:none}
 .pv-nav-scopes .pv-nav-row{display:contents}.pv-quick .pv-nav-row button{width:31px;min-width:31px;height:31px;padding:0;justify-content:center}
 .pv-nav-popover .pv-stop-row{position:absolute;top:calc(100% + 5px);right:-5px;box-sizing:border-box;display:flex;width:41px;padding:2px 5px 5px;margin:0;pointer-events:auto}
+
+/* Theme cards stay expanded; previews contain no printed labels. */
+.pv-theme-choices .pv-theme-swatch{height:40px;padding:9px;border-radius:9px}
+.pv-theme-choices{padding:3px 0;gap:7px}
+.pv-global-backgrounds{margin-top:8px;margin-bottom:8px}
+.pv-global-backgrounds .pv-theme-swatch{padding:0;background-color:var(--pv-soft);--pv-swatch-accent:var(--pv-accent);--pv-swatch-ink:var(--pv-primary-ink)}
+.pv-global-backgrounds .pv-theme-swatch::before{display:none}
+.pv-custom-background .pv-theme-swatch{align-items:center;justify-content:center}
+.pv-custom-background .pv-theme-swatch>.pv-icon{width:23px;height:23px;opacity:.8}
+.pv-custom-background[data-has-image=true] .pv-icon{display:none}
+.pv-theme-hint:empty{display:none}
+.pv-companion-preview{width:30px;height:30px;min-width:30px;padding:4px!important;background:transparent!important;display:flex;align-items:center;justify-content:center}
+.pv-companion-preview>.pv-icon{width:22px;height:22px}
+
+/* Artwork can extend past its registered body box without moving the hit target. */
+.pv-shell,.pv-mini,.pv-orb,.pv-mascot-interaction{overflow:visible}

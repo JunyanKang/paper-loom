@@ -27,8 +27,8 @@ var CiteLensThemes = {
     if(!png&&!jpg&&!webp)throw Error('请选择 PNG、JPG 或 WebP 图片');
     const win=Zotero.getMainWindow(),url=win.URL.createObjectURL(new win.Blob([bytes],{type:png?'image/png':jpg?'image/jpeg':'image/webp'}));
     try{const image=new win.Image();image.src=url;await image.decode();if(!image.width||!image.height||image.width*image.height>24000000)throw Error('图片不能超过 2400 万像素');
-      const canvas=win.document.createElementNS('http://www.w3.org/1999/xhtml','canvas');canvas.width=768;canvas.height=1024;const ctx=canvas.getContext('2d'),scale=Math.max(canvas.width/image.width,canvas.height/image.height),w=canvas.width/scale,h=canvas.height/scale;ctx.fillStyle=this.resolve(CiteLensServices.state.settings.theme).paper;ctx.fillRect(0,0,768,1024);ctx.drawImage(image,(image.width-w)/2,(image.height-h)/2,w,h,0,0,768,1024);
-      const data=canvas.toDataURL('image/jpeg',.86),out=Uint8Array.from(win.atob(data.split(',')[1]),x=>x.charCodeAt(0));await IOUtils.write(this.imagePath(),out,{tmpPath:this.imagePath()+'.tmp'});this.customImage=data;CiteLensServices.state.settings.customThemeImage=true;await CiteLensServices.persist();this.refresh();
+      const canvas=win.document.createElementNS('http://www.w3.org/1999/xhtml','canvas'),scale=Math.min(1,1536/Math.max(image.width,image.height));canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));const ctx=canvas.getContext('2d');ctx.fillStyle=this.resolve(CiteLensServices.state.settings.theme).paper;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+      const data=canvas.toDataURL('image/jpeg',.86),out=Uint8Array.from(win.atob(data.split(',')[1]),x=>x.charCodeAt(0));await IOUtils.write(this.imagePath(),out,{tmpPath:this.imagePath()+'.tmp'});this.customImage=data;CiteLensServices.state.settings.customThemeImage=true;CiteLensServices.state.settings.globalBackground='';await CiteLensServices.persist();this.refresh();
     }finally{win.URL.revokeObjectURL(url);}
   },
   async removeImage(){await IOUtils.remove(this.imagePath(),{ignoreAbsent:true});this.customImage=null;CiteLensServices.state.settings.customThemeImage=false;await CiteLensServices.persist();this.refresh();},
@@ -47,8 +47,9 @@ var CiteLensThemes = {
     }
     const settings=CiteLensServices.state.settings,t=this.resolve(settings.theme,state.media.matches),html=doc.documentElement;
     if(html.dataset.clTheme!==t.id)html.dataset.clTheme=t.id;const tone=t.dark?'dark':'light';if(html.dataset.clTone!==tone)html.dataset.clTone=tone;
+    const global=(this.globalBackgrounds||[]).find(b=>b.id===settings.globalBackground),custom=settings.customThemeImage&&this.customImage,image=custom||(global?this.globalAssetURI+global.art:CiteLens.assetURI+'themes/'+t.art);html.dataset.clBackgroundMode=custom||global?'global':'theme';
     const rgb=t.paper.match(/\w\w/g).map(x=>parseInt(x,16)).join(',');
-    const tokens={'edge-mask':'linear-gradient(transparent,transparent)',bg:t.surface,paper:t.paper,ink:t.ink,muted:t.muted,line:t.line,soft:t.soft,accent:t.accent,'on-accent':t.dark?t.paper:'#fff',error:t.dark?'#ffb5ac':'#a32d27',shadow:t.dark?'0 12px 32px #080d1859,0 2px 6px #080d183d':'0 12px 32px #18273824,0 2px 6px #18273824','surface-rim':t.dark?'#ffffff26':t.ink+'24','rim-light':t.dark?'#ffffff22':'#ffffffd9',veil:t.dark?'#0007':'#182d264d',knob:t.surface,scheme:t.dark?'dark':'light',art:!state.reduce.matches&&(settings.customThemeImage&&this.customImage||CiteLens.assetURI)?'url("'+(settings.customThemeImage&&this.customImage||CiteLens.assetURI+'themes/'+t.art)+'")':'none',mask:'rgba('+rgb+','+(settings.customThemeImage ? .94 : t.mask)+')','surface-opacity':state.reduce.matches?'1':String(1-Math.max(0,Math.min(80,Number(settings.transparency)||0))/100)};
+    const tokens={'edge-mask':'linear-gradient(transparent,transparent)',bg:t.surface,paper:t.paper,ink:t.ink,muted:t.muted,line:t.line,soft:t.soft,accent:t.accent,'on-accent':t.dark?t.paper:'#fff',error:t.dark?'#ffb5ac':'#a32d27',shadow:t.dark?'0 12px 32px #080d1859,0 2px 6px #080d183d':'0 12px 32px #18273824,0 2px 6px #18273824','surface-rim':t.dark?'#ffffff26':t.ink+'24','rim-light':t.dark?'#ffffff22':'#ffffffd9',veil:t.dark?'#0007':'#182d264d',knob:t.surface,scheme:t.dark?'dark':'light',art:!state.reduce.matches&&image?'url("'+image+'")':'none',mask:'rgba('+rgb+','+(custom||global ? .70 : t.mask)+')','surface-opacity':state.reduce.matches?'1':String(1-Math.max(0,Math.min(80,Number(settings.transparency)||0))/100)};
     for(const [key,value] of Object.entries(tokens))if(html.style.getPropertyValue('--cl-'+key)!==value)html.style.setProperty('--cl-'+key,value);
   },
   refresh(){if(typeof CiteLensI18n!=='undefined')CiteLensI18n.refresh();for(const doc of this.documents.keys())try{CiteLensUI.appearance(doc);}catch(_){this.release(doc);}},
@@ -56,7 +57,7 @@ var CiteLensThemes = {
     if(typeof CiteLensI18n!=='undefined')CiteLensI18n.release(doc);
     try{doc._clScrollEdges?.dispose();}catch(_){}if(typeof CiteLensControls!=='undefined')CiteLensControls.release(doc);
     const state=this.documents.get(doc);if(!state)return;this.documents.delete(doc);
-    try{state.media.removeEventListener('change',state.change);state.reduce.removeEventListener('change',state.change);doc.defaultView.removeEventListener('pagehide',state.leave);const html=doc.documentElement;html.removeAttribute('data-cl-theme');html.removeAttribute('data-cl-tone');for(const name of [...html.style])if(name.startsWith('--cl-'))html.style.removeProperty(name);}catch(_){}
+    try{state.media.removeEventListener('change',state.change);state.reduce.removeEventListener('change',state.change);doc.defaultView.removeEventListener('pagehide',state.leave);const html=doc.documentElement;html.removeAttribute('data-cl-theme');html.removeAttribute('data-cl-tone');html.removeAttribute('data-cl-background-mode');for(const name of [...html.style])if(name.startsWith('--cl-'))html.style.removeProperty(name);}catch(_){}
   },
   stop(){for(const doc of [...this.documents.keys()])this.release(doc);}
 };

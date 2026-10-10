@@ -2,6 +2,17 @@
 
 [Home](README.en.md) · [简体中文](CHANGELOG.md)
 
+## 1.0.3 · 2026-10-10
+
+- Keep all theme previews expanded without printed labels. Add four global backgrounds and a custom card for importing, previewing, and removing an image.
+- Centre custom backgrounds in each window and preserve imported image proportions. Consolidate shared appearance controls.
+- Remove checkmarks from every dropdown; selected rows use a background highlight.
+- Fix companion preview from settings and replace its text with an icon that cycles through eight performances.
+
+- Keep offline voice actions below the heading, with progress and status underneath and matching repair/check icons. Checks can be cancelled; success clears after five seconds and failure keeps a repair prompt. Remove duplicate location and platform labels.
+- Regroup reading and translation settings and align font menus. Remove redundant listening footer controls and use an icon for restoring defaults.
+- Expand the companion canvas and preserve limbs across sprite boundaries. Prevent window animations from capturing and warping underlying PDF text.
+
 ## 1.0.2 · 2026-10-10
 
 - Reading defaults to English; voice names use language, gender, and number. Tencent translation uses the full-color QQ penguin.

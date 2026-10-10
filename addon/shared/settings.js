@@ -49,7 +49,7 @@ var LoomSettings = {
   },
   connect(owner) {
     this.owner=owner;const V=owner.voice,R=owner.referencesScope,T=R.CiteLensTranslation,S=R.CiteLensServices,rawGet=V.get.bind(V),rawSet=V.set.bind(V);
-    const appearance={theme:'theme',interfaceLanguage:'interfaceLanguage',surfaceTransparency:'transparency',themeImageEnabled:'customThemeImage'};
+    const appearance={theme:'theme',interfaceLanguage:'interfaceLanguage',surfaceTransparency:'transparency',themeImageEnabled:'customThemeImage',globalBackground:'globalBackground'};
     const aliases={captionSize:'translationSize',captionFont:'translationFont'};
     V.get=(key,fallback)=>aliases[key]?T.get(aliases[key],fallback):this.isShared(key)?T.get(key,fallback):appearance[key]&&S.state?.settings?(S.state.settings[appearance[key]]??rawGet(key,fallback)):rawGet(key,fallback);
     V.set=(key,value)=>{
@@ -58,6 +58,9 @@ var LoomSettings = {
       if(appearance[key]&&S.state?.settings){S.state.settings[appearance[key]]=value;S.persist().catch(e=>Zotero.logError(e));R.CiteLensThemes.refresh();}else rawSet(key,value);
     };
     V.themeImagePath=()=>R.CiteLensThemes.imagePath();
+    R.CiteLensThemes.globalBackgrounds=V.globalBackgrounds;R.CiteLensThemes.globalAssetURI=V.assetURI+'themes/';
+    V.importThemeImage=path=>R.CiteLensThemes.importImage(path);
+    V.removeThemeImage=()=>R.CiteLensThemes.removeImage();
     const refresh=R.CiteLensThemes.refresh.bind(R.CiteLensThemes);
     R.CiteLensThemes.refresh=()=>{refresh();V.customThemeImage=R.CiteLensThemes.customImage;V.syncSettings();};
     // One provider catalog, one credential realm and one translation execution path.

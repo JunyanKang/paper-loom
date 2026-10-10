@@ -18,14 +18,18 @@ Do not include keys in feedback screenshots. Keys are stored locally using Zoter
 
 Reading defaults to English; Mandarin, Japanese, and French are also available. Voices use a language, gender, and number, such as “US · Female 1” or “UK · Male 1”. Choose a voice, preview it, and adjust its speed.
 
-Below the voice controls, download the matching engine, cancel/resume, check voices, or view the installation location. Import an existing engine with the folder button. Unchanged voice packages need not be downloaded for every plugin update.
+Installation status appears beside “Offline voices”, with action icons immediately below: a down arrow to download, a wrench to repair, and a checked shield to test voices. Progress, an icon-only cancel button, and status text expand underneath without moving the action buttons. Interrupted downloads can resume. Voice checks can also be cancelled. A success message clears after five seconds; a failed check keeps a repair prompt visible. Import an existing engine using the Voice folder button above. Unchanged voice packages need not be downloaded for every plugin update.
 
 ## Shortcuts
 
-On **Shortcuts**, select an action’s shortcut and record a new key combination. Avoid conflicts with Zotero or the operating system. The page shows the current defaults and provides a reset option.
+On **Shortcuts**, select an action’s shortcut and record a new key combination. Avoid conflicts with Zotero or the operating system. The page shows the current defaults and provides a circular-arrow button to restore defaults.
 
 ## Appearance
 
-Choose a theme, font, font size, transparency, and background image, or follow the system language. Captions and abstracts share reading font and size. Interface language and translation target are separate. Turn companion interactions off or adjust their interval; the system’s reduced-motion setting is also respected.
+![Appearance](images/appearance-en.png)
+
+All 10 theme cards stay visible. Click a preview to select it. The row below offers four global backgrounds and one custom-image slot. Click the empty slot to import a PNG, JPG, or WebP. The image fills each window from its centre and appears in the slot as a thumbnail; click the slot again to remove it. Selecting an original theme card restores its background.
+
+Transparency, interface language, and companion interactions sit below the cards. The motion icon cycles through eight performances. Automatic interactions can be disabled or timed, and reduced-motion preferences are respected. Shared caption and abstract font settings are on **Reading & translation**.
 
 Update settings, help, privacy, and feedback are at the bottom of this page. Choose a check interval, enable automatic updates, or check for a new version manually.

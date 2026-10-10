@@ -25,6 +25,9 @@ var PaperVoiceDockMotion = {
   const ctx=source.getContext('2d'),style=win.getComputedStyle(panel),radius=parseFloat(style.borderRadius)||22;
   if(!ctx?.drawWindow)throw Error('Window capture unavailable');
   ctx.scale(ratio,ratio);
+  // Gecko can retain composed PDF pixels outside an isolated panel. Clip the
+  // capture itself, including its padding, before any texture deformation.
+  ctx.beginPath();ctx.roundRect(pad,pad,b.width,b.height,radius);ctx.clip();
   // drawWindow does not reproduce Gecko's composited backdrop-filter surface.
   // Capture only the actual foreground (with its user/theme alpha), never a
   // flattened screenshot containing PDF text. All overrides are restored in
@@ -55,7 +58,7 @@ var PaperVoiceDockMotion = {
   try {
    const shader=(kind,text)=>{const s=gl.createShader(kind);gl.shaderSource(s,text);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){gl.deleteShader(s);throw Error('Window mesh shader unavailable');}return s;};
    vertex=shader(gl.VERTEX_SHADER,'attribute vec2 a_position;attribute vec2 a_uv;varying vec2 v_uv;varying vec2 v_screen;void main(){gl_Position=vec4(a_position,0.,1.);v_uv=a_uv;v_screen=vec2((a_position.x+1.)*.5,(1.-a_position.y)*.5);}');
-   fragment=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec2 v_uv;varying vec2 v_screen;uniform sampler2D u_image;uniform sampler2D u_backdrop;uniform vec4 u_panel;uniform vec4 u_bgRect;void main(){vec4 fg=texture2D(u_image,v_uv);vec2 pixel=v_uv*(u_panel.xy+2.*u_panel.z)-u_panel.z;vec2 q=abs(pixel-u_panel.xy*.5)-(u_panel.xy*.5-u_panel.w);float edge=length(max(q,0.))+min(max(q.x,q.y),0.)-u_panel.w;float cover=1.-smoothstep(-.5,.5,edge);vec4 bg=texture2D(u_backdrop,u_bgRect.xy+v_screen*u_bgRect.zw);float glass=(1.-fg.a)*cover;gl_FragColor=vec4(fg.rgb+bg.rgb*glass,fg.a+bg.a*glass);}');
+   fragment=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec2 v_uv;varying vec2 v_screen;uniform sampler2D u_image;uniform sampler2D u_backdrop;uniform vec4 u_panel;uniform vec4 u_bgRect;void main(){vec4 fg=texture2D(u_image,v_uv);vec2 pixel=v_uv*(u_panel.xy+2.*u_panel.z)-u_panel.z;vec2 q=abs(pixel-u_panel.xy*.5)-(u_panel.xy*.5-u_panel.w);float edge=length(max(q,0.))+min(max(q.x,q.y),0.)-u_panel.w;float cover=1.-smoothstep(-.5,.5,edge);vec4 bg=texture2D(u_backdrop,u_bgRect.xy+v_screen*u_bgRect.zw);fg*=cover;float glass=(1.-fg.a)*cover;gl_FragColor=vec4(fg.rgb+bg.rgb*glass,fg.a+bg.a*glass);}');
    program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);
    if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('Window mesh linking unavailable');
    gl.useProgram(program);gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);

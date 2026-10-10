@@ -1035,6 +1035,7 @@ var PaperVoiceI18n = (() => {
   '法语 · 女':['French · Female ','仏語 · 女性','Français · Femme ','Französisch · Weiblich ']
  };
  for(const [prefix,values] of Object.entries(voiceLabels))for(let number=1;number<=2;number++)for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][prefix+number]=values[i]+number;
+ for(const [source,values] of Object.entries({'全局背景':['Global backgrounds','共通の背景','Arrière-plans globaux','Globale Hintergründe'],'删除背景图片':['Remove background','背景画像を削除','Supprimer le fond','Hintergrund entfernen'],'预览动作':['Preview motion','動きをプレビュー','Aperçu des animations','Bewegung ansehen'],'雾蓝':['Mist','霧','Brume','Nebel'],'暖沙':['Sand','砂','Sable','Sand'],'林间':['Grove','森','Bosquet','Hain'],'夜空':['Night','夜','Nuit','Nacht']}))for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][source]=values[i];
  const keys=Object.keys(catalogs.en).sort((a,b)=>b.length-a.length);
  const pattern=new RegExp(keys.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
  const sources=new WeakMap();

@@ -87,7 +87,6 @@ Object.assign(PaperLoom,{
         }
         const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=()=>{try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);}catch(_){}dispose();};refit();}
         ui.action('settings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument);
-        ui.action('voiceSettings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument,'voice');
         for(const [action,key] of [['help','guide'],['feedback','feedback'],['privacy','privacy']])ui.action(action).onclick=()=>this.showInfo(key,ui.root.ownerDocument);
         return ui;
       };

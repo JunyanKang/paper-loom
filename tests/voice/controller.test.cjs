@@ -387,7 +387,7 @@ test('long translated sentences are bounded for offline engine input',async()=>{
 test('transparency is clamped, persisted, and updates caption surface only',()=>{
  const {p}=setup();p.syncSettings=()=>{};let css;p.caption={box:{style:{setProperty:(key,value)=>css={key,value}}}};
  p.setSurfaceTransparency(40);assert.equal(p.surfaceOpacity(),.6);assert.equal(css.value,'0.6');
- p.setSurfaceTransparency(120);assert.equal(p.get('surfaceTransparency'),40);p.setSurfaceTransparency(-1);assert.equal(p.surfaceOpacity(),1);
+ p.setSurfaceTransparency(120);assert.equal(p.get('surfaceTransparency'),80);p.setSurfaceTransparency(-1);assert.equal(p.surfaceOpacity(),1);
 });
 test('translated voice choice remains independent when target matches the saved source voice language',async()=>{
  for(const [target,sourceVoice,savedVoice] of [['en','af_heart','am_michael'],['zh-Hans','zm_yunxi','zf_xiaoxiao']]){

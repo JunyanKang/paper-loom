@@ -115,11 +115,11 @@ var PaperVoiceUI = {
   const open=entry=>{
    if(entry.select.disabled)return;
    close();active=entry;menu.replaceChildren();menu.classList.toggle('pl-language-menu',isIcon(entry.select));menu.id=entry.button.id+'-list';entry.button.setAttribute('aria-controls',menu.id);entry.button.setAttribute('aria-expanded','true');menu.setAttribute('aria-label',entry.button.getAttribute('aria-label')||entry.button.textContent);
-   Array.from(entry.select.options).forEach((option,i)=>{const row=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','div');row.id=menu.id+'-'+i;row.dataset.index=String(i);row.setAttribute('role','option');row.setAttribute('aria-selected',String(option.selected));row.setAttribute('aria-disabled',String(option.disabled));const label=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','span');if(isIcon(entry.select)){symbol(entry.select,label,option.value);const name=isProvider(entry.select)?controller.providerMeta(option.value).label:option.textContent;if(!isLanguage(entry.select))row.title=name;row.setAttribute('aria-label',name);row.classList.add('pl-language-option');}else label.textContent=option.textContent;row.append(label);const mark=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','span');mark.className='pv-select-check';mark.textContent=option.selected?'✓':'';mark.setAttribute('aria-hidden','true');row.append(mark);row.onpointermove=()=>highlight(i);row.onpointerdown=e=>e.preventDefault();row.onclick=()=>choose(i);menu.append(row);});
+   Array.from(entry.select.options).forEach((option,i)=>{const row=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','div');row.id=menu.id+'-'+i;row.dataset.index=String(i);row.setAttribute('role','option');row.setAttribute('aria-selected',String(option.selected));row.setAttribute('aria-disabled',String(option.disabled));const label=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','span');if(isIcon(entry.select)){symbol(entry.select,label,option.value);const name=isProvider(entry.select)?controller.providerMeta(option.value).label:option.textContent;if(!isLanguage(entry.select))row.title=name;row.setAttribute('aria-label',name);row.classList.add('pl-language-option');}else label.textContent=option.textContent;row.append(label);row.onpointermove=()=>highlight(i);row.onpointerdown=e=>e.preventDefault();row.onclick=()=>choose(i);menu.append(row);});
    if(portal){const css=win.getComputedStyle(root);for(const name of css)if(name.startsWith('--pv-'))host.style.setProperty(name,css.getPropertyValue(name));host.dataset.theme=root.dataset.theme;menu.hidden=false;menu.showPopover();}
    menu.style.maxHeight='230px';menu.style.width='max-content';menu.style.maxWidth=Math.max(80,Math.min(240,menuWin.innerWidth-16))+'px';menu.style.left='8px';menu.style.top='8px';PaperVoiceUI.visibility(menu,true);
    const b=box(entry.button),width=Math.min(Math.max(menu.offsetWidth,64),240,menuWin.innerWidth-16),below=menuWin.innerHeight-b.bottom-12,above=b.top-12,down=below>=Math.min(menu.scrollHeight,230)||below>=above,room=Math.max(36,down?below:above);
-   menu.style.width=width+'px';menu.style.maxHeight=Math.min(230,room)+'px';menu.style.left=Math.max(8,Math.min(b.right-width,menuWin.innerWidth-width-8))+'px';menu.style.top=(down?b.bottom+5:Math.max(8,b.top-menu.offsetHeight-5))+'px';if(isIcon(entry.select)){const flagBox=box(entry.label.querySelector('img'));menu.style.left=Math.max(4,Math.min(flagBox.left+flagBox.width/2-menu.offsetWidth/2,menuWin.innerWidth-menu.offsetWidth-4))+'px';}highlight(entry.select.selectedIndex);
+   menu.style.width=width+'px';menu.style.maxHeight=Math.min(230,room)+'px';menu.style.left=Math.max(8,Math.min(b.right-width,menuWin.innerWidth-width-8))+'px';menu.style.top=(down?b.bottom+5:Math.max(8,b.top-menu.offsetHeight-5))+'px';if(isIcon(entry.select)){const flagBox=box(entry.label.querySelector('img'));menu.style.left=Math.max(4,Math.min(flagBox.left+flagBox.width/2-menu.offsetWidth/2,menuWin.innerWidth-menu.offsetWidth-4))+'px';}else{const row=menu.querySelector('[role=option]>span');if(row){const delta=box(entry.label).right-row.getBoundingClientRect().right;menu.style.left=Math.max(8,Math.min(parseFloat(menu.style.left)+delta,menuWin.innerWidth-menu.offsetWidth-8))+'px';}}highlight(entry.select.selectedIndex);
   };
   for(const [i,select] of Array.from(root.querySelectorAll('select')).entries()){
    const wrapper=doc.createElementNS('http://www.w3.org/1999/xhtml','span');wrapper.className='pv-select';wrapper.dataset.selectField=select.dataset.field;
@@ -155,7 +155,7 @@ var PaperVoiceUI = {
   const doc=reader._iframeWindow.document,win=doc.defaultView,root=doc.createElementNS('http://www.w3.org/1999/xhtml','div');let disposed=false;
   root.className='pv-shell';root.dataset.paperVoice='shell';root.dataset.state='idle';
   const icon=name=>`<img class="pv-icon" src="${controller.assetURI}icons/${name}.svg" alt=""/>`;
-  const themeTile=t=>`<button type="button" data-theme-choice="${t.id}" aria-label="${t.name}" aria-pressed="false"><span class="pv-theme-swatch" style="background-color:${t.paper};background-image:url('${controller.assetURI}themes/${t.art}');color:${t.accent};--pv-swatch-mask:${t.paper}99;--pv-swatch-accent:${t.accent};--pv-swatch-text:${t.ink};--pv-swatch-ink:${t.dark?t.paper:'#ffffff'}"><i></i><i></i><span class="pv-theme-name">${t.name}</span></span></button>`;
+  const themeTile=t=>`<button type="button" data-theme-choice="${t.id}" aria-label="${t.name}" aria-pressed="false"><span class="pv-theme-swatch" style="background-color:${t.paper};background-image:url('${controller.assetURI}themes/${t.art}');color:${t.accent};--pv-swatch-mask:${t.paper}99;--pv-swatch-accent:${t.accent};--pv-swatch-text:${t.ink};--pv-swatch-ink:${t.dark?t.paper:'#ffffff'}"></span></button>`;
   this.setMarkup(root,`<style>${controller.cssText}</style><section class="pv-panel" data-paper-voice="panel" aria-label="Paper Loom 朗读控制" hidden>
    <header class="pv-header"><img class="pv-brand-icon" src="${controller.assetURI}mascot.png" alt=""/><div class="pv-brand">Paper Loom<span>论文听读</span></div><button class="pv-icon-button" data-action="settings" aria-label="声音与翻译设置">${icon('settings')}</button><button class="pv-icon-button" data-action="close" aria-label="收起朗读面板">${icon('x')}</button></header>
    <div data-field="home">
@@ -166,7 +166,6 @@ var PaperVoiceUI = {
     <div class="pv-preview" data-field="preview" tabindex="0" role="region" aria-label="原文预览">选择一段文字，留一点时间给耳朵。</div>
     <div class="pv-progress-track"><div data-field="progressBar"></div></div><div class="pv-status" data-field="status" role="status" aria-live="polite"></div>
     <div class="pv-transport"><button class="pv-icon-button" data-action="previous" aria-label="上一句" title="上一句">${icon('chevron-left')}</button><button class="pv-primary" data-action="primary">${icon('headphones')}<span data-field="primaryLabel">开始朗读</span></button><button class="pv-icon-button" data-action="next" aria-label="下一句" title="下一句">${icon('chevron-right')}</button></div>
-    <footer class="pv-footer"><button data-action="voiceSettings" data-field="voiceSummary">美音 · 女1</button><span>免费离线朗读</span></footer>
    </div>
    <div data-field="settingsPage" hidden>
     <div class="pv-settings-tabs" role="tablist" aria-label="设置分类"><button id="pv-tab-voice" data-settings-tab="voice" role="tab" aria-controls="pv-settings-voice" aria-selected="true">声音</button><button id="pv-tab-translation" data-settings-tab="translation" role="tab" aria-controls="pv-settings-translation" aria-selected="false" tabindex="-1">译文</button><button id="pv-tab-appearance" data-settings-tab="appearance" role="tab" aria-controls="pv-settings-appearance" aria-selected="false" tabindex="-1">外观</button><button id="pv-tab-shortcuts" data-settings-tab="shortcuts" role="tab" aria-controls="pv-settings-shortcuts" aria-selected="false" tabindex="-1">快捷键</button></div>
@@ -201,16 +200,16 @@ var PaperVoiceUI = {
      <div id="pv-settings-appearance" data-settings-pane="appearance" role="tabpanel" aria-labelledby="pv-tab-appearance" hidden>
        <div class="pv-theme-browser" data-field="themeBrowser">
         <div class="pv-theme-choices" data-field="themeChoices" role="group" aria-label="窗口主题">${controller.themes.map(themeTile).join('')}</div>
-        <div id="pv-theme-picker" class="pv-theme-popover" data-field="themePicker" role="dialog" aria-label="全部主题" hidden><div class="pv-theme-choices" data-field="allThemes" role="group" aria-label="窗口主题">${controller.themes.map(themeTile).join('')}</div></div>
        </div>
-       <div class="pv-background-row"><button data-action="importBackground" title="自动裁切 · 文字保护蒙版 · 仅存本机">导入图片</button><button data-field="customBackground" data-action="customBackground" aria-pressed="false" hidden>我的图片</button><button data-field="removeBackground" data-action="removeBackground" hidden>移除</button><span class="pv-theme-hint" data-field="themeHint" role="status"></span><button type="button" class="pv-theme-more" data-action="themeMore" aria-label="全部主题" aria-expanded="false" aria-controls="pv-theme-picker"><span aria-hidden="true">…</span></button></div>
-       <div class="pv-setting-row pv-transparency-row"><label for="pv-transparency">透明度</label><input id="pv-transparency" data-field="transparency" type="range" min="0" max="40" step="1" aria-label="窗口透明度"/><span data-field="transparencyLabel">0%</span></div>
+       <div class="pv-theme-choices pv-global-backgrounds" role="group" aria-label="全局背景">${controller.globalBackgrounds.map(t=>`<button type="button" data-global-background="${t.id}" aria-label="${t.name}" aria-pressed="false"><span class="pv-theme-swatch" style="background-image:url('${controller.assetURI}themes/${t.art}')"></span></button>`).join('')}<button type="button" data-field="customBackground" data-action="customBackground" class="pv-custom-background" aria-label="导入背景图片" aria-pressed="false"><span class="pv-theme-swatch">${icon('image-add')}</span></button></div>
+       <span class="pv-theme-hint" data-field="themeHint" role="status"></span>
+       <div class="pv-setting-row pv-transparency-row"><label for="pv-transparency">透明度</label><input id="pv-transparency" data-field="transparency" type="range" min="0" max="80" step="1" aria-label="窗口透明度"/><span data-field="transparencyLabel">0%</span></div>
        <div class="pv-setting-row"><label for="pv-language">界面语言</label><select id="pv-language" data-field="language" aria-label="Interface language / 界面语言"><option value="auto">跟随系统</option><option value="zh">简体中文</option><option value="en">English</option><option value="ja">日本語</option><option value="fr">Français</option><option value="de">Deutsch</option></select></div>
-       <div class="pv-setting-row pv-companion-row"><label for="pv-companion">角色互动</label><button data-action="previewCompanion">预览</button><select data-field="companionInterval" aria-label="互动间隔" title="互动间隔">${[1,3,5,10,15,30].map(n=>`<option value="${n}">${n} 分钟</option>`).join('')}</select><input id="pv-companion" type="checkbox" data-field="companion"/></div>
+       <div class="pv-setting-row pv-companion-row"><label for="pv-companion">角色互动</label><button class="pv-companion-preview" data-action="previewCompanion" aria-label="预览动作" title="预览动作">${icon('companion-preview')}</button><select data-field="companionInterval" aria-label="互动间隔" title="互动间隔">${[1,3,5,10,15,30].map(n=>`<option value="${n}">${n} 分钟</option>`).join('')}</select><input id="pv-companion" type="checkbox" data-field="companion"/></div>
      </div>
      <div id="pv-settings-shortcuts" data-settings-pane="shortcuts" role="tabpanel" aria-labelledby="pv-tab-shortcuts" hidden>
       <div class="pv-shortcut-list">${PaperVoiceShortcuts.actions.map((a,i)=>`<div class="pv-shortcut-row${i&&a.group!==PaperVoiceShortcuts.actions[i-1].group?' pv-shortcut-group':''}" data-shortcut-row="${a.id}"><span>${a.label}</span><button class="pv-shortcut-key" data-shortcut="${a.id}" aria-label="${a.label}"></button><button class="pv-shortcut-clear" data-shortcut-clear="${a.id}" aria-label="清除快捷键" hidden>${icon('x')}</button></div>`).join('')}</div>
-      <div class="pv-shortcut-footer"><button data-action="resetShortcuts">恢复默认</button></div>
+      <div class="pv-shortcut-footer"><button data-action="resetShortcuts" aria-label="恢复默认" title="恢复默认">${icon('rotate-ccw')}</button></div>
       <div class="pv-shortcut-status" data-field="shortcutStatus" role="status" aria-live="polite"></div>
      </div>
     </div>
@@ -222,7 +221,7 @@ var PaperVoiceUI = {
   if(controller.version)find('aboutVersion').textContent='v'+controller.version+' · Junyan Kang';
   for(const v of PaperVoiceCore.voices){const o=doc.createElementNS('http://www.w3.org/1999/xhtml','option');o.value=v.id;o.textContent=v.label;find('voice').append(o);}
   const settings=(open)=>{root._pvCloseThemePicker?.();cancelShortcutRecording?.();if(!open)find('llmKey').value='';find('home').hidden=open;find('settingsPage').hidden=!open;action('settings').querySelector('img').src=controller.assetURI+'icons/'+(open?'chevron-left':'settings')+'.svg';action('settings').setAttribute('aria-label',open?'返回播放控制':'声音与翻译设置');controller.localize?.(root);};
-  action('settings').onclick=()=>{settings(find('settingsPage').hidden);controller.loadUpdateSettings();fit();};action('voiceSettings').onclick=()=>{settings(true);selectSettingsTab('voice');controller.loadUpdateSettings();fit();};
+  action('settings').onclick=()=>{settings(find('settingsPage').hidden);controller.loadUpdateSettings();fit();};
   const fit=()=>{const right=parseFloat(root.style.right)||18,bottom=parseFloat(root.style.bottom)||18;panel.style.transform=`translate(${Math.max(0,right+panel.offsetWidth+8-win.innerWidth)}px,${Math.max(0,bottom+root.offsetHeight+8-win.innerHeight)}px)`;};
   action('orb').onclick=()=>controller.showPanel(reader,true);action('close').onclick=()=>{root._pvCloseThemePicker?.();cancelShortcutRecording();find('llmKey').value='';visible(panel,false);};
   const dockMotion=PaperVoiceDockMotion.create(panel,action('orb'),fit);
@@ -278,37 +277,12 @@ var PaperVoiceUI = {
   const cancelOutside=e=>{if(recordingShortcut&&!e.target.closest?.('[data-shortcut],[data-shortcut-clear]'))cancelShortcutRecording();};
   win.addEventListener('keydown',recordShortcut,true);doc.addEventListener('pointerdown',cancelOutside,true);
   syncShortcutBindings();
-  const themeChoices=find('themeChoices'),themePicker=find('themePicker'),themeBrowser=find('themeBrowser'),themeMore=action('themeMore');
-  const themeButtons=[...themeChoices.querySelectorAll('[data-theme-choice]')],allThemeButtons=[...find('allThemes').querySelectorAll('[data-theme-choice]')];
-  let themesOpen=false;
-  root._pvRevealTheme=()=>{
-   const index=Math.max(0,themeButtons.findIndex(b=>b.dataset.themeChoice===controller.theme().id)),start=Math.floor(index/5)*5;
-   themeButtons.forEach((b,i)=>{b.hidden=i<start||i>=start+5;});
-  };
-  const closeThemes=(focus=false)=>{themesOpen=false;themeBrowser.dataset.expanded='false';themeChoices.inert=false;themeMore.setAttribute('aria-expanded','false');visible(themePicker,false);if(focus){const restore=()=>{if(!themesOpen&&themeMore.isConnected&&!find('settingsPage').hidden)themeMore.focus();};themeMore.focus();const fade=themePicker._pvFade;if(fade)fade.finished.then(()=>win.requestAnimationFrame(restore),()=>{});else win.requestAnimationFrame(restore);}};
-  root._pvCloseThemePicker=closeThemes;
-  themeMore.onclick=()=>{
-   if(themesOpen){closeThemes();return;}
-   root._pvSelects?.close();themesOpen=true;themeBrowser.dataset.expanded='true';themeChoices.inert=true;themeMore.setAttribute('aria-expanded','true');visible(themePicker,true);
-   (allThemeButtons.find(b=>b.dataset.themeChoice===controller.theme().id)||allThemeButtons[0]).focus();
-  };
-  for(const b of [...themeButtons,...allThemeButtons]){
-   b.onclick=()=>{controller.setTheme(b.dataset.themeChoice);root._pvRevealTheme();if(themesOpen)closeThemes(true);};
-   b.onkeydown=e=>{
-    if(e.key==='Escape'&&themesOpen){e.preventDefault();e.stopPropagation();closeThemes(true);return;}
-    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;
-    e.preventDefault();e.stopPropagation();const buttons=allThemeButtons.includes(b)?allThemeButtons:themeButtons.filter(x=>!x.hidden),i=buttons.indexOf(b),delta=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:e.key==='ArrowDown'?5:-5;
-    const j=e.key==='Home'?0:e.key==='End'?buttons.length-1:Math.max(0,Math.min(buttons.length-1,i+delta));
-    buttons.forEach((x,k)=>x.tabIndex=k===j?0:-1);buttons[j].focus();
-   };
-  }
-  const closeThemesOutside=e=>{if(themesOpen&&!themeBrowser.contains(e.target)&&!themeMore.contains(e.target))closeThemes();};
-  const themeEscape=e=>{if(themesOpen&&e.key==='Escape'&&(themeBrowser.contains(e.target)||themeMore.contains(e.target))){e.preventDefault();e.stopImmediatePropagation();closeThemes(true);}};
-  win.addEventListener('keydown',themeEscape,true);
-  doc.addEventListener('pointerdown',closeThemesOutside,true);doc.addEventListener('focusin',closeThemesOutside);
-  action('importBackground').onclick=async()=>{action('importBackground').disabled=true;try{await controller.chooseThemeImage();find('themeHint').textContent=controller.t(controller.get('themeImageEnabled',false)?'背景已保存':'');}catch(e){find('themeHint').textContent=String(e.message||e);find('themeHint').title=String(e.message||e);}finally{action('importBackground').disabled=false;}};
-  action('customBackground').onclick=()=>{controller.set('themeImageEnabled',true);controller.syncSettings();};
-  action('removeBackground').onclick=async()=>{try{await controller.removeThemeImage();find('themeHint').textContent='';}catch(e){find('themeHint').textContent=String(e.message||e);}};
+  const themeChoices=find('themeChoices'),themeButtons=[...themeChoices.querySelectorAll('[data-theme-choice]')];
+  root._pvRevealTheme=()=>{};root._pvCloseThemePicker=()=>{};
+  const themeKeyboard=buttons=>{for(const b of buttons)b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const i=buttons.indexOf(b),delta=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:e.key==='ArrowDown'?5:-5,j=e.key==='Home'?0:e.key==='End'?buttons.length-1:Math.max(0,Math.min(buttons.length-1,i+delta));buttons.forEach((x,k)=>x.tabIndex=k===j?0:-1);buttons[j].focus();};};
+  themeKeyboard(themeButtons);for(const b of themeButtons)b.onclick=()=>controller.setTheme(b.dataset.themeChoice);
+  const backgrounds=[...root.querySelectorAll('[data-global-background]')];themeKeyboard([...backgrounds,action('customBackground')]);for(const b of backgrounds)b.onclick=()=>controller.setGlobalBackground(b.dataset.globalBackground);
+  action('customBackground').onclick=async()=>{const b=action('customBackground');if(b.disabled)return;b.disabled=true;find('themeHint').textContent='';try{if(controller.customThemeImage)await controller.removeThemeImage();else await controller.chooseThemeImage();}catch(e){find('themeHint').textContent=String(e.message||e);}finally{b.disabled=false;controller.syncSettings();}};
   find('companionInterval').onchange=e=>controller.setCompanionInterval(e.target.value);
   find('companion').onchange=e=>{controller.set('companionInteractions',e.target.checked);if(!e.target.checked)finishInteraction();};
   find('language').onchange=e=>{controller.setLanguage(e.target.value);fit();};
@@ -515,7 +489,8 @@ var PaperVoiceUI = {
   bindPageEvents();
   action('orb').addEventListener('pointerenter',()=>{if(!controller.get('companionInteractions',true))return;resetCompanionSchedule();playCompanion();});
   action('orb').addEventListener('pointerdown',finishInteraction);
-  action('previewCompanion').onclick=()=>{nextInteraction=Date.now()+controller.companionIntervalMs();playCompanion();};
+  let previewIndex=0;const previewCompanion=()=>{resetCompanionSchedule();const gestures=['greeting','listening','references','network','settings','page-forward','page-backward','dock-present'];playCompanion(gestures[previewIndex++%gestures.length]);};
+  action('previewCompanion').onclick=previewCompanion;
   action('previewCompanion').disabled=win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(action('previewCompanion').disabled)action('previewCompanion').title=controller.t('系统已开启减少动态效果');
   const tickCompanion=(now=Date.now())=>{
@@ -529,7 +504,7 @@ var PaperVoiceUI = {
    if(takeBreak)lastBreakAt=elapsed;
    nextInteraction=now+controller.companionIntervalMs();playCompanion(takeBreak?'rest':undefined);
   };
-  const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();win.removeEventListener('keydown',themeEscape,true);doc.removeEventListener('pointerdown',closeThemesOutside,true);doc.removeEventListener('focusin',closeThemesOutside);themePicker._pvFade?.cancel();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);for(const menu of choiceMenus)menu.dispose();player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
-  (doc.body||doc.documentElement).append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,dockMotion,find,action,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
+  const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);for(const menu of choiceMenus)menu.dispose();player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
+  (doc.body||doc.documentElement).append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,dockMotion,find,action,previewCompanion,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
  }
 };

@@ -193,6 +193,9 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .cl-settings.pl-settings .cl-settings-tabs::before,.cl-settings.pl-settings .cl-settings-tabs::after{content:'';position:absolute;bottom:0;height:1px;background:var(--pl-tab-line);pointer-events:none}
 .cl-settings.pl-settings .cl-settings-tabs::before{left:12px;right:calc(var(--pl-category-right) + 48px)}
 .cl-settings.pl-settings .cl-settings-tabs::after{left:calc(100% - var(--pl-category-right));right:12px}
+.cl-select-check,.pv-select-check{display:none!important}
+.pv-shell[data-background-mode=global] .pv-panel.pl-workspace-page::before{background-position:center;background-size:100% 100%,cover}
+html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-page::before{background-position:center;background-size:100% 100%,100% 100%,cover}
 /* Open content surface; only the lower edge flows into the active tab. */
 .pl-workspace-content{background:transparent;box-shadow:none;border-radius:0}
 .cl-settings.pl-settings .cl-dialog-body{background:transparent;box-shadow:none}
@@ -202,4 +205,18 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .pl-workspace-page>.pl-main-actions::before{left:12px;right:calc(var(--pl-selected-right) + 48px)}
 .pl-workspace-page>.pl-main-actions::after{left:calc(100% - var(--pl-selected-right));right:12px}
 .pl-workspace-page>.pl-main-actions>button[aria-current=page]::before{display:none}
+
+.pl-engine-heading{display:flex;justify-content:center;align-items:center;gap:8px}
+.pl-engine-badge{font:400 var(--pl-meta-size,12px)/1.5 var(--pl-font);color:var(--pv-muted)}
+.pl-engine .pl-engine-status{text-align:center;margin:8px 0;min-height:18px}
+.pl-engine-progress{display:flex;align-items:center;gap:10px;margin:8px 0}
+.pl-engine-progress[hidden]{display:none}
+.pl-engine-progress progress{flex:1;min-width:0;width:auto}
+.pl-engine-progress button{display:flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;padding:5px;background:transparent!important;border:0;white-space:nowrap;font:inherit;color:var(--pv-muted)}
+
+.cl-select-popover,.pv-select-popover{box-sizing:border-box}
+
+.pl-engine-actions{justify-content:center;gap:12px}
+.pl-engine .pl-engine-actions>button{flex:0 0 48px;height:32px;min-height:32px;display:flex;align-items:center;justify-content:center;padding:6px;border:1px solid var(--pv-glass-line)!important;border-radius:8px;background:var(--pv-soft)!important;color:var(--pv-accent)!important}
+.pl-engine-actions .pv-icon{width:19px;height:19px}
 `;

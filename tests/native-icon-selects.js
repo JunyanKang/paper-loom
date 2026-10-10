@@ -20,7 +20,7 @@ try{
  await inspect(f.querySelector('[data-translation-setting-proxy=translationProvider]'),'.cl-select-popover','translation services');
  const service=f.querySelector('select[data-translation-setting=translationProvider]');service.value='llm';service.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(200);f.querySelector('.pl-provider-settings').click();await wait(300);
  await inspect(f.querySelector('[data-translation-setting-proxy=llmProvider]'),'.cl-select-popover','LLM providers');
- f._plSelect('appearance');await wait(200);check('switching settings category hides model editor',f.querySelector('.cl-llm-settings').hidden&&!f.querySelector('.cl-settings-tabs').hidden);await inspect(f.querySelector('[data-select-id=cl-setting-interfaceLanguage]'),'.cl-select-popover','interface flags');
+ f._plSelect('appearance');await wait(200);check('switching settings category hides model editor',f.querySelector('.cl-llm-settings').hidden&&!f.querySelector('.cl-settings-tabs').hidden);await inspect(f.querySelector('iframe').contentDocument.querySelector('[data-select-field=language] button'),'.pv-select-popover','interface flags');
  f._plSelect('voice');await wait(250);const inside=f.querySelector('iframe').contentDocument;
  await inspect(inside.querySelector('[data-select-field=speechLanguage] button'),'.pv-select-popover','speech flags');
  const speech=inside.querySelector('[data-field=speechLanguage]');check('speech language always shows a concrete supported choice',speech.value!=='auto'&&[...speech.options].map(o=>o.value).join(',')==='en,zh,ja,fr');
