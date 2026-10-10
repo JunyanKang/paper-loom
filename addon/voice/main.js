@@ -6,7 +6,7 @@ var PaperVoice = {
   generation: 0, process: null, processStart: null, pending: new Map(), sequence: 0,
   audio: null, audioURL: null, lastText: '', currentReader: null, state: 'idle', status: '拖选 PDF 文字，松开鼠标即可朗读',
   lastSelections: new Map(), selectionContexts: new Map(), timers: new Map(), dead: false, translationTicket: 0,
-  get(name, fallback) { return Zotero.Prefs.get(this.prefix + name, true) ?? fallback; },
+  get(name, fallback) { return Zotero.Prefs.get(this.prefix + name, true) ?? (name==='translation'?true:fallback); },
   set(name, value) { Zotero.Prefs.set(this.prefix + name, name==='rate'?String(value):value, true); },
   language() { return PaperVoiceI18n.resolveLanguage(this.get('interfaceLanguage','auto'),Zotero.locale||Services.locale?.appLocaleAsBCP47||'en'); },
   t(text) { return typeof PaperVoiceI18n==='undefined'?text:PaperVoiceI18n.translate(text,this.language()); },
@@ -416,11 +416,12 @@ var PaperVoice = {
   quickTranslationClick(event) {
     this.cancelTranslationClick();
     if(event?.detail>1)return;
-    this.translationClickTimer=this.host.setTimeout(()=>{this.translationClickTimer=undefined;this.cycleTranslationLanguage();},500);
+    this.translationClickTimer=this.host.setTimeout(()=>{this.translationClickTimer=undefined;this.setReadTranslation(!this.get('readTranslation',false));},500);
   },
-  quickTranslationDoubleClick() { this.cancelTranslationClick();this.toggleTranslation(false); },
+  quickTranslationDoubleClick() { this.cancelTranslationClick();this.toggleTranslation(!this.get('translation',true)); },
   setTranslationTarget(target) {
-    if(this.get('readTranslation',false)&&!this.translationVoiceLanguage(target))return;
+    if(!this.translationLanguages().some(x=>x.code===target))return;
+    if(this.get('readTranslation',false)&&!this.translationVoiceLanguage(target))this.setReadTranslation(false);
     this.cancelTranslationClick();this.set('translationTarget',target);this.translationTicket++;this.hideTranslation();this.syncSettings();
     if(this.get('translation',false))this.toggleTranslation(true);
   },
@@ -430,9 +431,12 @@ var PaperVoice = {
     this.setTranslationTarget(languages[(index+1)%languages.length]);
     if(!this.get('translation',false))this.toggleTranslation(true);
   },
-  translationLanguage() {
+  translationLanguages() {
+    return ['zh-Hans','zh-Hant','ja','ko','fr','en','de','es','ru'].filter(code=>code!=='zh-Hant'||this.get('translationProvider','tencenttransmart')!=='tencenttransmart').map(code=>this.translationLanguage(code));
+  },
+  translationLanguage(code=this.get('translationTarget','zh-Hans')) {
     const languages={'zh-Hans':['简','简体中文'],'zh-Hant':['繁','繁體中文'],ja:['日','日本語'],ko:['한','한국어'],fr:['FR','Français'],en:['EN','English'],de:['DE','Deutsch'],es:['ES','Español'],ru:['RU','Русский']};
-    const code=this.get('translationTarget','zh-Hans'),[badge,label]=languages[code]||languages['zh-Hans'];return {code,badge,label};
+    const [badge,label]=languages[code]||languages['zh-Hans'];return {code,badge,label};
   },
   shortcutBindings() { return PaperVoiceShortcuts.read(this.get('shortcuts',null)); },
   shortcutLabel(id) { return PaperVoiceShortcuts.format(this.shortcutBindings()[id],Zotero.isMac,x=>this.t(x)); },
@@ -498,33 +502,34 @@ var PaperVoice = {
       const preview=find('preview'),text=this.currentSentence||this.lastText||'选择一段文字，留一点时间给耳朵。';
       if(preview.textContent!==text){preview.textContent=text;preview.scrollTop=0;}
       find('progressBar').style.width=(this.readProgress?100*(this.readProgress.fraction??(this.readProgress.total?this.readProgress.current/this.readProgress.total:0)):0)+'%';
-      if(action('quickReadTranslation')){action('quickReadTranslation').setAttribute('aria-checked',String(this.get('readTranslation',false)));action('quickReadTranslation').setAttribute('aria-keyshortcuts',PaperVoiceShortcuts.aria(this.shortcutBindings().readTranslation));action('quickReadTranslation').disabled=!this.translationVoiceLanguage();action('quickReadTranslation').title=this.translationVoiceLanguage()?(this.get('readTranslation',false)?'只读译文 · 点击切回原文':'朗读原文 · 点击切换译文'):'该译文语种暂无离线声音';}
-      if(!active)closeAudioPopover?.();
+
       action('quickTranslate').setAttribute('aria-pressed',String(this.get('translation',false)));
       const language=this.translationLanguage();
       find('quickTranslateLabel').textContent=language.badge;
       if(find('quickTranslationAudio'))find('quickTranslationAudio').hidden=!this.get('readTranslation',false);
-      action('quickTranslate').title='单击切换译文语言 · 双击关闭译文 · '+language.label+(this.get('readTranslation',false)?' · '+this.t('朗读译文'):'')+(this.shortcutBindings().translation?' · '+this.shortcutLabel('translation'):'');
+      action('quickTranslate').title=this.t('悬停选择语言 · 单击朗读译文 · 双击开关翻译')+' · '+language.label+(this.get('readTranslation',false)?' · '+this.t('朗读译文'):'')+(this.shortcutBindings().translation?' · '+this.shortcutLabel('translation'):'');
       action('quickTranslate').setAttribute('aria-keyshortcuts',PaperVoiceShortcuts.aria(this.shortcutBindings().translation));
       action('quickTranslate').setAttribute('aria-label',action('quickTranslate').title);
-      action('quickStop').hidden=!active;action('quickTranslate').hidden=!this.get('translation',false);
-      if(find('translationTools'))find('translationTools').hidden=!this.get('translation',false);
-      if(!this.get('translation',false))closeAudioPopover?.();
+      action('quickStop').hidden=!active;action('quickTranslate').hidden=false;
+      if(find('translationTools'))find('translationTools').hidden=false;
+      for(const button of root.querySelectorAll('[data-quick-language]')){button.hidden=button.dataset.quickLanguage===language.code||!this.translationLanguages().some(x=>x.code===button.dataset.quickLanguage);button.setAttribute('aria-pressed',String(button.dataset.quickLanguage===language.code));}
       action('quickPause').hidden=!active&&!this.lastText&&mode!=='document';
       find('playbackTools').hidden=action('quickPause').hidden;
       find('primaryLabel').textContent=this.state==='paused'?'继续':active?'暂停':mode==='document'?(this.get('documentStart','begin')==='resume'?'继续上次':'开始连读'):'开始朗读';
       action('primary').setAttribute('aria-label',this.t(find('primaryLabel').textContent));action('primary').title=this.t(find('primaryLabel').textContent);
       action('primary').querySelector('img').src=this.assetURI+'icons/'+(active && this.state!=='paused'?'pause':'headphones')+'.svg';
-      action('quickPause').querySelector('img').src=this.assetURI+'icons/'+(!active||this.state==='paused'?'play':'pause')+'.svg';
+      action('quickPause').querySelector('img').src=this.assetURI+'icons/'+(!active||this.state==='paused'?'headphones':'pause')+'.svg';
       const modeIndex=PaperVoiceCore.modes.findIndex(x=>x.id===mode),current=PaperVoiceCore.modes[modeIndex]||PaperVoiceCore.modes[0],next=PaperVoiceCore.modes[(modeIndex+1)%4];
       action('quickMode').querySelector('img').src=this.assetURI+'icons/'+current.icon+'.svg';
       find('quickModeLabel').textContent=current.short;
-      action('quickMode').setAttribute('aria-label',current.label+'；点击切换为'+next.label);action('quickMode').title=current.label+' → '+next.label;
+      action('quickMode').setAttribute('aria-label',this.t(current.label)+' · '+this.t('悬停选择朗读模式'));action('quickMode').title=action('quickMode').getAttribute('aria-label');
+      for(const button of root.querySelectorAll('[data-quick-mode]')){button.hidden=button.dataset.quickMode===mode;button.setAttribute('aria-pressed',String(button.dataset.quickMode===mode));}
       action('orb').title='Paper Loom · '+this.status;
       const canNavigate=active&&mode!=='selection'&&!!this.currentUnit;
-      find('paragraphNavigation').hidden=mode==='sentence';
+      find('sentenceNavigation').hidden=!canNavigate;
+      find('paragraphNavigation').hidden=!canNavigate||mode==='sentence';
       find('playbackTools').dataset.available=String(canNavigate);
-      if(!canNavigate)closeNavigation?.();
+      if(!active)closeNavigation?.();
       for(const name of ['Previous','Replay','Next']){
         action('quick'+name).disabled=!canNavigate;
         action('quickSentence'+name).disabled=!canNavigate;
@@ -534,7 +539,7 @@ var PaperVoice = {
           button.setAttribute('aria-keyshortcuts',PaperVoiceShortcuts.aria(this.shortcutBindings()[id]));
         }
       }
-      action('quickPause').title='暂停或继续'+(canNavigate?' · 悬停展开句段导航':'');
+      action('quickPause').title='暂停或继续'+(active?' · '+this.t('悬停展开导航与停止'):'');
       action('quickPause').setAttribute('aria-label',action('quickPause').title);
       for(const [name,delta] of [['previous',-1],['next',1]]){
         action(name).disabled=mode==='selection'||!this.currentUnit;

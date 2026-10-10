@@ -9,7 +9,7 @@ function setup(){
  context.PaperVoiceSelectionUI={updateButton(button,text){button.textContent=text;},create(c,d,button){return {card:button};}};
  vm.createContext(context);vm.runInContext(fs.readFileSync('addon/voice/main.js','utf8'),context);
  for(const file of ['pipeline.js','stream-player.js','performance.js'])vm.runInContext(fs.readFileSync('addon/voice/'+file,'utf8'),context);
- const p=context.PaperVoice;p.watchToolbar=()=>{};p.normalizeToolbar=()=>{};p.showPanel=()=>{};p.ensurePanel=()=>{};p.updatePanels=()=>{};p.set('speechLanguage','en');
+ const p=context.PaperVoice;p.watchToolbar=()=>{};p.normalizeToolbar=()=>{};p.showPanel=()=>{};p.ensurePanel=()=>{};p.updatePanels=()=>{};p.set('speechLanguage','en');p.set('translation',false);
  const generated=[],played=[],nativePlay=p.playAudio;
  p.ensureWorker=async()=>{};p.engineRoot=()=>'/test/engine';p.scheduleWorkerIdle=()=>{};
  p.requestSpeech=text=>new Promise((resolve,reject)=>generated.push({text,resolve:()=>resolve({audio:text,duration:1}),reject}));
@@ -194,13 +194,16 @@ test('automatic reading switches voices and translation source between language 
 test('automatic reading prompts for uncertain or unsupported language without generating wrong audio',async()=>{
  for(const text of ['RNA','Hola, este documento está escrito en español.']){const {p}=setup();p.set('speechLanguage','auto');p.documentUnits=async()=>[];let count=0;p.requestSpeech=async()=>{count++;return{audio:'x'}};await p.speak(text,{});assert.equal(count,0);assert.equal(p.state,'error');assert.match(p.status,/手动选择/);}
 });
-test('single click cycles translation while double click cancels pending switch',()=>{
- const {p,host}=setup();let job,cleared=0;host.setTimeout=fn=>{job=fn;return 1};host.clearTimeout=()=>{job=null;cleared++};p.syncSettings=()=>{};p.hideTranslation=()=>{};p.toggleTranslation=enabled=>p.set('translation',enabled);
- p.quickTranslationClick({detail:1});assert.equal(p.get('translationTarget','zh-Hans'),'zh-Hans');job();assert.equal(p.get('translationTarget'),'ja');assert.equal(p.get('translation'),true);
- p.quickTranslationClick({detail:1});p.quickTranslationClick({detail:2});p.quickTranslationDoubleClick();assert.equal(job,null);assert.equal(p.get('translationTarget'),'ja');assert.equal(p.get('translation'),false);assert.ok(cleared>0);
- p.set('translationProvider','bing');p.set('translationTarget','zh-Hans');p.quickTranslationClick({detail:1});job();assert.equal(p.get('translationTarget'),'zh-Hant');assert.equal(p.get('translation'),true);
+test('single click toggles translated audio without changing target; double click toggles captions only',()=>{
+ const {p,host}=setup();let job,cleared=0;host.setTimeout=fn=>{job=fn;return 1};host.clearTimeout=()=>{job=null;cleared++};p.syncSettings=()=>{};p.hideTranslation=()=>{};p.setStatus=()=>{};p.translationVoiceLanguage=target=>!target||['zh-Hans','ja','fr','en'].includes(target)?'en':null;p.toggleTranslation=enabled=>p.set('translation',enabled);
+ p.quickTranslationClick({detail:1});assert.equal(p.get('readTranslation',false),false);job();assert.equal(p.get('readTranslation'),true);assert.equal(p.get('translationTarget','zh-Hans'),'zh-Hans');
+ p.quickTranslationClick({detail:1});job();assert.equal(p.get('readTranslation'),false);
+ p.quickTranslationClick({detail:1});p.quickTranslationClick({detail:2});p.quickTranslationDoubleClick();assert.equal(job,null);assert.equal(p.get('translation'),true);assert.equal(p.get('readTranslation'),false);assert.ok(cleared>0);
+ p.quickTranslationDoubleClick();assert.equal(p.get('translation'),false);
+ p.set('readTranslation',true);p.setTranslationTarget('de');assert.equal(p.get('translationTarget'),'de');assert.equal(p.get('readTranslation'),false);
  p.quickTranslationClick({detail:1});p.stop();assert.equal(job,null);
 });
+test('new installation defaults to translation while an explicit off preference remains off',()=>{const {p,context}=setup();context.Zotero.Prefs.set(p.prefix+'translation',undefined);assert.equal(p.get('translation',false),true);p.set('translation',false);assert.equal(p.get('translation',true),false);});
 for(const mode of ['document','paragraph'])test(mode+' sentence replay and navigation preserve reading mode and continuation',async()=>{
  const {p,played}=setup(),reader={navigate:async()=>{}};p.set('mode',mode);p.set('repeat',1);p.documentUnits=async()=>navigationUnits;p.requestSpeech=async text=>({audio:text});
  for(const [delta,current,expected] of [[0,1,mode==='document'?[0,1,2,3]:[0,1,2]],[-1,2,mode==='document'?[0,1,2,3]:[0,1,2]],[1,1,mode==='document'?[2,3]:[2]],[1,2,[3]]]){

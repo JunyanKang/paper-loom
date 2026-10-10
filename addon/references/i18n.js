@@ -1899,3 +1899,29 @@ Object.assign(CiteLensI18n.catalogs.en,{"听读":"Read","引文":"Papers","朋�
 Object.assign(CiteLensI18n.catalogs.en,{'返回首页':'Back to home','打开或收起 Paper Loom':'Open or collapse Paper Loom'});
 
 Object.assign(CiteLensI18n.catalogs.en,{'返回听读':'Back to listening'});
+
+// Complete phrases prevent mixed-language status and action labels.
+for(const [source,values] of Object.entries({
+ '暂无匹配下载':['対応するダウンロードなし','Aucun téléchargement compatible','Kein passender Download'],
+ '声音安装进度':['音声のインストール状況','Installation des voix','Fortschritt der Stimmeninstallation'],
+ '当前声音：':['現在のエンジン：','Moteur actuel : ','Aktuelle Engine: '],
+ '声音文件位置':['エンジンの場所','Emplacement du moteur','Speicherort der Engine'],
+ '继续下载 / 重试':['再開／再試行','Reprendre / réessayer','Fortsetzen / erneut versuchen'],
+ '重新下载 / 修复':['再ダウンロード／修復','Télécharger à nouveau / réparer','Erneut laden / reparieren'],
+ '尚未检查声音':['音声は未確認です','Voix non vérifiées','Stimmen noch nicht geprüft'],
+ '已找到离线声音，可试听或检查。':['オフライン音声が見つかりました。試聴または確認できます。','Voix hors ligne disponibles. Écoutez un aperçu ou vérifiez le moteur.','Offline-Stimmen gefunden. Hören Sie eine Probe oder prüfen Sie die Engine.'],
+ '可在这里安装离线声音。':['ここからオフライン音声をインストールできます。','Téléchargez les voix hors ligne ici.','Hier können Sie Offline-Stimmen herunterladen.'],
+ '首次下载后可离线使用。下载中断可继续；所有语言和音色包含在同一声音包中。已有声音可用上方文件夹按钮导入。':['ダウンロード後はオフラインで利用できます。中断したダウンロードは再開できます。すべての言語と音声を含みます。既存の音声は上のフォルダーボタンで読み込めます。','Utilisable hors ligne après téléchargement. Un téléchargement interrompu peut reprendre. Le pack inclut toutes les langues et voix. Importez un moteur existant avec le bouton de dossier ci-dessus.','Nach dem Download offline nutzbar. Unterbrochene Downloads lassen sich fortsetzen. Das Paket enthält alle Sprachen und Stimmen. Über die Ordnerschaltfläche können Sie eine vorhandene Engine importieren.'],
+ '已下载 ':['ダウンロード済み ','Téléchargé : ','Heruntergeladen: '],
+ '正在下载':['ダウンロード中：','Téléchargement : ','Download: '],
+ '声音文件':['音声ファイル','fichiers vocaux','Sprachdateien'],
+ '声音引擎':['音声エンジン','moteur vocal','Sprachengine'],
+ '正在校验声音包…':['音声パッケージを検証中…','Vérification du pack vocal…','Sprachpaket wird geprüft…'],
+ '正在准备引擎与音色…':['エンジンと音声を準備中…','Préparation du moteur et des voix…','Engine und Stimmen werden vorbereitet…'],
+ '正在实际合成声音，确认可以使用…':['動作確認用の音声を生成中…','Synthèse d’un aperçu pour vérifier le moteur…','Eine Sprachprobe wird zur Prüfung erzeugt…'],
+ '引擎和声音已安装，可离线听读。':['インストール完了。オフラインで読み上げできます。','Moteur et voix installés. Écoute hors ligne disponible.','Engine und Stimmen installiert. Offline-Vorlesen ist verfügbar.'],
+ '正在检查当前声音并实际合成…':['現在の音声を確認して試聴音声を生成中…','Vérification et synthèse d’un aperçu…','Stimmen werden geprüft und eine Probe erzeugt…'],
+ '声音检查通过，已成功生成测试音频。':['音声を確認し、試聴音声を生成しました。','Vérification réussie. Un aperçu audio a été créé.','Prüfung erfolgreich. Eine Sprachprobe wurde erzeugt.'],
+ '下载已取消，已完成的分片会保留。':['ダウンロードを中止しました。完了部分は再開用に保存されます。','Téléchargement annulé. Les parties terminées sont conservées.','Download abgebrochen. Fertige Teile bleiben zum Fortsetzen erhalten.'],
+ '声音不可用：':['音声を利用できません：','Voix indisponibles : ','Stimmen nicht verfügbar: ']
+}))for(const [i,lang] of ['ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];

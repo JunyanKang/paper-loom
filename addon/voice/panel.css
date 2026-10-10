@@ -269,3 +269,16 @@
 .pv-orb,.pv-orb:hover{transform:none!important;transition:none!important}
 .pv-orb>.pv-mascot{opacity:0!important;transform:none!important;animation:none!important;transition:none!important}
 .pv-mascot-interaction,.pv-shell[data-interaction-set] .pv-mascot-interaction{background:none!important;opacity:1!important;pointer-events:none}
+
+/* Quick choices retain the anchor position and expose direct selection. */
+.pv-mode-tools{position:relative}.pv-choice-popover{position:absolute;bottom:-5px;right:0;z-index:5;display:flex;flex-direction:column;gap:3px;padding:6px 5px 39px;border-radius:12px;background:var(--pv-surface,var(--pv-paper));box-shadow:var(--pv-small-shadow,0 4px 16px #0002);overflow-y:auto;scrollbar-width:none;min-width:100%;box-sizing:border-box}
+.pv-choice-popover[data-side=below]{top:-5px;bottom:auto;padding:39px 5px 6px}
+.pv-mode-tools>button,.pv-translation-tools>button{position:relative;z-index:6}
+.pv-quick .pv-choice-popover button{flex:none;width:100%;height:31px;min-width:57px;padding:0 7px;gap:5px;white-space:nowrap;justify-content:flex-start;font-size:11px}
+.pv-language-popover{min-width:136px}.pv-language-popover .pv-language-token{min-width:23px;text-align:center;font-size:11px}.pv-choice-popover>button>span:last-child{white-space:nowrap}
+.pv-shell .pv-quick button[aria-pressed=true]{background:color-mix(in srgb,var(--pv-accent) 10%,var(--pv-surface))!important;color:var(--pv-accent)}
+
+.pv-quick .pv-quick-mode{width:31px;min-width:31px;padding:0;justify-content:center}.pv-quick-mode [data-field=quickModeLabel],.pv-mode-popover [data-quick-mode]>span{display:none}
+.pv-choice-popover.pv-mode-popover{width:41px;min-width:41px;right:-5px}.pv-quick .pv-mode-popover button{width:31px;min-width:31px;padding:0;justify-content:center}
+.pv-language-popover{bottom:calc(100% + 5px);padding:6px}.pv-language-popover[data-side=below]{top:calc(100% + 5px);padding:6px}.pv-translation-tools:after{content:"";position:absolute;bottom:100%;right:0;width:100%;height:8px}
+.pv-stop-row{justify-content:flex-end}.pv-stop-row>span{flex:1}.pv-stop-row button{color:var(--pv-muted)}

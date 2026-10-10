@@ -208,7 +208,7 @@ var PaperVoiceUI = {
     </div>
 
    </div>
-  </section><div class="pv-mini"><div class="pv-quick" data-field="quick" hidden><button class="pv-quick-mode" data-action="quickMode" aria-label="切换朗读模式">${icon("text-select")}<span data-field="quickModeLabel">划选</span></button><div class="pv-playback-tools" data-field="playbackTools"><button data-action="quickPause" aria-label="暂停或继续" aria-expanded="false">${icon('pause')}</button><div class="pv-nav-popover" data-field="navigation" hidden><div class="pv-nav-card" role="group" aria-label="阅读导航"><div class="pv-nav-row" data-field="sentenceNavigation"><span>句子</span><button data-action="quickSentencePrevious" aria-label="上一句" title="上一句">${icon('chevron-left')}</button><button data-action="quickSentenceReplay" aria-label="重读当前句" title="重读当前句">${icon('repeat')}</button><button data-action="quickSentenceNext" aria-label="下一句" title="下一句">${icon('chevron-right')}</button></div><div class="pv-nav-row" data-field="paragraphNavigation"><span>段落</span><button data-action="quickPrevious" aria-label="上一段" title="上一段">${icon('chevron-left')}</button><button data-action="quickReplay" aria-label="重读当前段" title="重读当前段">${icon('repeat')}</button><button data-action="quickNext" aria-label="下一段" title="下一段">${icon('chevron-right')}</button></div></div></div></div><button data-action="quickStop" aria-label="停止朗读">${icon('square')}</button><div class="pv-translation-tools" data-field="translationTools"><button data-action="quickTranslate" aria-label="切换译文显示" title="译文开关 · Option/Alt + T"><span class="pv-language-token" data-field="quickTranslateLabel" aria-hidden="true">简</span><span class="pv-translation-audio-indicator" data-field="quickTranslationAudio" aria-hidden="true" hidden>${icon("headphones")}</span></button><div class="pv-audio-popover" data-field="audioPopover" hidden><button class="pv-audio-toggle" data-action="quickReadTranslation" role="switch" aria-checked="false"><svg class="pv-icon pv-audio-icon" aria-hidden="true"   xmlns="http://www.w3.org/2000/svg"   width="24"   height="24"   viewBox="0 0 24 24"   fill="none"   stroke="currentColor"   stroke-width="1.65"   stroke-linecap="round"   stroke-linejoin="round" >   <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" /> </svg> <span>朗读译文</span></button></div></div></div><button class="pv-orb" data-action="orb" aria-label="展开 Paper Loom 朗读面板" title="Paper Loom · 点击展开听读"><img class="pv-mascot" src="${controller.assetURI}mascot.png" alt="Paper Loom 书页精灵"/><img class="pv-mascot pv-mascot-reading" src="${controller.assetURI}mascot-reading.png" alt=""/><span class="pv-mascot-interaction" data-field="mascotInteraction" aria-hidden="true"></span><span class="pv-waves" aria-hidden="true"><i></i><i></i><i></i></span><span class="pv-dot"></span></button><button class="pv-update-badge" data-action="updateNotice" aria-label="发现新版本" aria-expanded="false" hidden>${icon('arrow-up')}</button><div class="pv-update-notice" data-field="updateNotice" hidden><div class="pv-update-notice-heading"><span>发现新版本</span><strong data-field="updateNoticeVersion"></strong><button data-action="closeUpdateNotice" aria-label="关闭">${icon('x')}</button></div><div class="pv-update-feedback" data-field="updateFeedback" hidden><div class="pv-update-progress-label"><span class="pv-update-spinner" aria-hidden="true"></span><span data-field="updatePhase" role="status" aria-live="polite"></span><span data-field="updatePercent" aria-hidden="true"></span></div><div class="pv-update-meter" data-field="updateMeter" role="progressbar" aria-label="更新进度" aria-valuemin="0" aria-valuemax="100"><span data-field="updateFill"></span></div></div><div class="pv-update-notice-actions" data-field="updateNoticeActions"><button data-action="ignoreUpdate">忽略此版本</button><button data-action="installNotice">安装更新</button></div></div></div>`);
+  </section><div class="pv-mini"><div class="pv-quick" data-field="quick" hidden><div class="pv-mode-tools" data-field="modeTools"><button class="pv-quick-mode" data-action="quickMode" aria-label="切换朗读模式">${icon("text-select")}<span data-field="quickModeLabel">划选</span></button><div class="pv-choice-popover pv-mode-popover" data-field="modePopover" role="group" aria-label="朗读模式" hidden>${PaperVoiceCore.modes.map(x=>`<button data-quick-mode="${x.id}" aria-label="${x.label}" title="${x.label}">${icon(x.icon)}<span>${x.short}</span></button>`).join('')}</div></div><div class="pv-playback-tools" data-field="playbackTools"><button data-action="quickPause" aria-label="暂停或继续" aria-expanded="false">${icon('pause')}</button><div class="pv-nav-popover" data-field="navigation" hidden><div class="pv-nav-card" role="group" aria-label="阅读导航"><div class="pv-nav-row" data-field="sentenceNavigation"><span>句子</span><button data-action="quickSentencePrevious" aria-label="上一句" title="上一句">${icon('chevron-left')}</button><button data-action="quickSentenceReplay" aria-label="重读当前句" title="重读当前句">${icon('repeat')}</button><button data-action="quickSentenceNext" aria-label="下一句" title="下一句">${icon('chevron-right')}</button></div><div class="pv-nav-row" data-field="paragraphNavigation"><span>段落</span><button data-action="quickPrevious" aria-label="上一段" title="上一段">${icon('chevron-left')}</button><button data-action="quickReplay" aria-label="重读当前段" title="重读当前段">${icon('repeat')}</button><button data-action="quickNext" aria-label="下一段" title="下一段">${icon('chevron-right')}</button></div><div class="pv-nav-row pv-stop-row"><span>结束本次朗读</span><button data-action="quickStop" aria-label="停止朗读">${icon('square')}</button></div></div></div></div><div class="pv-translation-tools" data-field="translationTools"><button data-action="quickTranslate" aria-label="切换译文显示" title="译文开关 · Option/Alt + T"><span class="pv-language-token" data-field="quickTranslateLabel" aria-hidden="true">简</span><span class="pv-translation-audio-indicator" data-field="quickTranslationAudio" aria-hidden="true" hidden>${icon("headphones")}</span></button><div class="pv-choice-popover pv-language-popover" data-field="audioPopover" role="group" aria-label="译文语言" hidden>${['zh-Hans','zh-Hant','ja','ko','fr','en','de','es','ru'].map(code=>{const x=controller.translationLanguage(code);return `<button data-quick-language="${code}" aria-label="${x.label}"><span class="pv-language-token">${x.badge}</span><span>${x.label}</span></button>`;}).join('')}</div></div></div><button class="pv-orb" data-action="orb" aria-label="展开 Paper Loom 朗读面板" title="Paper Loom · 点击展开听读"><img class="pv-mascot" src="${controller.assetURI}mascot.png" alt="Paper Loom 书页精灵"/><img class="pv-mascot pv-mascot-reading" src="${controller.assetURI}mascot-reading.png" alt=""/><span class="pv-mascot-interaction" data-field="mascotInteraction" aria-hidden="true"></span><span class="pv-waves" aria-hidden="true"><i></i><i></i><i></i></span><span class="pv-dot"></span></button><button class="pv-update-badge" data-action="updateNotice" aria-label="发现新版本" aria-expanded="false" hidden>${icon('arrow-up')}</button><div class="pv-update-notice" data-field="updateNotice" hidden><div class="pv-update-notice-heading"><span>发现新版本</span><strong data-field="updateNoticeVersion"></strong><button data-action="closeUpdateNotice" aria-label="关闭">${icon('x')}</button></div><div class="pv-update-feedback" data-field="updateFeedback" hidden><div class="pv-update-progress-label"><span class="pv-update-spinner" aria-hidden="true"></span><span data-field="updatePhase" role="status" aria-live="polite"></span><span data-field="updatePercent" aria-hidden="true"></span></div><div class="pv-update-meter" data-field="updateMeter" role="progressbar" aria-label="更新进度" aria-valuemin="0" aria-valuemax="100"><span data-field="updateFill"></span></div></div><div class="pv-update-notice-actions" data-field="updateNoticeActions"><button data-action="ignoreUpdate">忽略此版本</button><button data-action="installNotice">安装更新</button></div></div></div>`);
   const visible=(el,show)=>PaperVoiceUI.visibility(el,show);
   const find=name=>root.querySelector(`[data-field="${name}"]`),action=name=>root.querySelector(`[data-action="${name}"]`),panel=root.querySelector('.pv-panel');
   if(controller.version)find('aboutVersion').textContent='v'+controller.version+' · Junyan Kang';
@@ -357,14 +357,14 @@ var PaperVoiceUI = {
   const closeNavigation=()=>{win.clearTimeout(closeTimer);visible(navigation,false);action('quickPause').setAttribute('aria-expanded','false');};
   const openNavigation=()=>{
    win.clearTimeout(closeTimer);
-   if(controller.get('mode','selection')==='selection'||!controller.currentUnit||!['playing','paused','loading'].includes(controller.state))return;
-   closeAudioPopover();const alreadyOpen=!navigation.hidden&&navigation.dataset.pvVisible==='true';
+   if(!['playing','paused','loading'].includes(controller.state))return;
+   closeAudioPopover();closeModePopover();const alreadyOpen=!navigation.hidden&&navigation.dataset.pvVisible==='true';
    if(!alreadyOpen){navigation._pvFade?.cancel();navigation._pvFade=null;}
    // Complete geometry before creating the first composited animation frame.
    navigation.style.visibility='hidden';navigation.hidden=false;
    action('quickPause').setAttribute('aria-expanded','true');
    navigation.style.left='0px';navigation.dataset.side='above';
-   const anchor=tools.getBoundingClientRect(),bar=find('quick').getBoundingClientRect(),win=win;
+   const anchor=tools.getBoundingClientRect(),bar=find('quick').getBoundingClientRect();
    const width=Math.min(win.innerWidth-16,Math.max(find('quick').offsetWidth,184));
    navigation.style.width=width+'px';navigation.style.left=(Math.max(8,Math.min(bar.right-width,win.innerWidth-width-8))-anchor.left)+'px';
    const box=navigation.getBoundingClientRect();
@@ -382,25 +382,40 @@ var PaperVoiceUI = {
     buttons[(at<0?0:(at+step+buttons.length)%buttons.length)]?.focus();
    }
   });
-  const translationTools=find('translationTools'),audioPopover=find('audioPopover');let audioCloseTimer=null;
-  const closeAudioPopover=()=>{win.clearTimeout(audioCloseTimer);visible(audioPopover,false);action('quickTranslate').setAttribute('aria-expanded','false');};
-  const openAudioPopover=()=>{
-   win.clearTimeout(audioCloseTimer);closeNavigation();visible(audioPopover,true);
-   action('quickTranslate').setAttribute('aria-expanded','true');
-   audioPopover.style.left='auto';audioPopover.style.right='0px';audioPopover.dataset.side='above';
-   const box=audioPopover.getBoundingClientRect();
-   if(box.left<8)audioPopover.style.right=(box.left-8)+'px';
-   if(box.top<8)audioPopover.dataset.side='below';
+  // Keep the current choice in its original hit target; alternatives grow above it.
+  const choiceMenus=[];
+  const bindChoiceMenu=(host,popup,trigger)=>{
+   let timer=null;
+   const close=()=>{win.clearTimeout(timer);visible(popup,false);trigger.setAttribute('aria-expanded','false');};
+   const open=()=>{
+    win.clearTimeout(timer);closeNavigation();for(const menu of choiceMenus)if(menu.popup!==popup)menu.close();
+    popup.style.visibility='hidden';popup.hidden=false;popup.style.maxHeight='';popup.dataset.side='above';popup.style.right='0px';
+    const anchor=trigger.getBoundingClientRect(),box=popup.getBoundingClientRect(),above=anchor.top-8,below=win.innerHeight-anchor.bottom-8;
+    const side=box.height>above&&below>above?'below':'above';popup.dataset.side=side;
+    popup.style.maxHeight=Math.max(40,(side==='above'?above:below))+'px';
+    if(box.left<8)popup.style.right=(box.left-8)+'px';
+    popup.style.visibility='';visible(popup,true);trigger.setAttribute('aria-expanded','true');
+   };
+   const leave=()=>{win.clearTimeout(timer);timer=win.setTimeout(()=>{if(!host.matches(':hover')&&!(host.contains(doc.activeElement)&&doc.activeElement.matches(':focus-visible')))close();},260);};
+   host.addEventListener('pointerenter',open);host.addEventListener('pointerleave',leave);host.addEventListener('focusin',e=>{if(e.target.matches(':focus-visible'))open();});host.addEventListener('focusout',e=>{if(!host.contains(e.relatedTarget))leave();});
+   host.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();trigger.focus();close();return;}
+    if(!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;
+    e.preventDefault();e.stopPropagation();open();const buttons=[...popup.querySelectorAll('button:not([hidden]):not(:disabled)'),trigger],i=buttons.indexOf(doc.activeElement);
+    buttons[e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowUp'?-1:1)+buttons.length)%buttons.length]?.focus();
+   });
+   const menu={popup,close,open,dispose(){win.clearTimeout(timer);popup._pvFade?.cancel();}};choiceMenus.push(menu);return menu;
   };
-  const leaveAudioPopover=()=>{win.clearTimeout(audioCloseTimer);audioCloseTimer=win.setTimeout(()=>{if(!translationTools.matches(':hover,:focus-within'))closeAudioPopover();},180);};
-  translationTools.addEventListener('pointerenter',openAudioPopover);translationTools.addEventListener('pointerleave',leaveAudioPopover);
-  translationTools.addEventListener('focusin',openAudioPopover);translationTools.addEventListener('focusout',e=>{if(!translationTools.contains(e.relatedTarget))leaveAudioPopover();});
-  const quickReveal=this.bindQuickReveal(root,find('quick'),action('orb'),()=>{closeNavigation();closeAudioPopover();});
+  const translationTools=find('translationTools'),audioPopover=find('audioPopover'),modeTools=find('modeTools'),modePopover=find('modePopover');
+  const audioMenu=bindChoiceMenu(translationTools,audioPopover,action('quickTranslate')),modeMenu=bindChoiceMenu(modeTools,modePopover,action('quickMode'));
+  const closeAudioPopover=()=>audioMenu.close(),closeModePopover=()=>modeMenu.close();
+  for(const b of modePopover.querySelectorAll('button'))b.onclick=()=>{controller.setMode(b.dataset.quickMode);closeModePopover();};
+  for(const b of audioPopover.querySelectorAll('button'))b.onclick=()=>{controller.setTranslationTarget(b.dataset.quickLanguage);closeAudioPopover();};
+  const quickReveal=this.bindQuickReveal(root,find('quick'),action('orb'),()=>{closeNavigation();closeAudioPopover();closeModePopover();});
   action('orb').addEventListener('pointerenter',()=>controller.scheduleWarmup());
   action('orb').addEventListener('pointerleave',()=>{if(panel.hidden){controller.host.clearTimeout(controller.warmupTimer);controller.warmupTimer=null;}});
-  action('quickReadTranslation').onclick=()=>controller.setReadTranslation(!controller.get('readTranslation',false));
-  root.addEventListener('pointerdown',e=>{if(!tools.contains(e.target))closeNavigation();if(!translationTools.contains(e.target))closeAudioPopover();});
-  action('quickMode').onclick=()=>controller.cycleMode();
+  root.addEventListener('pointerdown',e=>{if(!tools.contains(e.target))closeNavigation();if(!translationTools.contains(e.target))closeAudioPopover();if(!modeTools.contains(e.target))closeModePopover();});
+  action('quickMode').onclick=()=>modeMenu.open();
   action('chooseEngineFolder').onclick=()=>controller.chooseEngineFolder();action('resetEngineFolder').onclick=()=>controller.setEngineFolder('');
   action('checkUpdate').onclick=()=>controller.availableUpdateVersion()?controller.installUpdate():controller.checkForUpdates();
   find('autoUpdate').onchange=e=>controller.setAutoUpdate(e.target.checked);
@@ -491,7 +506,7 @@ var PaperVoiceUI = {
    if(takeBreak)lastBreakAt=elapsed;
    nextInteraction=now+controller.companionIntervalMs();playCompanion(takeBreak?'rest':undefined);
   };
-  const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();win.removeEventListener('keydown',themeEscape,true);doc.removeEventListener('pointerdown',closeThemesOutside,true);doc.removeEventListener('focusin',closeThemesOutside);themePicker._pvFade?.cancel();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);win.clearTimeout(audioCloseTimer);player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
+  const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();win.removeEventListener('keydown',themeEscape,true);doc.removeEventListener('pointerdown',closeThemesOutside,true);doc.removeEventListener('focusin',closeThemesOutside);themePicker._pvFade?.cancel();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);for(const menu of choiceMenus)menu.dispose();player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
   (doc.body||doc.documentElement).append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,dockMotion,find,action,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
  }
 };

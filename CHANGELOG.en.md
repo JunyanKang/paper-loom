@@ -4,6 +4,8 @@
 
 ## 1.0.2 · 2026-10-10
 
+- Restore hover navigation, add four icon-only mode choices and direct language selection, and keep translation controls visible when disabled.
+- Group pause and stop under one control; hide scrollbars and align translated tabs, buttons, and settings rows.
 - Softer theme tints for selected tabs and primary actions in both light and dark themes.
 - An icon-only headphones button starts or resumes listening and changes to pause during playback, with accessible labels and tooltips.
 - Direct animated transitions between listening, papers, authors, and settings. Click elsewhere in Zotero or the PDF to collapse the workspace.

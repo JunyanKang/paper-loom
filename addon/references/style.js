@@ -490,7 +490,7 @@ button[data-cite-lens]:is(:hover,:focus-visible){background:var(--cl-soft);color
 @container(max-width:700px){.pn-career-body{padding:0 12px 12px}.pn-career-year{grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr)}.pn-career-event{padding:8px}.pn-career-event::before{width:29px}.pn-career-event[data-side=left]::before{right:-30px}.pn-career-event[data-side=right]::before{left:-30px}.pn-career-event-top{display:block}.pn-career-event time{white-space:normal;display:block;margin-top:3px}.pn-career-identity h2{font-size:22px}.pn-career-controls{grid-template-columns:30px minmax(0,1fr) 30px}}
 @media(prefers-reduced-motion:reduce){.pn-career-event{animation:none;transition:none}}
 /* A citation surface must remain opaque at its scroll boundary. */
-:is(.cl-native-host,.cl-floating){scrollbar-width:thin;background:var(--cl-bg)!important;mask-image:none;scrollbar-color:color-mix(in srgb,var(--cl-ink) 26%,transparent) transparent}
+:is(.cl-native-host,.cl-floating){scrollbar-width:none;background:var(--cl-bg)!important;mask-image:none;scrollbar-color:color-mix(in srgb,var(--cl-ink) 26%,transparent) transparent}
 
 
 /* Compact bibliographic editor: two stable rows, and a generated read-only citation. */
