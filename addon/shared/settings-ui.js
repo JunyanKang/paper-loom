@@ -29,7 +29,7 @@ PaperLoom.extendSettings=async function(ctx) {
   for(const key of ['voice','shortcuts']){const b=this.button(doc,labels[key],()=>select(key));b.dataset.pane=key;b.setAttribute('role','tab');b.setAttribute('aria-controls','pl-settings-'+key);tabs.append(b);}
   for(const key of ['general','voice','shortcuts','appearance'])tabs.append(tabs.querySelector('[data-pane='+key+']'));
   const select=key=>{
-    if(!labels[key])key='general';for(const page of Object.values(ctx.modelPages))page.hide();tabs.hidden=false;activate(key);ctx.footer.hidden=key!=='appearance';frame.dataset.settingsPage=key;ui.root._pvSelects?.close();
+    if(!labels[key])key='general';for(const page of Object.values(ctx.modelPages))page.hide();tabs.hidden=false;activate(key);ctx.footer.hidden=key!=='appearance';frame.dataset.settingsPage=key;tabs.style.setProperty('--pl-category-index',String(['general','voice','shortcuts','appearance'].indexOf(key)));ui.root._pvSelects?.close();
     for(const b of tabs.children){const active=b.dataset.pane===key;const label=labels[b.dataset.pane]||'';b.replaceChildren();const image=this.el(doc,'span',null,'pl-settings-icon');image.style.setProperty('--pl-settings-icon','url("'+this.voice.assetURI+'icons/'+({general:'languages',appearance:'palette',voice:'headphones',shortcuts:'keyboard'})[b.dataset.pane]+'.svg")');image.setAttribute('aria-hidden','true');b.append(image);b.setAttribute('aria-label',label);b.title=label;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;}
     ui.settings(true);ui.selectSettingsTab(key==='general'?'translation':key);
     embedded.id='pl-settings-'+key;embedded.hidden=false;ui.root.hidden=false;embedded.style.height=({general:290,appearance:90,voice:480,shortcuts:390})[key]+'px';V.syncSettings();

@@ -129,8 +129,8 @@ var LoomDesignStyle = `
 .pl-workspace-page>.pl-main-actions>button[aria-current=page]{background:transparent!important;color:var(--cl-accent,var(--pv-accent))!important;box-shadow:inset 1px 0 var(--pl-tab-line),inset -1px 0 var(--pl-tab-line),inset 0 -1px var(--pl-tab-line)!important}
 .pl-workspace-page>.pl-main-actions>button[aria-current=page]::before{content:'';position:absolute;left:1px;right:1px;top:-2px;height:4px;background:var(--pl-page-surface);pointer-events:none}
 .pl-workspace-page>.pl-main-actions>button[aria-current=page]::after{display:none}
-.cl-settings.pl-settings .cl-settings-tabs.cl-tabs{flex:none;margin:0 12px;padding:8px 0 0;gap:12px;min-height:50px}
-.cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button{position:relative;width:48px;height:42px!important;min-height:42px;border-radius:10px 10px 0 0;padding:10px;margin:0}
+.cl-settings.pl-settings .cl-settings-tabs.cl-tabs{position:relative;display:flex;flex:none;justify-content:flex-end;align-items:flex-end;flex-wrap:nowrap;margin:0;padding:2px var(--pl-nav-right,58px) 0 0;gap:12px;height:38px;min-height:38px;border-radius:0}
+.cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button{position:relative;flex:none;width:48px;min-width:48px;height:36px!important;min-height:36px;padding:7px 10px;border-radius:12px 12px 0 0;margin:0}
 .cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button[aria-selected=true]{background:transparent!important;color:var(--cl-accent)!important;box-shadow:inset 1px 0 var(--pl-tab-line),inset -1px 0 var(--pl-tab-line),inset 0 1px var(--pl-tab-line)!important}
 .cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button[aria-selected=true]::after{content:'';position:absolute;left:1px;right:1px;bottom:-2px;height:4px;z-index:2;background:var(--pl-tab-surface);pointer-events:none}
 .cl-settings.pl-settings .cl-dialog-body{margin:0 8px 8px;padding:8px 12px 12px!important;border-radius:10px;background:var(--pl-tab-surface);box-shadow:inset 0 0 0 1px var(--pl-tab-line)}
@@ -157,7 +157,7 @@ var LoomDesignStyle = `
 :is(.cl-root,.cl-settings).pl-workspace-page::before{background-position:left bottom;background-size:100% 100%,100% 100%,var(--pl-art-size);background-repeat:no-repeat}
 .pl-workspace-page>.pl-main-actions{justify-content:flex-end;height:38px;padding:0 var(--pl-nav-right,58px) 2px 0;gap:12px}
 .pl-workspace-page>.pl-main-actions>button{height:36px!important;min-height:36px!important;padding:7px 10px!important}
-@media(max-width:350px){.pl-workspace-page>.pl-main-actions{--pl-nav-right:12px}}
+@media(max-width:350px){.pl-workspace-page{--pl-nav-right:12px}}
 :is(.cl-select-popover,.pv-select-popover) [role=option]:not(.pl-language-option){justify-content:flex-end;text-align:right;white-space:normal}
 :is(.cl-select-popover,.pv-select-popover) [role=option]:not(.pl-language-option)>span:first-child{flex:1;min-width:0;text-align:right;overflow-wrap:break-word}
 /* Settings categories retain one outer height and a common row rhythm. */
@@ -186,6 +186,13 @@ var LoomDesignStyle = `
 /* Embedded settings inherit the parent surface without glass tint or saturation. */
 html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.pl-embedded.pv-shell .pv-panel,.pl-embedded .pv-settings-content,.pl-embedded [data-settings-pane]{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}
 .pl-embedded .pv-panel::before,.pl-embedded .pv-panel::after{display:none!important}
+/* Equal top/bottom margins and mirrored category/navigation tab geometry. */
+.cl-settings.pl-settings{padding-top:4px!important}
+.cl-settings.pl-settings .cl-settings-tabs .pl-settings-icon{width:21px;height:21px}
+.cl-settings.pl-settings .cl-settings-tabs{--pl-category-right:calc(var(--pl-nav-right,58px) + (3 - var(--pl-category-index,0))*60px)}
+.cl-settings.pl-settings .cl-settings-tabs::before,.cl-settings.pl-settings .cl-settings-tabs::after{content:'';position:absolute;bottom:0;height:1px;background:var(--pl-tab-line);pointer-events:none}
+.cl-settings.pl-settings .cl-settings-tabs::before{left:12px;right:calc(var(--pl-category-right) + 48px)}
+.cl-settings.pl-settings .cl-settings-tabs::after{left:calc(100% - var(--pl-category-right));right:12px}
 /* Open content surface; only the lower edge flows into the active tab. */
 .pl-workspace-content{background:transparent;box-shadow:none;border-radius:0}
 .cl-settings.pl-settings .cl-dialog-body{background:transparent;box-shadow:none}
