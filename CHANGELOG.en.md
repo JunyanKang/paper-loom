@@ -2,6 +2,16 @@
 
 [Home](README.en.md) · [简体中文](CHANGELOG.md)
 
+## 1.0.4 · 2026-10-10
+
+- Hover over a translation caption for an attached control row with sentence/paragraph navigation, pause/stop, all four modes, and the current flag. Other languages expand upward on hover.
+- Hover over the selection card’s headphones button to choose one of four reading modes and start once. Dropdown edges remain intact, and expanded triggers stay transparent.
+- Voice choices pair flags with individual portraits. Speech environment matches the adjacent status typography; repeat choices are 1, 2, 3, 5, 10, and ∞.
+- Align controls across settings, listening, and references. Keep text and content still when returning to translation settings. Order themes from light to dark.
+- Add synchronized flags and scope icons to selection translations, with headphones to start reading. Preserve full-text mode when reading from a selection.
+- Offer only supported languages during spoken translation. Collapse unsupported choices from the top while keeping the quick bar and its background aligned.
+- Match navigation, voice actions, and network guidance to the interface language; remove provider tooltips from translated captions.
+
 ## 1.0.3 · 2026-10-10
 
 - Keep all theme previews expanded without printed labels. Add four global backgrounds and a custom card for importing, previewing, and removing an image.

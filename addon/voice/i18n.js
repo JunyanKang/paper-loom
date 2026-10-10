@@ -1036,6 +1036,7 @@ var PaperVoiceI18n = (() => {
  };
  for(const [prefix,values] of Object.entries(voiceLabels))for(let number=1;number<=2;number++)for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][prefix+number]=values[i]+number;
  for(const [source,values] of Object.entries({'全局背景':['Global backgrounds','共通の背景','Arrière-plans globaux','Globale Hintergründe'],'删除背景图片':['Remove background','背景画像を削除','Supprimer le fond','Hintergrund entfernen'],'预览动作':['Preview motion','動きをプレビュー','Aperçu des animations','Bewegung ansehen'],'雾蓝':['Mist','霧','Brume','Nebel'],'暖沙':['Sand','砂','Sable','Sand'],'林间':['Grove','森','Bosquet','Hain'],'夜空':['Night','夜','Nuit','Nacht']}))for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][source]=values[i];
+ for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang]['停止']=['Stop','停止','Arrêter','Stopp'][i];
  const keys=Object.keys(catalogs.en).sort((a,b)=>b.length-a.length);
  const pattern=new RegExp(keys.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
  const sources=new WeakMap();
@@ -1072,7 +1073,7 @@ var PaperVoiceI18n = (() => {
   };
   function visit(node){
    if(node.nodeType===3){update(node,'text',node.nodeValue,v=>node.nodeValue=v);return;}
-   if(node.nodeType!==1||['STYLE','SCRIPT'].includes(node.tagName)||node.classList?.contains('pl-engine')||node.classList?.contains('pl-navigation'))return;
+   if(node.nodeType!==1||['STYLE','SCRIPT'].includes(node.tagName)||node.classList?.contains('pl-engine')||node.classList?.contains('pl-navigation')||node.classList?.contains('pl-main-actions'))return;
    if(node.getAttribute('data-field')==='selectPopover')return;
    if(node.getAttribute('data-field')==='language'){const auto=node.querySelector('option[value=auto]');if(auto)visit(auto);return;}
    if(node.getAttribute('data-field')==='preview'&&!placeholders.has(node.textContent))return;
@@ -1081,6 +1082,7 @@ var PaperVoiceI18n = (() => {
   }
   if(root){root.setAttribute('lang',language);visit(root);}
  }
+ for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang]['朗读控制']=['Reading controls','読み上げ操作','Commandes de lecture','Lesesteuerung'][i];
  return {translate,apply,resolveLanguage,supportedLanguages};
 })();
 if(typeof module!=='undefined')module.exports=PaperVoiceI18n;

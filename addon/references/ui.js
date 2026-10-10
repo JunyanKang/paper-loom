@@ -247,7 +247,7 @@ var CiteLensUI = {
     };load();
   },
   scrollEdges(doc){
-    if(doc._clScrollEdges)return;const win=doc.defaultView,selector='.cl-body,.cl-dialog-body,.cl-menu,.pn-list,.pn-detail,.cl-summary-body,.cl-select-popover,.cl-citation-locations,.pn-map-inspector,.pn-inspector-content,.pn-node-abstract,.pn-search-results,.pn-career-bio-content,.pn-career-timeline',tracked=new Set(),pending=new Set();let raf=0,disposed=false;
+    if(doc._clScrollEdges)return;const win=doc.defaultView,selector='.cl-body,.cl-dialog-body,.pn-list,.pn-detail,.cl-summary-body,.pn-map-inspector,.pn-inspector-content,.pn-node-abstract,.pn-search-results,.pn-career-bio-content,.pn-career-timeline',tracked=new Set(),pending=new Set();let raf=0,disposed=false;
     const update=el=>{if(!el.isConnected)return;const scrollable=/auto|scroll/.test(win.getComputedStyle(el).overflowY)&&el.clientHeight>0&&el.scrollHeight-el.clientHeight>2;el.classList.toggle('cl-scroll-edges',scrollable);el.style.setProperty('--cl-edge-top',scrollable&&el.scrollTop>2?'12px':'0px');el.style.setProperty('--cl-edge-bottom',scrollable&&el.scrollHeight-el.clientHeight-el.scrollTop>2?'12px':'0px');};
     const flush=()=>{raf=0;for(const el of tracked)if(!el.isConnected){resize.unobserve(el);tracked.delete(el);pending.delete(el);}for(const el of pending)update(el);pending.clear();};
     const queue=el=>{if(disposed)return;pending.add(el);if(!raf)raf=win.requestAnimationFrame(flush);};
@@ -755,7 +755,7 @@ var CiteLensUI = {
     const summary=dialog.root.querySelector('.cl-save-summary .cl-muted');if(ready.length!==rows.length&&summary)summary.textContent=`${rows.length-ready.length} 篇尚未确认，仍保留在阅读清单。`;
   },
   settingsDialog(doc,{reader=CiteLens.readerForDocument(doc)}={}) {
-    const S=CiteLensServices,existing=doc.querySelector('.cl-settings');if(existing){if(existing._clReader===reader){existing._clPage?.activate();return existing._plReady;}existing._clClose?.();}
+    const S=CiteLensServices,existing=doc.querySelector('.cl-settings');if(existing){if(existing._clReader===reader){existing._clPage?.activate();return existing._plReady;}if(existing._clPage)existing._clPage.destroy();else existing._clClose?.();}
     const panel=CiteLens.panels.get(reader);
     const cleanups=[];let unsubscribe=()=>{},unsubscribeModels=()=>{},testTicket=0;
     const {root,footer,close}=this.dialog(doc,'Paper Loom',{className:'cl-settings',reader,onClose:()=>{testTicket++;unsubscribe();unsubscribeModels();for(const cleanup of cleanups.splice(0))cleanup();}}),status=this.el(doc,'div','','cl-status');

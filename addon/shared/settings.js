@@ -69,6 +69,14 @@ var LoomSettings = {
     V.saveLLM=(config,key)=>T.saveLLM(config,key);
     V.testLLM=async config=>{const result=await T.testLLM(config);if(!result.translation?.ok)throw Error(result.translation?.message||'连接失败');return {text:'连接成功',source:config.name||config.id};};
     V.translate=(text,sourceLanguage=null,options={})=>T.translate(owner.voiceScope.PaperVoiceCore.speechText(text),sourceLanguage||V.activeSpeechLanguage||V.speechLanguage?.()||'en',options);
+    V.syncSharedTranslationControls=()=>{
+      const docs=new Set([...V.livePanels()].map(p=>p.root.ownerDocument));
+      for(const doc of docs)for(const select of doc.querySelectorAll('.cl-settings select[data-translation-setting]')){
+        const key=select.dataset.translationSetting;if(!['translationTarget','translationProvider'].includes(key))continue;
+        select.value=T.get(key,key==='translationTarget'?'zh-Hans':'tencenttransmart');
+        if(key==='translationTarget')for(const option of select.options)option.hidden=option.disabled=!V.translationLanguages().some(x=>x.code===option.value);
+      }
+    };
     T.syncSettings=()=>{V.syncSettings();};
   },
   async restoreTranslation(source) {

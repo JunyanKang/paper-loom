@@ -200,7 +200,7 @@ test('single click toggles translated audio without changing target; double clic
  p.quickTranslationClick({detail:1});job();assert.equal(p.get('readTranslation'),false);
  p.quickTranslationClick({detail:1});p.quickTranslationClick({detail:2});p.quickTranslationDoubleClick();assert.equal(job,null);assert.equal(p.get('translation'),true);assert.equal(p.get('readTranslation'),false);assert.ok(cleared>0);
  p.quickTranslationDoubleClick();assert.equal(p.get('translation'),false);
- p.set('readTranslation',true);p.setTranslationTarget('de');assert.equal(p.get('translationTarget'),'de');assert.equal(p.get('readTranslation'),false);
+ p.set('readTranslation',true);p.setTranslationTarget('de');assert.equal(p.get('translationTarget','zh-Hans'),'zh-Hans');assert.equal(p.get('readTranslation'),true);p.setReadTranslation(false);p.setTranslationTarget('de');assert.equal(p.get('translationTarget'),'de');
  p.quickTranslationClick({detail:1});p.stop();assert.equal(job,null);
 });
 test('new installation defaults to translation while an explicit off preference remains off',()=>{const {p,context}=setup();context.Zotero.Prefs.set(p.prefix+'translation',undefined);assert.equal(p.get('translation',false),true);p.set('translation',false);assert.equal(p.get('translation',true),false);});
@@ -426,12 +426,12 @@ test('popup dismissal never closes a newer selection, other reader or cancelled 
 });
 test('selection translation uses the configured service and ignores stale selection results',async()=>{
  const {p}=setup(),reader={};p.t=s=>s;p.set('translationTarget','ja');p.set('translationProvider','google');p.translationLanguage=()=>({label:'日本語'});const pending=[];p.translate=(text,source,options)=>new Promise(resolve=>pending.push({text,source,options,resolve}));
- const ui=()=>({card:{isConnected:true,dataset:{}},heading:{},translation:{},retry:{},language:{}}),first={text:'The human retina transforms light.'},second={text:'Neural cells detect signals.'},a=ui(),b=ui();
+ const ui=()=>({card:{isConnected:true,dataset:{}},heading:{},translation:{},retry:{setAttribute(){}},language:{setAttribute(){}},flag:{},languageGroup:{},languages:{children:[]},scopes:[]}),first={text:'The human retina transforms light.'},second={text:'Neural cells detect signals.'},a=ui(),b=ui();
  p.selectionContexts.set(reader,first);p.translateSelection(reader,first,a);await new Promise(r=>setTimeout(r,250));assert.equal(a.translation.textContent,'正在翻译…');assert.equal(pending[0].options.target,'ja');assert.equal(pending[0].options.provider,'google');
  p.selectionContexts.set(reader,second);p.translateSelection(reader,second,b);pending[0].resolve({text:'stale'});await tick();assert.notEqual(a.translation.textContent,'stale');await new Promise(r=>setTimeout(r,250));pending[1].resolve({text:'神経細胞'});await tick();assert.equal(b.translation.textContent,'神経細胞');assert.equal(b.card.dataset.translationState,'ready');
 });
 test('selection translation may be disabled and failures keep reading controls independent',async()=>{
- const {p}=setup(),r={},s={text:'Cells detect light.'},ui={card:{isConnected:true,dataset:{}},heading:{},translation:{},retry:{},language:{}};p.t=s=>s;p.translationLanguage=()=>({label:'简体中文'});p.set('selectionTranslation',false);let calls=0;p.translate=async()=>{calls++;throw Error('offline');};
+ const {p}=setup(),r={},s={text:'Cells detect light.'},ui={card:{isConnected:true,dataset:{}},heading:{},translation:{},retry:{setAttribute(){}},language:{setAttribute(){}},flag:{},languageGroup:{},languages:{children:[]},scopes:[]};p.t=s=>s;p.translationLanguage=()=>({label:'简体中文'});p.set('selectionTranslation',false);let calls=0;p.translate=async()=>{calls++;throw Error('offline');};
  p.selectionContexts.set(r,s);p.translateSelection(r,s,ui);assert.equal(ui.translation.hidden,true);assert.equal(calls,0);p.set('selectionTranslation',true);p.translateSelection(r,s,ui);await new Promise(r=>setTimeout(r,250));assert.equal(ui.card.dataset.translationState,'error');assert.equal(ui.retry.hidden,false);assert.notEqual(p.state,'error');
 });
 
@@ -477,4 +477,14 @@ test('long terminal author citation never synthesizes a punctuation-only pause',
  const units=core.layoutUnits([{pageIndex:0,text,height:800}]);const sent=[];p.requestSpeech=async speech=>{sent.push(speech);return {audio:speech};};
  await p.runUnits(units,{navigate:async()=>{}},p.generation,{mode:'document',loops:1});
  assert.match(played.slice(0,-1).join(' '),/koniocellular ganglion cells\.$/);assert.equal(played.at(-1),'More cells respond.');assert.deepEqual([...played].sort(),[...sent].sort());assert.ok(sent.every(core.hasSpeech));
+});
+
+test('one-shot selection launch overrides looping without changing saved preferences',async()=>{
+ const {p}=setup(),r={};p.set('mode','selection');p.set('selectionRepeat',0);p.locateSelectionUnits=async()=>{};
+ let playback;p.runUnits=async(units,reader,generation,options)=>{playback=options;};
+ await p.beginSelectionReading(r,{text:'A single reading.'},null,null,{loops:1});
+ assert.equal(playback.loops,1);assert.equal(p.get('selectionRepeat'),0);
+});
+test('one-shot sentence and paragraph launches override loops after resolving PDF selection',async()=>{
+ for(const mode of ['sentence','paragraph']){const {p}=setup(),r=progressReader();p.set('mode',mode);p.set('repeat',0);const unit={text:'A single reading.',pageIndex:0,sentenceIndex:0,paragraphIndex:0};p.resolveSelection=async()=>unit;p.localUnits=async()=>[unit];let playback;p.runUnits=async(units,reader,generation,options)=>{playback=options;};await p.beginSelectionReading(r,{text:unit.text,pageIndex:0},null,null,{loops:1});assert.equal(playback.loops,1);assert.equal(p.get('repeat'),0);}
 });

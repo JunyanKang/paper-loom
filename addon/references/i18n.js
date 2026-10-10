@@ -2,6 +2,7 @@
 var CiteLensI18n = {
  catalogs:{
   "en": {
+    "划词翻译": "Selection",
     "朋友圈自动整理本地文献中的作者与合作关系。":"Coauthor networks automatically organize authors and collaborations in your library.",
     "主题网络 · 开发中":"Topic network · Coming soon",
     "主题网络入口暂不可启用，成熟后将随插件更新开放。":"Topic networks will be available in a future update.",
@@ -442,6 +443,7 @@ var CiteLensI18n = {
     "安装 v": "Install v"
   },
   "ja": {
+    "划词翻译": "選択翻訳",
     "重试翻译": "翻訳を再試行",
     "透明度": "透明度",
     "主题": "テーマ",
@@ -816,6 +818,7 @@ var CiteLensI18n = {
     "安装 v": "インストール v"
   },
   "fr": {
+    "划词翻译": "Sélection",
     "重试翻译": "Réessayer",
     "透明度": "Transparence",
     "主题": "Thème",
@@ -1190,6 +1193,7 @@ var CiteLensI18n = {
     "安装 v": "Installer v"
   },
   "de": {
+    "划词翻译": "Auswahl",
     "重试翻译": "Erneut übersetzen",
     "透明度": "Transparenz",
     "主题": "Design",
@@ -1578,11 +1582,11 @@ var CiteLensI18n = {
    const visit=n=>{if(n.nodeType===3){update(n,'text',n.nodeValue,v=>n.nodeValue=v);return;}if(n.nodeType!==1||['STYLE','SCRIPT'].includes(n.tagName))return;
      if(n.matches('.cl-reference-preview,[data-cl-citation],.cl-title,.cl-row-title,.cl-byline,.cl-journal,.cl-authors,.cl-author-name,.cl-existing,.cl-raw,.cl-summary-content:not([data-ui-status="true"]),.cl-cite-snippet,.pn-snippet,.pn-authorline,.pn-node-abstract,.pn-node-link>button:first-child,.pn-abstract-preview p,.pn-proof-row>span,.pn-paper,.pn-publication,.pn-authors,.pn-location'))return;
      if(n.matches('[data-select-id="cl-setting-interfaceLanguage"],#cl-setting-interfaceLanguage'))return;
-     for(const key of ['title','data-cl-tooltip','aria-label','placeholder'])if(n.hasAttribute(key))update(n,key,n.getAttribute(key),v=>n.setAttribute(key,v));
+     for(const key of ['title','data-cl-tooltip','data-pv-tooltip','aria-label','placeholder'])if(n.hasAttribute(key))update(n,key,n.getAttribute(key),v=>n.setAttribute(key,v));
      if(['INPUT','TEXTAREA'].includes(n.tagName))return;for(const c of n.childNodes)visit(c);
    };visit(root);
  },
- install(doc){if(this.documents.has(doc))return;let running=false,scheduled=0,previous='zh';const win=doc.defaultView,apply=()=>{if(running)return;const language=this.language();if(language==='zh'&&previous==='zh')return;previous=language;running=true;try{for(const root of doc.querySelectorAll('.cl-root,.cl-dialog,.cl-floating,.cl-summary,.cl-select-popover,.cl-tooltip,.pl-engine,.pl-navigation,.pl-conflicts,[data-cite-lens="toolbar"]'))this.apply(root);}finally{running=false;}};const observer=new win.MutationObserver(()=>{if(scheduled)return;scheduled=win.requestAnimationFrame(()=>{scheduled=0;apply();});});observer.observe(doc.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','data-cl-tooltip','aria-label','placeholder']});this.documents.set(doc,{apply,observer,cancel:()=>win.cancelAnimationFrame(scheduled)});apply();},
+ install(doc){if(this.documents.has(doc))return;let running=false,scheduled=0,previous='zh';const win=doc.defaultView,apply=()=>{if(running)return;const language=this.language();if(language==='zh'&&previous==='zh')return;previous=language;running=true;try{for(const root of doc.querySelectorAll('.cl-root,.cl-dialog,.cl-floating,.cl-summary,.cl-select-popover,.cl-tooltip,.pl-engine,.pl-navigation,.pl-main-actions,.pl-conflicts,[data-cite-lens="toolbar"]'))this.apply(root);}finally{running=false;}};const observer=new win.MutationObserver(()=>{if(scheduled)return;scheduled=win.requestAnimationFrame(()=>{scheduled=0;apply();});});observer.observe(doc.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','data-cl-tooltip','data-pv-tooltip','aria-label','placeholder']});this.documents.set(doc,{apply,observer,cancel:()=>win.cancelAnimationFrame(scheduled)});apply();},
  refresh(){for(const entry of this.documents.values())entry.apply();},
  release(doc){this.documents.get(doc)?.cancel?.();this.documents.get(doc)?.observer.disconnect();this.documents.delete(doc);}
 };
@@ -1929,3 +1933,8 @@ for(const [source,values] of Object.entries({
 for(const [source,values] of Object.entries({'已安装':['Installed','インストール済み','Installé','Installiert'],'尚未安装':['Not installed','未インストール','Non installé','Nicht installiert'],'修复声音':['Repair voices','音声を修復','Réparer les voix','Stimmen reparieren'],'下载声音':['Download voices','音声をダウンロード','Télécharger les voix','Stimmen laden'],'检查声音':['Check voices','音声を確認','Vérifier les voix','Stimmen prüfen']}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
 
 for(const [source,values] of Object.entries({'正在检查声音…':['Checking voices…','音声を確認中…','Vérification des voix…','Stimmen werden geprüft…'],'声音检查通过':['Voices are ready','音声は利用可能です','Voix prêtes','Stimmen sind bereit'],'声音检查未通过，请修复声音。':['Voice check failed. Repair voices.','音声を確認できません。修復してください。','Échec de la vérification. Réparez les voix.','Stimmenprüfung fehlgeschlagen. Bitte reparieren.'],'声音检查已取消':['Voice check cancelled','音声の確認をキャンセルしました','Vérification annulée','Stimmenprüfung abgebrochen']}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
+
+for(const [i,lang] of ['en','ja','fr','de'].entries())Object.assign(CiteLensI18n.catalogs[lang],{
+ '发音环境':['Speech environment','音声環境','Environnement vocal','Sprachumgebung'][i],
+ '文献网络；可搜索定位，方向键平移，加减号缩放，Enter 查看当前节点':['Library network; search to locate, arrow keys to pan, plus/minus to zoom, Enter to inspect the current node','文献ネットワーク。検索で移動、方向キーでパン、＋/−で拡大縮小、Enter でノードを表示','Réseau bibliographique ; rechercher, déplacer avec les flèches, zoomer avec +/−, Entrée pour ouvrir le nœud','Literaturnetzwerk; suchen, mit Pfeiltasten verschieben, mit +/− zoomen, Eingabe öffnet den Knoten'][i]
+});

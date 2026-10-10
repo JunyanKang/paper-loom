@@ -5,7 +5,7 @@ var PaperLoom = {
   message(text,doc=Zotero.getMainWindow().document){let status=doc.querySelector('[data-loom-status]');if(status)status.textContent=text;else Zotero.getMainWindow().alert(text);},
   currentReader(doc){if(doc){const match=Zotero.Reader._readers.find(r=>r._iframeWindow?.document===doc||r._window?.document===doc);if(match)return match;}const win=doc?.defaultView||Zotero.getMainWindow();return Zotero.Reader.getByTabID(win.Zotero_Tabs?.selectedID)||null;},
   logo(doc,size=28){const image=this.el(doc,'img');image.src=this.assetURI+'loom.png';image.alt='';image.style.cssText='width:'+size+'px;height:'+size+'px;object-fit:contain';return image;},
-  flagURI(code){const id=({'zh':'cn','zh-Hans':'cn','zh-Hant':'tw',en:'gb',ja:'jp',ko:'kr',fr:'fr',de:'de',es:'es',ru:'ru',auto:'auto'})[code]||'auto';return this.assetURI+'flags/'+id+'.svg';},
+  flagURI(code){const id=({'zh':'cn','zh-Hans':'cn','zh-Hant':'tw',en:'gb','en-US':'us',ja:'jp',ko:'kr',fr:'fr',de:'de',es:'es',ru:'ru',auto:'auto'})[code]||'auto';return this.assetURI+'flags/'+id+'.svg';},
   providerMeta(code){
     const presets=this.voice.llmPresets;let id=code;
     if(code==='llm'){try{const selected=this.voice.get('llmProvider','');const saved=JSON.parse(this.voice.get('llmConfigs','{}'));id=selected&&saved[selected]?selected:'llm';}catch(_){id='llm';}}
@@ -82,7 +82,7 @@ var PaperLoom = {
   },
   async showSettings(reader=this.currentReader(),doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document,tab='general') {
     this.style(doc);const result=await this.referencesScope.CiteLensUI.settingsDialog(doc,{reader});
-    const frame=doc.querySelector('.cl-settings');frame?._plSelect?.(tab);return result;
+    const frame=result?.frame||doc.querySelector('.cl-settings');frame?._plSelect?.(tab);return result;
   },
   showConflicts(doc=Zotero.getMainWindow().document) {
     // Predecessors must stop before their Reader hooks and global aliases are reused.

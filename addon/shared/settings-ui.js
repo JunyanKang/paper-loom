@@ -1,7 +1,7 @@
 PaperLoom.extendSettings=async function(ctx) {
   const {doc,reader,root,frame,tabs,panes,activate,cleanups,translation,data}=ctx;
   frame.classList.add('pl-settings');this.style(doc);
-  const embedded=this.el(doc,'iframe');embedded.className='pl-settings-frame';embedded.setAttribute('title','听读设置');embedded.style.cssText='width:100%;border:0;display:block;height:320px;background:transparent';
+  const embedded=this.el(doc,'iframe');embedded.className='pl-settings-frame';embedded.setAttribute('title','听读设置');embedded.style.cssText='width:calc(100% + 12px);border:0;display:block;height:320px;background:transparent';
   await new Promise((resolve,reject)=>{
     const win=doc.defaultView;let finished=false,timer;
     const finish=error=>{if(finished)return;finished=true;win.clearTimeout(timer);embedded.removeEventListener('load',loaded);error?reject(error):resolve();};
@@ -11,7 +11,7 @@ PaperLoom.extendSettings=async function(ctx) {
     timer=win.setTimeout(()=>finish(!root.isConnected||embedded.contentDocument?.body?null:Error('听读设置页面未能加载')),8000);
   });
   if(!root.isConnected)return;
-  const inside=embedded.contentDocument;inside._pvSelectHost=frame;inside.documentElement.classList.add('pl-settings-document');inside.body.style.cssText='margin:0;background:transparent;overflow:hidden';this.style(inside);this.referencesScope.CiteLensUI.appearance(inside);this.referencesScope.CiteLensI18n.install(inside);
+  const inside=embedded.contentDocument;inside._pvSelectHost=frame;inside.documentElement.classList.add('pl-settings-document');inside.body.style.cssText='margin:0;padding-right:12px;box-sizing:border-box;background:transparent;overflow:hidden';this.style(inside);this.referencesScope.CiteLensUI.appearance(inside);this.referencesScope.CiteLensI18n.install(inside);
   const fake={_iframeWindow:embedded.contentWindow,_window:embedded.contentWindow,itemID:reader?.itemID},V=this.voice;
   const ui=this.voiceScope.PaperVoiceUI.create(V,fake);ui.root.classList.add('pl-embedded');ui.root.dataset.loomSettings='true';ui.panel.hidden=false;ui.panel.dataset.pvVisible='true';
   V.panels.set(fake,ui);ui.settings(true);V.syncSettings();
@@ -41,9 +41,9 @@ PaperLoom.extendSettings=async function(ctx) {
     if(!labels[key])key='general';for(const page of Object.values(ctx.modelPages))page.hide();tabs.hidden=false;activate(key);data.hidden=key!=='general';ctx.footer.hidden=key!=='appearance';frame.dataset.settingsPage=key;tabs.style.setProperty('--pl-category-index',String(['general','voice','shortcuts','appearance'].indexOf(key)));ui.root._pvSelects?.close();
     for(const b of tabs.children){const active=b.dataset.pane===key;const label=labels[b.dataset.pane]||'';b.replaceChildren();const image=this.el(doc,'span',null,'pl-settings-icon');image.style.setProperty('--pl-settings-icon','url("'+this.voice.assetURI+'icons/'+({general:'languages',appearance:'palette',voice:'headphones',shortcuts:'keyboard'})[b.dataset.pane]+'.svg")');image.setAttribute('aria-hidden','true');b.append(image);b.setAttribute('aria-label',label);b.title=label;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;}
     ui.settings(true);ui.selectSettingsTab(key==='general'?'translation':key);
-    embedded.id='pl-settings-'+key;embedded.hidden=false;ui.root.hidden=false;embedded.style.height=({general:290,appearance:90,voice:480,shortcuts:390})[key]+'px';V.syncSettings();
+    embedded.id='pl-settings-'+key;embedded.hidden=false;ui.root.hidden=false;V.syncSettings();
     for(const field of ['provider','target'])ui.find(field)?.closest('.pv-setting-row')?.setAttribute('hidden','');
-    embedded.contentWindow.requestAnimationFrame(resize);root.scrollTop=0;
+    resize();root.scrollTop=0;
   };
   for(const b of tabs.children)b.onclick=()=>select(b.dataset.pane);
   frame._plSelect=select;
@@ -60,7 +60,7 @@ PaperLoom.extendSettings=async function(ctx) {
 PaperLoom.enginePanel=function(doc) {
   const node=this.el(doc,'section',null,'pl-engine'),runtime=LoomRuntime;
   const heading=this.el(doc,'h3',null,'pl-engine-heading'),badge=this.el(doc,'span',null,'pl-engine-badge');
-  heading.append(this.el(doc,'span','离线声音'),badge);
+  heading.append(this.el(doc,'span','发音环境'),badge);
   const status=this.el(doc,'p',null,'pl-engine-status'),progress=this.el(doc,'progress'),progressRow=this.el(doc,'div',null,'pl-engine-progress'),actions=this.el(doc,'div',null,'pl-engine-actions');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');progress.max=1;progress.setAttribute('aria-label','声音安装进度');
   const download=this.button(doc,'',()=>runtime.install().catch(()=>{})),cancel=this.button(doc,'',()=>runtime.cancel()),check=this.button(doc,'',()=>runtime.diagnose().catch(()=>{}));

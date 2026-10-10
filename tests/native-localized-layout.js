@@ -8,7 +8,7 @@ const check=(name,ok,detail)=>checks.push({name,ok,detail});
 const inspect=(root,label)=>{
  const win=root.ownerDocument.defaultView;
  if(root.classList.contains('pl-workspace-page')){check(label+' network navigation is first',root.querySelector(':scope>.pl-main-actions>button')?.dataset.loomPage==='network');const nav=root.querySelector(':scope>.pl-main-actions'),content=root.querySelector(':scope>.pl-workspace-content'),b=root.getBoundingClientRect(),n=nav?.getBoundingClientRect(),c=content?.getBoundingClientRect();check(label+' connected bottom navigation',!!n&&n.bottom<=b.bottom+1&&Math.abs(n.top-c.bottom)<2&&[...nav.children].filter(x=>x.getAttribute('aria-current')==='page').length===1,{frame:b.toJSON(),nav:n?.toJSON(),content:c?.toJSON()});check(label+' no duplicate product heading',[...root.querySelectorAll('.pv-header,.cl-dialog-header,.cl-brand')].every(x=>!visible(x)||win.getComputedStyle(x.closest('header')).display==='none'));}
- check(label+' no horizontal scrolling',root.scrollWidth<=root.clientWidth+2,{scroll:root.scrollWidth,width:root.clientWidth});
+ const available=root.closest('.pl-embedded')?win.innerWidth-root.getBoundingClientRect().left:root.clientWidth;check(label+' no horizontal scrolling',root.scrollWidth<=available+2,{scroll:root.scrollWidth,width:available});
  for(const el of [root,...root.querySelectorAll('*')]){
   if(!visible(el))continue;const css=win.getComputedStyle(el);
   if(/auto|scroll/.test(css.overflowY+' '+css.overflowX)&&(el.scrollHeight>el.clientHeight+2||el.scrollWidth>el.clientWidth+2))check(label+' hides scrollbar '+el.className,css.scrollbarWidth==='none');

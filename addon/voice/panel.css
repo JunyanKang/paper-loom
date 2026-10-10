@@ -315,3 +315,8 @@
 
 /* Artwork can extend past its registered body box without moving the hit target. */
 .pv-shell,.pv-mini,.pv-orb,.pv-mascot-interaction{overflow:visible}
+
+/* Without a visible caption, retain transport access as one compact hover row. */
+.pv-nav-popover{display:flex;align-items:center;gap:6px;padding:5px;box-sizing:border-box;pointer-events:auto}
+.pv-nav-scopes{position:static;display:flex;flex-direction:row;width:auto;padding:0;gap:2px;overflow:visible}
+.pv-nav-popover .pv-stop-row{position:static;width:auto;padding:0;margin:0}

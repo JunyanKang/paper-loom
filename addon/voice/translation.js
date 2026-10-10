@@ -289,6 +289,55 @@ var PaperVoiceTranslation = {
   if(active.win){active.win.removeEventListener('resize',active.redraw);if(active.raf!==undefined)active.win.cancelAnimationFrame(active.raf);}
   active.observer?.disconnect();active.layer?.remove();active.markers.forEach(marker=>marker.remove());
  },
+ createCaptionControls(c) {
+  const doc=c.box.ownerDocument,win=doc.defaultView,make=(tag,cls)=>{const el=doc.createElement(tag);el.className=cls;return el;};
+  const tools=make('div','pv-caption-tools');tools.hidden=true;tools.setAttribute('role','toolbar');
+  const style=make('style','');style.textContent=`
+   .pv-caption-tools{position:absolute;z-index:21;display:flex;align-items:center;gap:8px;box-sizing:border-box;padding:4px 6px;border-radius:0 10px 10px 10px;background:var(--pv-paper,#f6f8f5);color:var(--pv-ink,#253c33);box-shadow:0 5px 16px #15342920;font:12px/1.4 system-ui,sans-serif;isolation:isolate}
+   .pv-caption-tools[hidden],.pv-caption-tools [hidden]{display:none!important}
+   .pv-caption-tools-group{display:flex;align-items:center;gap:2px}
+   .pv-caption-tools button{appearance:none;box-sizing:border-box;flex:none;display:flex;align-items:center;justify-content:center;position:relative;width:var(--pv-caption-button,26px);height:28px;margin:0;padding:4px;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
+   .pv-caption-tools button:is(:hover,:focus-visible),.pv-caption-tools button[aria-pressed=true]{background:color-mix(in srgb,var(--pv-accent,#386c59) 14%,transparent);color:var(--pv-accent,#386c59)}
+   .pv-caption-tools button:focus-visible{outline:1px solid currentColor;outline-offset:-1px}
+   .pv-caption-tools .pv-caption-control-icon{display:block;width:18px;height:18px;background:currentColor;mask:var(--pv-control-icon) center/contain no-repeat;pointer-events:none}
+   .pv-caption-tools .pl-flag{display:block;width:22px;height:15px;object-fit:contain;pointer-events:none}
+   .pv-caption-language-tools{position:relative}
+   .pv-caption-language-menu{box-sizing:border-box;position:absolute;z-index:2;right:-4px;top:100%;display:flex;flex-direction:column;gap:2px;padding:4px;border-radius:8px;background:var(--pv-paper,#f6f8f5);box-shadow:0 4px 14px #15342920;max-height:300px;overflow-y:auto;scrollbar-width:none}
+   .pv-caption-language-menu[data-side=above]{top:auto;bottom:100%}
+   .pv-caption-tools .pv-caption-audio-badge{position:absolute;right:0;bottom:0;width:10px;height:10px;border-radius:3px;background:var(--pv-paper,#f6f8f5);color:var(--pv-accent,#386c59)}
+   .pv-caption-tools .pv-caption-audio-badge>.pv-caption-control-icon{width:10px;height:10px}
+   @media(prefers-reduced-motion:reduce){.pv-caption-tools *{animation:none!important;transition:none!important}}
+  `;
+  tools.append(style);c.box.parentElement.append(tools);this.applyTheme?.(tools);c.tools=tools;
+  const icon=name=>{const el=make('span','pv-caption-control-icon');el.setAttribute('aria-hidden','true');el.style.setProperty('--pv-control-icon',`url("${this.assetURI}icons/${name}.svg")`);return el;};
+  const group=()=>{const el=make('div','pv-caption-tools-group');tools.append(el);return el;};
+  const buttons=[],button=(parent,name,label,action)=>{const b=make('button','');b.type='button';b.dataset.label=label;b.append(icon(name));b.onclick=e=>{e.preventDefault();e.stopPropagation();action(e);};parent.append(b);buttons.push(b);return b;};
+  const transport=group();
+  for(const [scope,prefix,names] of [['sentence','句',['chevron-left','repeat-sentence','chevron-right']],['paragraph','段',['chevrons-left','repeat-paragraph','chevrons-right']]])for(const [i,delta] of [-1,0,1].entries()){const b=button(transport,names[i],delta<0?'上一'+prefix:delta>0?'下一'+prefix:'重读当前'+prefix,()=>this.navigateScope(delta,c.reader,scope));b.dataset.captionScope=scope;b.dataset.delta=delta;}
+  const pause=button(transport,'pause','暂停',()=>this.primary(c.reader));pause.dataset.captionAction='pause';
+  button(transport,'square','停止',()=>this.stop()).dataset.captionAction='stop';
+  const modes=group();for(const mode of PaperVoiceCore.modes){const b=button(modes,mode.icon,mode.short,()=>this.setMode(mode.id));b.dataset.captionMode=mode.id;}
+  const languageHost=group();languageHost.classList.add('pv-caption-language-tools');
+  const language=button(languageHost,'languages','译文语言',e=>this.quickTranslationClick(e));language.dataset.captionAction='translation';language.replaceChildren();language.removeAttribute('title');language.setAttribute('aria-haspopup','true');language.setAttribute('aria-expanded','false');
+  const flag=make('img','pl-flag');flag.alt='';const badge=make('span','pv-caption-audio-badge');badge.append(icon('headphones'));badge.setAttribute('aria-hidden','true');language.append(flag,badge);
+  language.ondblclick=e=>{e.preventDefault();e.stopPropagation();this.quickTranslationDoubleClick();};
+  const menu=make('div','pv-caption-language-menu');menu.hidden=true;menu.setAttribute('role','group');languageHost.append(menu);
+  for(const code of ['ko','de','es','ru','zh-Hant','ja','fr','en','zh-Hans']){const b=make('button','');b.type='button';b.dataset.captionLanguage=code;const img=make('img','pl-flag');img.alt='';img.src=this.flagURI(code);b.append(img);b.onclick=e=>{e.preventDefault();e.stopPropagation();closeLanguages();this.setTranslationTarget(code);};menu.append(b);}
+  let timer=null,languageTimer=null,animation=null;
+  const closeLanguages=()=>{win.clearTimeout(languageTimer);menu.hidden=true;language.setAttribute('aria-expanded','false');};
+  const hide=()=>{win.clearTimeout(timer);closeLanguages();tools.hidden=true;};
+  const layout=()=>{if(c.box.style.visibility==='hidden'||!c.box.isConnected){hide();return;}const b=c.box.getBoundingClientRect(),parent=tools.parentElement.getBoundingClientRect(),frame=c.frame.getBoundingClientRect();tools.style.setProperty('--pv-caption-button',Math.max(16,Math.min(26,(frame.width-56)/13))+'px');const width=tools.getBoundingClientRect().width;tools.style.left=(Math.max(frame.left+4,Math.min(b.left,frame.right-width-4))-parent.left)+'px';tools.style.top=(b.bottom-parent.top-1)+'px';};
+  const show=()=>{win.clearTimeout(timer);if(c.box.style.visibility==='hidden')return;tools.hidden=false;layout();this.panels?.get(c.reader)?.closeNavigation?.();};
+  const leave=()=>{win.clearTimeout(timer);timer=win.setTimeout(()=>{if(!c.box.matches(':hover')&&!tools.matches(':hover,:focus-within'))hide();},220);};
+  const openLanguages=()=>{show();win.clearTimeout(languageTimer);menu.hidden=false;const anchor=language.getBoundingClientRect();menu.dataset.side='above';menu.style.maxHeight=Math.max(32,anchor.top-c.frame.getBoundingClientRect().top-8)+'px';language.setAttribute('aria-expanded','true');};
+  const leaveLanguages=()=>{win.clearTimeout(languageTimer);languageTimer=win.setTimeout(()=>{if(!languageHost.matches(':hover,:focus-within'))closeLanguages();},180);};
+  const events=[];const listen=(el,name,fn)=>{el.addEventListener(name,fn);events.push(()=>el.removeEventListener(name,fn));};
+  for(const el of [c.box,tools]){listen(el,'pointerenter',show);listen(el,'pointerleave',leave);listen(el,'focusin',show);listen(el,'focusout',leave);}
+  listen(tools,'pointerdown',e=>e.preventDefault());listen(tools,'keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();if(!menu.hidden)closeLanguages();else hide();}else if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const all=[...tools.querySelectorAll('button')].filter(b=>!b.closest('.pv-caption-language-menu')),i=all.indexOf(doc.activeElement);all[(i+(e.key==='ArrowRight'?1:-1)+all.length)%all.length]?.focus();}});
+  listen(languageHost,'pointerenter',openLanguages);listen(languageHost,'pointerleave',leaveLanguages);listen(languageHost,'focusin',e=>{if(e.target.matches(':focus-visible'))openLanguages();});listen(languageHost,'focusout',leaveLanguages);
+  const sync=()=>{tools.setAttribute('aria-label',this.t('朗读控制'));for(const b of buttons){const text=this.t(b===pause?(this.state==='paused'?'继续':'暂停'):b.dataset.label);b.setAttribute('aria-label',text);if(b!==language)b.title=text;}for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.captionMode===this.get('mode','selection')));pause.firstChild.style.setProperty('--pv-control-icon',`url("${this.assetURI}icons/${this.state==='paused'?'play':'pause'}.svg")`);flag.src=this.flagURI(this.get('translationTarget','zh-Hans'));language.setAttribute('aria-pressed',String(this.get('translation',true)));badge.hidden=!this.get('readTranslation',false);const before=menu.getBoundingClientRect().height;for(const b of menu.children){b.hidden=b.dataset.captionLanguage===this.get('translationTarget')||!this.translationLanguages().some(x=>x.code===b.dataset.captionLanguage);b.setAttribute('aria-label',this.t(this.translationLanguage(b.dataset.captionLanguage).label));}const after=menu.getBoundingClientRect().height;animation?.cancel();if(!menu.hidden&&before!==after&&!win.matchMedia('(prefers-reduced-motion: reduce)').matches)animation=menu.animate([{height:before+'px'},{height:after+'px'}],{duration:180,easing:'ease-out'});if(!tools.hidden)layout();};
+  c.controls={sync,layout,hide,dispose(){hide();animation?.cancel();for(const off of events)off();tools.remove();}};sync();
+ },
  showTranslation(reader,unit,text,source='') {
   if(!this.get('translation',false))return;
   const frame=reader._internalReader?._primaryView?._iframe,doc=reader._iframeWindow.document;
@@ -305,7 +354,7 @@ var PaperVoiceTranslation = {
    const original={height:frame.style.height,width:frame.style.width,display:frame.style.display};
    const pdfWindow=reader._internalReader._primaryView._iframeWindow;
    c=this.caption={box,frame,original,reader,pdfWindow,inline:true,timer:null};
-   frame.parentElement.append(box);
+   frame.parentElement.append(box);this.createCaptionControls(c);
    // Keep the caption visible while geometry changes. All events in one
    // rendering frame share one measurement; unrelated annotation/UI mutations
    // must not restart the appearance transition.
@@ -327,20 +376,20 @@ var PaperVoiceTranslation = {
   }
   if(c.unit&&c.unit!==unit)c.layout();
   c.box.lang=this.get('translationTarget','zh-Hans');c.box.setAttribute('aria-label',(this.t?.('显示译文')||'显示译文')+' · '+(this.translationLanguage?.().label||c.box.lang));
-  c.unit=unit;const content=source?text:(this.t?.(text)||text);if(c.box.textContent!==content)c.box.textContent=content;c.box.title=this.t?.(source||'显示译文')||(source||'显示译文');c.box.dataset.provider=source;
+  c.unit=unit;const content=source?text:(this.t?.(text)||text);if(c.box.textContent!==content)c.box.textContent=content;c.box.removeAttribute('title');delete c.box.dataset.pvTooltip;c.box.dataset.provider=source;
   this.positionTranslation(c);
  },
  positionTranslation(c) {
   if(this.caption!==c)return;
   const {box,frame,reader}=c,match=this.findSentence(reader,c.unit);
-  if(!match){if(!c.missingSince)c.missingSince=Date.now();if(!c.positioned||Date.now()-c.missingSince>250)box.style.visibility='hidden';else if(c.timer===null)c.timer=this.host.setTimeout(()=>{c.timer=null;c.layout();},260);return;}
+  if(!match){c.controls?.hide();if(!c.missingSince)c.missingSince=Date.now();if(!c.positioned||Date.now()-c.missingSince>250)box.style.visibility='hidden';else if(c.timer===null)c.timer=this.host.setTimeout(()=>{c.timer=null;c.layout();},260);return;}
   c.missingSince=null;
   const fr=frame.getBoundingClientRect(),parent=frame.parentElement.getBoundingClientRect();
   const blocks=this.readingBlocks(match);
   // Prefer the leading visible part of this spoken chunk. In a two-column
   // sentence, the final DOM rectangle may be at the top of the opposite column.
   const block=blocks.find(part=>part.rects.some(r=>r.bottom>0&&r.top<fr.height&&r.right>0&&r.left<fr.width));
-  if(!block){box.style.visibility='hidden';return;}
+  if(!block){box.style.visibility='hidden';c.controls?.hide();return;}
   const column=this.readingColumn(match,block);
   box.style.visibility='visible';box.style.opacity='1';c.positioned=true;
   // Follow the current source directly. Covering subsequent unread text is intentional;
@@ -350,23 +399,23 @@ var PaperVoiceTranslation = {
   // Short captions hug their text; the detected source column remains the
   // wrapping limit for longer translations and larger user-selected fonts.
   box.style.width='max-content';box.style.maxWidth=width+'px';box.style.maxHeight=Math.max(56,fr.height*.55)+'px';
-  const height=box.getBoundingClientRect().height;
+  const height=box.getBoundingClientRect().height,bottomInset=c.controls?48:12;
   let top=block.bottom+8;c.inline=true;box.dataset.placement='below-source';
   if(this.get('captionPlacement','below')==='above'){
    const room=block.top-20;
-   if(room<24){box.style.visibility='hidden';return;}
+   if(room<24){box.style.visibility='hidden';c.controls?.hide();return;}
    box.style.maxHeight=Math.min(fr.height*.55,room)+'px';
    top=block.top-box.getBoundingClientRect().height-8;box.dataset.placement='above-source';
-  }else if(top+height>fr.height-12&&block.top-height-8>=12){
+  }else if(top+height>fr.height-bottomInset&&block.top-height-8>=12){
    top=block.top-height-8;box.dataset.placement='above-source';
-  }else if(top+height>fr.height-12){
-   box.style.maxHeight=Math.max(56,fr.height-top-12)+'px';
+  }else if(top+height>fr.height-bottomInset){
+   box.style.maxHeight=Math.max(56,fr.height-top-bottomInset)+'px';
   }
-  box.style.left=(fr.left-parent.left+left)+'px';box.style.top=(fr.top-parent.top+top)+'px';
+  box.style.left=(fr.left-parent.left+left)+'px';box.style.top=(fr.top-parent.top+top)+'px';c.controls?.layout();
  },
  hideTranslation() {
   const c=this.caption;if(!c)return;this.caption=null;
-  c.pdfWindow.removeEventListener('scroll',c.layout,true);c.pdfWindow.removeEventListener('resize',c.layout);
+  c.controls?.dispose();c.pdfWindow.removeEventListener('scroll',c.layout,true);c.pdfWindow.removeEventListener('resize',c.layout);
   if(c.timer!==null)this.host.clearTimeout(c.timer);if(c.raf!==undefined)c.pdfWindow.cancelAnimationFrame(c.raf);c.observer?.disconnect();
   c.box.style.opacity='0';c.box.style.pointerEvents='none';
   if(this.dead||c.pdfWindow.matchMedia?.('(prefers-reduced-motion: reduce)').matches)c.box.remove();

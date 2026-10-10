@@ -19,7 +19,7 @@ Each document shows one expanded main panel at a time: listening, references, ne
 | Paragraph | Select within a paragraph to hear the full paragraph and set repeats |
 | Full text | Read from the beginning, a selected position, or saved progress |
 
-Hover over the book for quick controls. Hover over the leftmost mode icon to choose directly from a column of four icons; hover over an icon for its name. Pause and resume share one main button. Hover over it for sentence/paragraph navigation and Stop. Pause keeps your current position; Stop ends the current reading task. Adjust speed, repeats, and voice in the panel and voice settings. You can disable automatic selection reading in Settings.
+Hover over the book for quick controls. Hover over the leftmost mode icon to choose directly from a column of four icons; hover over an icon for its name. Pause and resume share one main button. When a translation caption is visible, hover over it for a single row of sentence/paragraph controls, pause/resume, Stop, four reading modes, and the current language flag. The selected mode is highlighted. Hover over the flag to reveal other languages in a column above it; click to toggle translated audio or double-click to toggle translation. Without a visible caption, hovering over Pause opens a compact transport row. Pause keeps your current position; Stop ends the current reading task. Adjust speed, repeats, and voice in the panel and voice settings. Repeat choices are 1, 2, 3, 5, 10, or ∞ (continuous). You can disable automatic selection reading in Settings.
 
 The PDF must contain extractable text. OCR scanned pages first. Complex tables, equations, and unusual layouts may not read as expected. Text processing handles citation markers and running headers; figure-caption reading is configurable.
 
@@ -27,7 +27,9 @@ Language choices use flags; translation services and model providers use logos. 
 
 ## Compare a translation
 
-Translation display is enabled by default. Hover over the language icon to choose a target directly. Click the current language icon once to toggle **Read translation**. Double-click to toggle translation display: a soft background marks the enabled state, and the icon remains available when disabled. Choosing a language without a bundled voice switches speech back to the original text while keeping translated text available. The translation target and interface language are separate choices. Targets without a bundled voice can still be displayed. Online translation requires connectivity; built-in services may rate-limit requests, or you can use your own model provider.
+Translation display is enabled by default. Hover over the language icon to choose a target directly. Click the current language icon once to toggle **Read translation**. Double-click to toggle translation display: a soft background marks the enabled state, and the icon remains available when disabled. With spoken translation enabled, the language list contains only supported voice languages; turn it off to restore all text-translation languages. The translation target and interface language are separate choices. Targets without a bundled voice can still be displayed. Online translation requires connectivity; built-in services may rate-limit requests, or you can use your own model provider.
+
+The selection translation card has a flag synchronized with the quick bar. Changing it refreshes the translation. Three scope icons select sentence, selection, or paragraph; hovering over the headphones button reveals four equal mode areas. Click Sentence, Selection, Paragraph, or Document to start one reading; Document starts at the selected passage.
 
 ## Inspect in-text citations
 
