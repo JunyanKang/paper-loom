@@ -61,7 +61,7 @@ var PaperVoice = {
     if (!hooks) { hooks = []; this.readerHooks.set(reader, hooks); }
     const hookDocument = d => {
       if (hooks.some(x => x.doc === d)) return;
-      const outside=e=>{const ui=this.panels.get(reader);if(ui?.root.contains(e.target)||e.target.closest?.('[data-paper-voice=toolbar]'))return;this.dismissPanel(reader);};
+      const outside=e=>{if(this.onOutsideInteraction){this.onOutsideInteraction(reader,e);return;}const ui=this.panels.get(reader);if(ui?.root.contains(e.target)||e.target.closest?.('[data-paper-voice=toolbar]'))return;this.dismissPanel(reader);};
       const wheel=e=>{if(e.deltaX||e.deltaY)outside(e);};
       const down = e => {
         outside(e);
@@ -513,7 +513,8 @@ var PaperVoice = {
       action('quickPause').hidden=!active&&!this.lastText&&mode!=='document';
       find('playbackTools').hidden=action('quickPause').hidden;
       find('primaryLabel').textContent=this.state==='paused'?'继续':active?'暂停':mode==='document'?(this.get('documentStart','begin')==='resume'?'继续上次':'开始连读'):'开始朗读';
-      action('primary').querySelector('img').src=this.assetURI+'icons/'+(active && this.state!=='paused'?'pause':'play')+'.svg';
+      action('primary').setAttribute('aria-label',this.t(find('primaryLabel').textContent));action('primary').title=this.t(find('primaryLabel').textContent);
+      action('primary').querySelector('img').src=this.assetURI+'icons/'+(active && this.state!=='paused'?'pause':'headphones')+'.svg';
       action('quickPause').querySelector('img').src=this.assetURI+'icons/'+(!active||this.state==='paused'?'play':'pause')+'.svg';
       const modeIndex=PaperVoiceCore.modes.findIndex(x=>x.id===mode),current=PaperVoiceCore.modes[modeIndex]||PaperVoiceCore.modes[0],next=PaperVoiceCore.modes[(modeIndex+1)%4];
       action('quickMode').querySelector('img').src=this.assetURI+'icons/'+current.icon+'.svg';

@@ -40,19 +40,16 @@ Object.assign(PaperLoom,{
         doc.documentElement.style.setProperty('--pl-dock-right',Math.max(16,win.innerWidth-o.right)+'px');
         doc.documentElement.style.setProperty('--pl-dock-bottom',bottom+'px');
       };
+      this.managedWorkspaces=true;
       U.fitPage=fitWorkspace;U.onDockProgress=(doc,p,m)=>readerUI(doc)?.dockCompanion(p,m);
-      U.onPageActivate=doc=>{const ui=readerUI(doc);if(!ui)return;for(const [reader,current] of V.panels)if(current===ui)V.dismissPanel(reader);return ui.waitMotion();};
-      const showVoice=V.showPanel.bind(V);
+      U.onPageActivate=doc=>doc._clAbstract?.close(true);
+      RS.CiteLensDockMotion.create=(panel,orb,fit,settled,progress)=>{const motion=VS.PaperVoiceDockMotion.create(panel,orb,fit);motion.setSettled(settled);motion.setCompanion(progress);return motion;};
       V.showPanel=(reader,toggle=false)=>{
-        const ui=V.ensurePanel(reader),doc=ui.root.ownerDocument,expanded=ui.panel.dataset.pvVisible==='true'||(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false');
-        if(toggle&&expanded)return showVoice(reader,true);
-        let scope=U.pageScopes.get(doc);if(!scope){scope={serial:0,queue:Promise.resolve()};U.pageScopes.set(doc,scope);}const ticket=++scope.serial;
-        const other=[...U.livePages(doc)].filter(view=>!view.container.hidden);
-        const open=()=>{if(ticket!==scope.serial||!ui.root.isConnected)return;fitWorkspace(doc);ui.setContext('listening');showVoice(reader,false);};
-        doc._clAbstract?.close(true);
-        if(!other.length){open();return;}
-        scope.queue=scope.queue.catch(e=>Zotero.logError(e)).then(async()=>{if(ticket!==scope.serial)return;await Promise.all(other.map(view=>view.hide(true)));open();});U.pageQueue=scope.queue;return scope.queue;
+        V.scheduleWarmup();const ui=V.ensurePanel(reader),view=ui.panel._clPage;
+        if(!view)return;
+        ui.setContext('listening');return toggle&&!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'?view.dismiss():view.activate();
       };
+      V.onOutsideInteraction=(reader,event)=>V.panels.get(reader)?._outside?.(event);
 
       const page=RS.CiteLensUI.page.bind(RS.CiteLensUI);
       RS.CiteLensUI.page=(frame,options={})=>{
@@ -63,8 +60,8 @@ Object.assign(PaperLoom,{
           if(head&&workspaceReader&&!head.querySelector('.pl-main-actions')){frame.classList.add('pl-workspace-page');(head.querySelector('.cl-row')||head).append(this.mainNavigation(doc,workspaceReader,active));}
         }
         if(reader){
-          const context=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':frame.classList.contains('pl-home')?'ready':'references';
-          frame.addEventListener('cl-page-visible',()=>{const ui=readerUI(doc);ui?.setContext(context);ui?.performContext();});
+          const context=frame.classList.contains('pv-panel')?'listening':frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':frame.classList.contains('pl-home')?'ready':'references';
+          frame.addEventListener('cl-page-visible',()=>readerUI(doc)?.setContext(context));frame.addEventListener('cl-page-switched',()=>readerUI(doc)?.performContext());
           fitWorkspace(doc);
         }
         return page(frame,options);
@@ -76,7 +73,13 @@ Object.assign(PaperLoom,{
         ui.root.querySelector('.pv-brand-icon').src=this.assetURI+'loom.png';
         ui.root.querySelector('.pv-orb>.pv-mascot:not(.pv-mascot-reading)').src=this.assetURI+'loom.png';
         if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){
-          const doc=ui.root.ownerDocument;ui.panel.querySelector('.pv-header').append(this.mainNavigation(doc,reader));ui.action('settings').hidden=true;ui.action('close').hidden=true;ui.panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();e.stopPropagation();V.dismissPanel(reader);}});
+          const doc=ui.root.ownerDocument;
+          ui.panel.tabIndex=-1;const view=U.page(ui.panel,{reader,retain:true,autoOpen:false,dockMotion:ui.dockMotion});
+          ui.panel._pvDockVisibility=visible=>visible?view.activate():view.dismiss();
+          const originalDispose=ui.dispose;ui.dispose=()=>{view.destroy();originalDispose();};
+          ui.panel.addEventListener('cl-page-visible',()=>{ui.setContext('listening');});
+          this.installOutsideCollapse(ui,reader);
+          ui.panel.querySelector('.pv-header').append(this.mainNavigation(doc,reader));ui.action('settings').hidden=true;ui.action('close').hidden=true;ui.panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();e.stopPropagation();V.dismissPanel(reader);}});
           ui.action('orb').setAttribute('aria-label','打开或收起 Paper Loom');ui.action('orb').title='Paper Loom';
           ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
           RS.CiteLensI18n.install(doc);

@@ -29,10 +29,13 @@ var PaperVoiceDockMotion = {
   // Capture only the actual foreground (with its user/theme alpha), never a
   // flattened screenshot containing PDF text. All overrides are restored in
   // the same task before a browser frame can be displayed.
-  const isolation=doc.createElementNS('http://www.w3.org/1999/xhtml','style');
-  isolation.textContent='html,body{background:transparent!important}:is(body,window) > :not(.pv-shell){opacity:0!important}.pv-shell > :not(.pv-panel){opacity:0!important}.pv-panel{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
+  const isolation=doc.createElementNS('http://www.w3.org/1999/xhtml','style'),marked=[];
+  const mark=(node,key)=>{marked.push([node,key,node.getAttribute(key)]);node.setAttribute(key,'');};
+  mark(panel,'data-pl-capture-panel');
+  for(let node=panel;node;node=node.parentElement){mark(node,'data-pl-capture-path');for(const sibling of node.parentElement?.children||[])if(sibling!==node)mark(sibling,'data-pl-capture-hidden');}
+  isolation.textContent='[data-pl-capture-hidden]{visibility:hidden!important}[data-pl-capture-path]:not([data-pl-capture-panel]){background:transparent!important;box-shadow:none!important;outline:0!important}[data-pl-capture-panel]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
   (doc.head||doc.documentElement).append(isolation);
-  try{ctx.drawWindow(win,b.x-pad,b.y-pad,b.width+pad*2,b.height+pad*2,'rgba(0,0,0,0)');}finally{isolation.remove();}
+  try{ctx.drawWindow(win,b.x-pad,b.y-pad,b.width+pad*2,b.height+pad*2,'rgba(0,0,0,0)');}finally{isolation.remove();for(const [node,key,value] of marked)value===null?node.removeAttribute(key):node.setAttribute(key,value);}
   const left=Math.floor(Math.min(b.x-pad,o.x-pad)),top=Math.floor(Math.min(b.y-pad,o.y-pad));
   const width=Math.ceil(Math.max(b.right+pad,o.right+pad)-left),height=Math.ceil(Math.max(b.bottom+pad,o.bottom+pad)-top);
   const blurPad=72,background=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas'),blurred=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas');
@@ -43,7 +46,7 @@ var PaperVoiceDockMotion = {
   blurredContext.filter=(style.backdropFilter||'none').replace(/([\d.]+)px/g,(_,n)=>(Number(n)*ratio)+'px');
   blurredContext.drawImage(background,0,0);background.width=background.height=0;
   const canvas=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas');canvas.className='pv-dock-motion';canvas.setAttribute('aria-hidden','true');
-  canvas.style.cssText=`position:fixed;left:${left}px;top:${top}px;width:${width}px;height:${height}px;pointer-events:none;z-index:20;`;
+  canvas.style.cssText=`position:fixed;left:${left}px;top:${top}px;width:${width}px;height:${height}px;pointer-events:none;z-index:100040;`;
   canvas.width=Math.ceil(width*ratio);canvas.height=Math.ceil(height*ratio);
   const gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:true,depth:false,stencil:false});
   if(!gl)throw Error('Window mesh unavailable');
@@ -90,7 +93,7 @@ var PaperVoiceDockMotion = {
  },
  create(panel,orb,fit) {
   const win=panel.ownerDocument.defaultView,query=win.matchMedia('(prefers-reduced-motion: reduce)');
-  let rendering=null,frame=0,progress=0,velocity=0,target=false,last=0,fallback=null,fallbackBox=null,disposed=false,companion=null;const settled=[];
+  let rendering=null,frame=0,progress=0,velocity=0,target=false,last=0,fallback=null,fallbackBox=null,disposed=false,companion=null,onSettled=null;const settled=[];
   const notify=(moving)=>companion?.(Math.max(0,Math.min(1,progress)),moving,target);
   const paint=()=>{
    // Never fade two translucent surfaces over one another. Keep one fully
@@ -101,7 +104,7 @@ var PaperVoiceDockMotion = {
    win.cancelAnimationFrame(frame);frame=0;fallback?.cancel();fallback=null;rendering?.destroy();rendering=null;
    progress=show?1:0;velocity=0;panel.hidden=!show;panel.inert=!show;panel.style.pointerEvents=show?'':'none';
    panel.style.visibility='';panel.style.willChange='';panel.style.transformOrigin='';panel.dataset.pvVisible=String(show);
-   delete panel.dataset.dockMotion;delete panel.dataset.dockRenderer;notify(false);for(const resolve of settled.splice(0))resolve();
+   delete panel.dataset.dockMotion;delete panel.dataset.dockRenderer;notify(false);onSettled?.(show);for(const resolve of settled.splice(0))resolve();
   };
   const tick=now=>{
    if(disposed)return;
@@ -149,6 +152,6 @@ var PaperVoiceDockMotion = {
   const background=()=>{if(panel.ownerDocument.hidden&&(rendering||fallback))settle(target);};
   win.addEventListener('resize',refit);query.addEventListener('change',reduced);panel.ownerDocument.addEventListener('visibilitychange',background);
   panel._pvDockVisibility=show;
-  return {whenSettled(){return rendering||fallback?new Promise(resolve=>settled.push(resolve)):Promise.resolve();},refit,setCompanion(listener){companion=listener;},finish(){if(rendering||fallback)settle(target);},dispose(){disposed=true;settle(false);delete panel._pvDockVisibility;win.removeEventListener('resize',refit);query.removeEventListener('change',reduced);panel.ownerDocument.removeEventListener('visibilitychange',background);}};
+  return {show,snap(visible){target=!!visible;settle(target);},setSettled(listener){onSettled=listener;},whenSettled(){return rendering||fallback?new Promise(resolve=>settled.push(resolve)):Promise.resolve();},refit,setCompanion(listener){companion=listener;},finish(){if(rendering||fallback)settle(target);},dispose(){disposed=true;onSettled=null;settle(false);delete panel._pvDockVisibility;win.removeEventListener('resize',refit);query.removeEventListener('change',reduced);panel.ownerDocument.removeEventListener('visibilitychange',background);}};
  }
 };

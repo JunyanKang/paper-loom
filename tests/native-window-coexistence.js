@@ -6,7 +6,7 @@ await r._initPromise;for(let i=0;i<100&&!V.panels.has(r);i++)await wait(100);
 const doc=r._iframeWindow.document,voice=V.panels.get(r);let detached;
 const settle=async()=>{await Promise.all([...U.livePages()].map(v=>U.pageScopes.get(v.frame.ownerDocument)?.queue));for(let i=0;i<60;i++){if(![...V.panels.values()].some(v=>v.panel.dataset.pvVisible==='false'&&!v.panel.hidden))break;await wait(100);}await wait(350);};
 try{
- for(const view of [...U.livePages()])view.destroy();
+ for(const view of [...U.livePages()]){if(view.frame.classList.contains('pv-panel'))view.snap(false);else view.destroy();}
  V.showPanel(r);await wait(600);check('listening opens',!voice.panel.hidden);check('toolbar entry removed',!doc.querySelector('[data-cite-lens=toolbar],[data-paper-voice=toolbar]'));check('main header has four icon shortcuts and no duplicate controls',voice.panel.querySelectorAll('.pl-main-actions [data-loom-page]').length===4&&!voice.panel.querySelector('.pl-home-back')&&voice.action('settings').hidden&&voice.action('close').hidden);
  const refs=L.references.showPanel(r);await settle();check('references collapse listening',voice.panel.hidden&&!refs.hidden);
  const original=refs;L.references.showPanel(r);await settle();check('reference view is reused',original===L.references.panels.get(r));

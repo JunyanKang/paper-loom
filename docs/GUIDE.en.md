@@ -4,7 +4,7 @@
 
 ## Open and collapse
 
-Click the book in the library toolbar or the lower-right corner of a PDF to open the listening window directly. The upper-right headphones, papers, authors, and gear icons open listening, references and the reading list, author networks, and settings. Hover over an icon for its name. All four main windows share these icons, with a filled background for the current function. Each page keeps its own controls below the header. Click the book again or press Esc to collapse. Hover over the book for listening shortcuts and drag to reposition it.
+Click the book in the library toolbar or the lower-right corner of a PDF to open the listening window directly. The upper-right headphones, papers, authors, and gear icons open listening, references and the reading list, author networks, and settings. Hover over an icon for its name. All four main windows share these icons, with a soft tinted background for the current function. Each page keeps its own controls below the header. Click outside the workspace in Zotero or the PDF, click the book again, or press Esc to collapse. Hover over the book for listening shortcuts and drag to reposition it.
 
 Each document shows one expanded main panel at a time: listening, references, network, or settings. Switching panels collapses the previous one without stopping speech. Reopening references or the network resumes the existing view. PDF tabs and separate reader windows keep their own panel states. Detail and editing dialogs open above their parent and return to it when closed.
 

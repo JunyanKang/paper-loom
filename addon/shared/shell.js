@@ -17,6 +17,25 @@ var PaperLoom = {
     this.references?.windows.set(win,item);
   },
   removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
+  installOutsideCollapse(ui,reader){
+    const doc=ui.root.ownerDocument,U=this.referencesScope.CiteLensUI,surfaces=new Set();let disposed=false;
+    const inside=node=>{
+      for(let current=node;current;){
+        if(current.closest?.('.pv-shell,.cl-root,.cl-overlay,.cl-summary,.cl-select-popover,.cl-tooltip,.pv-tooltip,.pv-select-popover,.cl-menu,.cl-citation-locations,.pv-selection-card,.pl-library-entry,#paper-loom-tools'))return true;
+        try{current=current.ownerDocument?.defaultView?.frameElement;}catch(_){break;}
+      }return false;
+    };
+    const outside=event=>{
+      if(disposed||inside(event.target))return;
+      for(const view of U.livePages(doc))if(!view.container.hidden&&view.frame.dataset.dockMotion!=='closing')view.dismiss();
+    };
+    const scan=surface=>{try{for(const frame of surface.querySelectorAll('iframe,browser'))if(frame.contentDocument)watch(frame.contentDocument,true);}catch(_){} };
+    const loaded=event=>{try{const frame=event.target;if(frame.contentDocument)watch(frame.contentDocument,true);else if(frame.nodeType===9)watch(frame,true);}catch(_){} };
+    const watch=(surface,deep=false)=>{if(!surface||surfaces.has(surface))return;surfaces.add(surface);surface.addEventListener('pointerdown',outside,true);if(deep){surface.addEventListener('load',loaded,true);scan(surface);}};
+    watch(doc,true);try{for(let window=doc.defaultView;window?.frameElement;){window=window.frameElement.ownerDocument.defaultView;watch(window.document);}}catch(_){}
+    if(reader._window?.document)watch(reader._window.document);
+    ui._outside=outside;const dispose=ui.dispose;ui.dispose=()=>{disposed=true;for(const surface of surfaces)try{surface.removeEventListener('pointerdown',outside,true);surface.removeEventListener('load',loaded,true);}catch(_){}surfaces.clear();dispose();};
+  },
   mainNavigation(doc,reader,active='listening'){
     const nav=this.el(doc,'nav',null,'pl-main-actions');nav.setAttribute('aria-label','Paper Loom');
     const entries=[['listening','headphones','听读',()=>this.voice.showPanel(reader)],['references','references','引文与稍后读',()=>this.references.showPanel(reader,this.references.panels.get(reader)?.isConnected?{}:{view:reader.itemID?'references':'queue'})],['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];

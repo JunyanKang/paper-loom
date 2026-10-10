@@ -18,10 +18,18 @@ var LoomDesignStyle = `
 .pl-workspace-page>header .cl-header-tools,.pl-workspace-page>header .cl-dismiss,.pl-workspace-page>header .pl-home-back{display:none!important}
 .pl-workspace-page>header .cl-brand,.pl-workspace-page>header h2{flex:1;justify-content:flex-start;text-align:left;min-width:0;white-space:nowrap}
 .pl-workspace-page>header .cl-row,.pl-workspace-page>.cl-dialog-header{display:flex;align-items:center;gap:8px}
-.pl-main-actions button[aria-current=page]{background:var(--cl-accent,var(--pv-accent))!important;color:var(--cl-on-accent,var(--pv-primary-ink))!important}
+.pl-main-actions button[aria-current=page]{background:color-mix(in srgb,var(--cl-accent,var(--pv-accent)) 10%,var(--cl-bg,var(--pv-surface)))!important;color:var(--cl-accent,var(--pv-accent))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cl-accent,var(--pv-accent)) 18%,transparent)}
 /* Selection stays distinct from both idle and hover, including icon-only tabs. */
-:is(.cl-root,.cl-dialog,.cl-card,.cl-summary) :is(.cl-tabs,.pn-task-tabs,.pn-map-views,.pn-career-filters,.pn-ref-filters,.pn-topic-chips,.cl-summary-modes)>button:is([aria-selected=true],[aria-pressed=true]){background:var(--cl-accent)!important;color:var(--cl-on-accent)!important;border-color:transparent;box-shadow:0 2px 5px #00000012;font-weight:650}
-.pv-shell :is(.pv-mode-options,.pv-settings-tabs)>button:is([aria-pressed=true],[aria-selected=true]){background:var(--pv-accent)!important;color:var(--pv-primary-ink)!important;box-shadow:0 2px 5px #00000012}
-.pv-shell .pv-mode-options>button[aria-pressed=true] .pv-icon{filter:var(--pv-primary-filter);opacity:1}
+:is(.cl-root,.cl-dialog,.cl-card,.cl-summary) :is(.cl-tabs,.pn-task-tabs,.pn-map-views,.pn-career-filters,.pn-ref-filters,.pn-topic-chips,.cl-summary-modes)>button:is([aria-selected=true],[aria-pressed=true]){background:color-mix(in srgb,var(--cl-accent) 10%,var(--cl-bg))!important;color:var(--cl-accent)!important;border-color:transparent;box-shadow:0 2px 5px #00000012;font-weight:650}
+.pv-shell :is(.pv-mode-options,.pv-settings-tabs)>button:is([aria-pressed=true],[aria-selected=true]){background:color-mix(in srgb,var(--pv-accent) 10%,var(--pv-surface))!important;color:var(--pv-accent)!important;box-shadow:0 2px 5px #00000012}
+.pv-shell .pv-mode-options>button[aria-pressed=true] .pv-icon{filter:var(--pv-icon-filter);opacity:1}
 .pv-shell .pv-mode-options>button[aria-pressed=true]::after{display:none}
+/* Quiet action surfaces use the same tint as the selected tabs. */
+.pv-shell[data-theme] .pv-panel .pv-primary,.pv-shell .pv-llm-actions button:last-child,.pv-shell .pv-update-notice-actions button:last-child{background:color-mix(in srgb,var(--pv-accent) 10%,var(--pv-surface))!important;color:var(--pv-accent)!important;box-shadow:0 2px 6px #00000012}
+.pv-shell[data-theme] .pv-panel .pv-primary .pv-icon{filter:var(--pv-icon-filter);width:24px;height:24px}
+.pv-shell .pv-panel .pv-primary{min-width:46px;width:46px;height:42px;padding:9px;border-radius:13px}
+.pv-primary [data-field=primaryLabel]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+:is(.cl-root,.cl-dialog,.cl-card,.cl-floating) button.cl-primary,.pl-engine-actions button:first-child{background:color-mix(in srgb,var(--cl-accent) 10%,var(--cl-bg))!important;color:var(--cl-accent)!important}
+.pv-shell .pv-panel .pv-mode-options>button{height:auto!important;min-height:62px;line-height:1.35;justify-content:center;gap:6px;padding:9px 4px;white-space:normal}
+.pv-shell .pv-mode-options>button>span{display:block;line-height:1.35}
 `;

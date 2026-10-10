@@ -23,7 +23,7 @@ if '--fresh' in sys.argv:
  for p in [profile,library]:
   if p.exists():p.rename(archive/p.name)
  for p in [profile/'extensions',library]:p.mkdir(parents=True,exist_ok=True)
-prefs={'extensions.zotero.dataDir':str(library),'extensions.zotero.useDataDir':True,'extensions.zotero.firstRun2':False,'extensions.zotero.firstRunGuidance':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,'extensions.zotero.httpServer.enabled':False,'app.update.auto':False,'extensions.update.enabled':False}
+prefs={'extensions.zotero.dataDir':str(library),'extensions.zotero.useDataDir':True,'extensions.zotero.firstRun2':False,'extensions.zotero.firstRunGuidance':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,'extensions.zotero.httpServer.enabled':False,'app.update.auto':False,'extensions.update.enabled':False,'extensions.zotero.sync.autoSync':False}
 cache_backup=root/('qa-cache-'+str(time.time_ns()));cache_backup.mkdir()
 for name in ['extensions.json','addonStartup.json.lz4','startupCache']:
  p=profile/name

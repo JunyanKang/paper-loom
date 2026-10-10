@@ -1,12 +1,13 @@
 """Upgrade a supplied previous XPI through the live public feed in a disposable profile."""
 from pathlib import Path
 import json,os,subprocess,sys,time,zipfile
-r=Path(__file__).resolve().parents[1];source=Path(sys.argv[1]).resolve();profile=r/'qa-profile-upgrade101';results=r/'test-results-upgrade101';library=r/'qa-library-upgrade101'
+r=Path(__file__).resolve().parents[1];source=Path(sys.argv[1]).resolve();version=json.loads((r/'addon/manifest.json').read_text())['version'];suffix=version.replace('.','');profile=r/('qa-profile-upgrade'+suffix);results=r/('test-results-upgrade'+suffix);library=r/('qa-library-upgrade'+suffix)
+with zipfile.ZipFile(source) as z:previous=json.loads(z.read('manifest.json'))['version']
 for p in [profile/'extensions',results,library]:p.mkdir(parents=True,exist_ok=True)
 if (profile/'extensions.json').exists():raise SystemExit('Use a fresh upgrade QA profile')
-prefs={'extensions.zotero.dataDir':str(library),'extensions.zotero.useDataDir':True,'extensions.zotero.firstRun2':False,'extensions.zotero.firstRunGuidance':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,'app.update.auto':False,'extensions.update.enabled':False}
+prefs={'extensions.zotero.dataDir':str(library),'extensions.zotero.useDataDir':True,'extensions.zotero.firstRun2':False,'extensions.zotero.firstRunGuidance':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,'app.update.auto':False,'extensions.update.enabled':False,'extensions.zotero.sync.autoSync':False}
 (profile/'user.js').write_text(''.join('user_pref('+json.dumps(k)+','+json.dumps(v)+');\n' for k,v in prefs.items()),encoding='utf-8')
-harness=(r/'tests/native-public-update.js').read_text(encoding='utf-8').replace('__ROOT__',json.dumps(str(r)))
+harness=(r/'tests/native-public-update.js').read_text(encoding='utf-8').replace('__ROOT__',json.dumps(str(r))).replace('__PREVIOUS__',json.dumps(previous)).replace('__TARGET__',json.dumps(version)).replace('__RESULT_DIR__',json.dumps(results.name))
 with zipfile.ZipFile(source) as original,zipfile.ZipFile(profile/'extensions/paper-loom@local.research.xpi','w',zipfile.ZIP_DEFLATED) as target:
  for name in original.namelist():
   data=original.read(name)

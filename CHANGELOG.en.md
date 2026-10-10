@@ -2,6 +2,14 @@
 
 [Home](README.en.md) · [简体中文](CHANGELOG.md)
 
+## 1.0.2 · 2026-10-10
+
+- Softer theme tints for selected tabs and primary actions in both light and dark themes.
+- An icon-only headphones button starts or resumes listening and changes to pause during playback, with accessible labels and tooltips.
+- Direct animated transitions between listening, papers, authors, and settings. Click elsewhere in Zotero or the PDF to collapse the workspace.
+- All four workspaces use the same curved motion back into the book, with synchronized opening and closing gestures.
+- Fix overflowing mode labels and interrupted gestures from out-of-range animation frames.
+
 ## 1.0.1 · 2026-10-10
 
 - Fix API key import, saving, and removal in Zotero 11 while preserving existing settings.

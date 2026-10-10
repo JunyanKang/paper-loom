@@ -11,7 +11,7 @@ var PaperVoiceCompanion = {
  frameCount:6,frameMs:170,breakInterval:30*60*1000,
  // Window motion has a fixed grip; extending a hand must not pull its anchor around.
  hand(){return {x:143/256,y:128/256};},
- placement(id,frame){const [sheet,row]=this.gestures[id]||this.gestures.greeting,[x,top,foot]=this.registration[sheet][row][frame],scale=226/(foot-top);return {sheet,row,x:143-x*scale,y:244-foot*scale,size:256*scale};},
+ placement(id,frame){frame=Number.isFinite(frame)?Math.max(0,Math.min(this.frameCount-1,Math.round(frame))):0;const [sheet,row]=this.gestures[id]||this.gestures.greeting,[x,top,foot]=this.registration[sheet][row][frame],scale=226/(foot-top);return {sheet,row,frame,x:143-x*scale,y:244-foot*scale,size:256*scale};},
  pageGesture(previous,next){return Number.isInteger(previous)&&Number.isInteger(next)&&previous!==next?(next>previous?'page-forward':'page-backward'):null;},
  shuffled(ids,last,random=Math.random){const queue=ids.slice();for(let i=queue.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]];}if(queue.length>1&&queue[0]===last)[queue[0],queue[1]]=[queue[1],queue[0]];return queue;},
  player(sprite,assetURI,onFinish) {
@@ -19,7 +19,7 @@ var PaperVoiceCompanion = {
   canvas.width=canvas.height=256;canvas.style.cssText='display:block;width:100%;height:100%';sprite.append(canvas);const ctx=canvas.getContext('2d');
   let ticket=0,request=null,current='listening',disposed=false;
   const load=id=>{const [sheet]=C.gestures[id]||C.gestures.greeting;if(!images.has(sheet)){const image=new win.Image();image.src=assetURI+'animations/'+sheet+'.png';images.set(sheet,image);}return images.get(sheet);};
-  const draw=(id,frame)=>{const image=load(id);if(!image.complete||!image.naturalWidth)return false;const p=C.placement(id,frame);ctx.clearRect(0,0,256,256);ctx.drawImage(image,frame*256,p.row*256,256,256,p.x,p.y,p.size,p.size);sprite.dataset.gesture=id;sprite.dataset.frame=String(frame);sprite.dataset.ready='true';return true;};
+  const draw=(id,frame)=>{const image=load(id);if(!image.complete||!image.naturalWidth)return false;const p=C.placement(id,frame);ctx.clearRect(0,0,256,256);ctx.drawImage(image,p.frame*256,p.row*256,256,256,p.x,p.y,p.size,p.size);sprite.dataset.gesture=id;sprite.dataset.frame=String(p.frame);sprite.dataset.ready='true';return true;};
   const cancel=()=>{ticket++;if(request!==null)win.cancelAnimationFrame(request);request=null;};
   const still=async(id='listening')=>{cancel();current=id;const token=ticket;try{await load(id).decode();}catch(_){return;}if(!disposed&&token===ticket)draw(id,0);};
   const finish=()=>{cancel();draw('listening',0);onFinish?.();};
