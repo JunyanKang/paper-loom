@@ -5,9 +5,11 @@
 ## 1.0.1 · 2026-10-10
 
 - Fix API key import, saving, and removal in Zotero 11 while preserving existing settings.
-- Bring PDF navigation into the floating book, with consistent Read, Papers, Authors, and Settings navigation, typography, and spacing.
+- Bring PDF navigation into the floating book, with one Home for listening, papers, authors, and settings, removing repeated navigation from feature pages and improving typography and spacing.
 - Keep panel states independent per document; opening settings or references collapses listening controls without stopping playback.
 - Improve import dialog wrapping and button layout; use Paper Loom consistently throughout the product.
+- Newly illustrated feature gestures, distinct forward/backward page turns, and window gestures with a steady mascot centre and shared bottom-right panel alignment.
+- Abstract listening uses the shared headphones icon with bilingual labels and keyboard access.
 
 ## 1.0.0 · 2026-10-10
 

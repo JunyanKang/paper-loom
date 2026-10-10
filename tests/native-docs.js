@@ -10,13 +10,14 @@ const people=[['Maya','Chen'],['Oliver','Reed'],['Sofia','Martin'],['Leo','Park'
 const combos=[[0,1,2],[0,2,3],[1,3,4],[0,4,5],[2,5,6],[1,6,7],[3,4,7],[0,5,7]];
 let items=await collection.getChildItems();
 if(!items.length){for(let n=0;n<titles.length;n++){const item=new Zotero.Item('journalArticle');item.setField('title',titles[n]);item.setField('date',String(2026-(n%3)));item.setField('publicationTitle','Paper Loom demonstration library');item.setField('abstractNote','The retina transforms light into signals that allow us to see the world. This illustrative reading example introduces a workflow for listening to a passage, comparing a translation, and following a reference. It is a demonstration document, not a scientific publication.');item.setCreators(combos[n].map(i=>({creatorType:'author',firstName:people[i][0],lastName:people[i][1]})));item.addToCollection(collection.id);await item.saveTx();items.push(item);}}
-const parent=items.find(i=>i.getField('title')===titles[0]);let attachment=parent.getAttachments().map(id=>Zotero.Items.get(id))[0];if(!attachment)attachment=await Zotero.Attachments.importFromFile({file:PathUtils.join(base,'docs','demo','reading-demo.pdf'),parentItemID:parent.id});
+const parent=items.find(i=>i.getField('title')===titles[0]);parent.setField('abstractNote','The retina transforms light into signals that allow us to see the world. Photoreceptors detect incoming light, interneurons shape visual signals, and retinal ganglion cells carry the output to the brain. Understanding retinal development connects the formation of individual cell types with the organization of complete visual circuits.');await parent.saveTx();let attachment=parent.getAttachments().map(id=>Zotero.Items.get(id))[0];if(!attachment)attachment=await Zotero.Attachments.importFromFile({file:PathUtils.join(base,'docs','demo','reading-demo.pdf'),parentItemID:parent.id});
 // No manual attachReader or ensurePanel here: opening the PDF must create the companion automatically.
 const reader=(await Zotero.Reader.open(attachment.id))||Zotero.Reader._readers.find(r=>r.itemID===attachment.id);await reader._initPromise;await until(()=>L.voice.panels.get(reader)?.root.isConnected,'automatic companion');await wait(1800);
 const rd=reader._iframeWindow.document,ui=L.voice.panels.get(reader),checks=[];
 const orb=ui.action('orb'),rect=orb.getBoundingClientRect();checks.push({name:'new PDF automatically shows floating book',ok:rect.width>30&&rect.height>30&&rect.right<=rd.defaultView.innerWidth&&rect.bottom<=rd.defaultView.innerHeight});
 const host=d.getElementById('zotero-items-toolbar'),entry=host.querySelector('.pl-library-entry'),spacer=[...host.children].find(e=>e.localName==='spacer');checks.push({name:'launcher precedes flexible spacer',ok:!!(entry.compareDocumentPosition(spacer)&4)});
 L.demoReader=reader;L.demoParent=parent;L.captureDocs=capture;
+const previousInteractions=L.voice.get('companionInteractions',true);
 S.state.settings.theme='porcelain';S.state.settings.transparency=0;L.voice.set('companionInteractions',false);L.voice.set('translationProvider','tencenttransmart');L.voice.set('translationTarget','zh-Hans');
 const images=[];
 for(const lang of ['zh','en']){
@@ -34,4 +35,5 @@ for(const lang of ['zh','en']){
  const node=network._pnModel.nodes.find(n=>n.title==='Maya Chen');await network._pnSelect(node.id);await wait(700);images.push(await capture(network,'network-'+lang));
  const career=Q.CiteLensCareerUI.open(d,{orcid:'0000-0002-9053-5249',name:'Dawang Zhou',host:network});await until(()=>career.querySelector('.pn-career-event'),'career');images.push(await capture(career,'career-'+lang));career._clClose();network._pnClose();await wait(350);
 }
+L.voice.set('companionInteractions',previousInteractions);
 return {passed:checks.every(c=>c.ok),checks,images};

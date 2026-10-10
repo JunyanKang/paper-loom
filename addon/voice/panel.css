@@ -264,3 +264,8 @@
 .pv-engine-location button[aria-busy=true] .pv-engine-spinner{display:block}
 @keyframes pv-engine-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.pv-engine-spinner{animation:none}}
+
+/* A stable hit target and one registered performance surface in every state. */
+.pv-orb,.pv-orb:hover{transform:none!important;transition:none!important}
+.pv-orb>.pv-mascot{opacity:0!important;transform:none!important;animation:none!important;transition:none!important}
+.pv-mascot-interaction,.pv-shell[data-interaction-set] .pv-mascot-interaction{background:none!important;opacity:1!important;pointer-events:none}

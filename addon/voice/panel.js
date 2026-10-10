@@ -422,15 +422,16 @@ var PaperVoiceUI = {
   action('orb').addEventListener('pointerup',()=>{drag=null;});
   action('orb').addEventListener('click',e=>{if(moved){e.stopImmediatePropagation();e.preventDefault();moved=false;}},true);
   let nextInteraction=Date.now()+controller.companionIntervalMs(),readingSince=null,readingElapsed=0,lastBreakAt=0;
-  const gestureQueues={ready:[],reading:[]},lastGestures={ready:null,reading:null},sprite=find('mascotInteraction');
+  let companionContext='ready';
+  const gestureQueues=Object.fromEntries(Object.keys(PaperVoiceCompanion.sets).map(k=>[k,[]])),lastGestures={},sprite=find('mascotInteraction');
   const player=PaperVoiceCompanion.player(sprite,controller.assetURI,()=>{root.dataset.resting='true';});
   let dockGesture=false,dockPose=false;
   player.preload('dock-present');
   const finishInteraction=()=>{if(dockGesture||dockPose)return;player.finish();if(root.hasAttribute('data-interaction')){root.dataset.resting='true';if(!sprite.style.backgroundImage)root.removeAttribute('data-interaction');}};
-  const companionState=()=>['playing','paused'].includes(controller.state)?'reading':'ready';
+  const companionState=()=>companionContext==='listening'?'reading':companionContext!=='ready'?companionContext:['playing','paused'].includes(controller.state)?'reading':'ready';
   const syncCompanionPose=()=>{
    const now=Date.now();if(controller.state==='playing'){if(readingSince===null)readingSince=now;}else{if(readingSince!==null)readingElapsed+=now-readingSince;readingSince=null;if(!['paused','loading'].includes(controller.state)){readingElapsed=0;lastBreakAt=0;}}
-   const state=companionState();if(dockGesture||root.dataset.interactionSet===state)return;dockPose=false;finishInteraction();if(lastGestures[state]){root.dataset.interactionSet=state;root.dataset.interaction=lastGestures[state];root.dataset.resting='true';player.still(lastGestures[state]);}else{root.removeAttribute('data-interaction');root.removeAttribute('data-interaction-set');root.removeAttribute('data-resting');}
+   const state=companionState();if(dockGesture||root.dataset.interactionSet===state)return;dockPose=false;root.dataset.interactionSet=state;root.dataset.interaction='listening';root.dataset.resting='true';player.still('listening');
   };
   const resetCompanionSchedule=()=>{nextInteraction=Date.now()+controller.companionIntervalMs();};
   const playCompanion=forced=>{
@@ -444,7 +445,7 @@ var PaperVoiceUI = {
    const index=forced||gestureQueues[state].shift();lastGestures[state]=index;
    root.dataset.interactionSet=state;root.dataset.interaction=index;root.removeAttribute('data-resting');player.play(index);
   };
-  dockMotion.setCompanion((progress,moving)=>{
+  const dockCompanion=(progress,moving)=>{
    if(disposed||!root.isConnected)return;
    const enabled=controller.get('companionInteractions',true)&&!win.matchMedia('(prefers-reduced-motion: reduce)').matches;
    if(!enabled){if(dockGesture||dockPose){dockGesture=dockPose=false;root.removeAttribute('data-interaction');root.removeAttribute('data-resting');}return;}
@@ -452,15 +453,20 @@ var PaperVoiceUI = {
    if(!player.seek('dock-present',progress)){dockGesture=false;return;}
    dockGesture=moving;dockPose=true;root.dataset.interactionSet=companionState();root.dataset.interaction='dock-present';
    if(moving)root.removeAttribute('data-resting');else{root.dataset.resting='true';resetCompanionSchedule();}
+   if(!moving){dockPose=false;player.still('listening');}
    const hand=PaperVoiceCompanion.hand(progress),bounds=sprite.getBoundingClientRect();return {x:bounds.left+bounds.width*hand.x,y:bounds.top+bounds.height*hand.y};
-  });
+  };
+  dockMotion.setCompanion(dockCompanion);
+  const setContext=context=>{companionContext=PaperVoiceCompanion.sets[context]?context:context==='listening'?'listening':'ready';root.dataset.companionContext=companionContext;resetCompanionSchedule();};
+  const performContext=()=>{if(controller.get('companionInteractions',true))playCompanion(companionContext==='listening'?'listening':undefined);};
+  player.still('listening');root.dataset.interaction='listening';root.dataset.resting='true';
   let pageEvents=null,lastPage=null,pageAnimationTimer=null;
   const onPageChanged=({pageNumber})=>{
    if(!Number.isInteger(pageNumber)||pageNumber===lastPage)return;
-   const hadPage=Number.isInteger(lastPage);lastPage=pageNumber;
-   if(!hadPage||!controller.get('companionInteractions',true)||doc.hidden)return;
+   const gesture=PaperVoiceCompanion.pageGesture(lastPage,pageNumber);lastPage=pageNumber;
+   if(!gesture||!controller.get('companionInteractions',true)||doc.hidden)return;
    if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);
-   pageAnimationTimer=win.setTimeout(()=>{pageAnimationTimer=null;if(!controller.get('companionInteractions',true)||doc.hidden||!root.isConnected)return;resetCompanionSchedule();playCompanion('pages');},120);
+   pageAnimationTimer=win.setTimeout(()=>{pageAnimationTimer=null;if(!controller.get('companionInteractions',true)||doc.hidden||!root.isConnected)return;resetCompanionSchedule();playCompanion(gesture);},120);
   };
   const bindPageEvents=()=>{
    const app=reader._internalReader?._primaryView?._iframeWindow?.PDFViewerApplication,bus=app?.eventBus;
@@ -486,6 +492,6 @@ var PaperVoiceUI = {
    nextInteraction=now+controller.companionIntervalMs();playCompanion(takeBreak?'rest':undefined);
   };
   const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();win.removeEventListener('keydown',themeEscape,true);doc.removeEventListener('pointerdown',closeThemesOutside,true);doc.removeEventListener('focusin',closeThemesOutside);themePicker._pvFade?.cancel();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);win.clearTimeout(audioCloseTimer);player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
-  doc.body.append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,find,action,finishMotion:()=>dockMotion.finish(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
+  doc.body.append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,find,action,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
  }
 };

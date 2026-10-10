@@ -7,7 +7,7 @@ const doc=r._iframeWindow.document,voice=V.panels.get(r);let detached;
 const settle=async()=>{await Promise.all([...U.livePages()].map(v=>U.pageScopes.get(v.frame.ownerDocument)?.queue));for(let i=0;i<60;i++){if(![...V.panels.values()].some(v=>v.panel.dataset.pvVisible==='false'&&!v.panel.hidden))break;await wait(100);}await wait(350);};
 try{
  for(const view of [...U.livePages()])view.destroy();
- V.showPanel(r);await wait(600);check('listening opens',!voice.panel.hidden);check('toolbar entry removed',!doc.querySelector('[data-cite-lens=toolbar],[data-paper-voice=toolbar]'));check('floating panel contains all four destinations',voice.root.querySelectorAll('.pl-navigation button').length===4);
+ V.showPanel(r);await wait(600);check('listening opens',!voice.panel.hidden);check('toolbar entry removed',!doc.querySelector('[data-cite-lens=toolbar],[data-paper-voice=toolbar]'));check('listening has one home control and no repeated global tabs',voice.root.querySelectorAll('.pl-home-back').length===1&&!voice.root.querySelector('.pl-navigation')&&voice.action('settings').hidden);
  const refs=L.references.showPanel(r);await settle();check('references collapse listening',voice.panel.hidden&&!refs.hidden);
  const original=refs;L.references.showPanel(r);await settle();check('reference view is reused',original===L.references.panels.get(r));
  await L.showSettings(r,doc);await settle();const settings=doc.querySelector('.cl-settings');check('settings replaces references',refs.hidden&&!settings.hidden);const secret=settings.querySelector('[data-llm=key]');if(secret)secret.value='unsaved-fixture';

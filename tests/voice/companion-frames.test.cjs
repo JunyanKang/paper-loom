@@ -1,17 +1,6 @@
-process.chdir(require('node:path').resolve(__dirname,'../..'));
 const test=require('node:test'),assert=require('node:assert/strict'),c=require('../../addon/voice/companion.js');
-test('Companion shuffle covers all state gestures before repeating',()=>{
- for(const ids of Object.values(c.sets))for(let i=0;i<50;i++){const queue=c.shuffled(ids,ids[0]);assert.equal(queue.length,ids.length);assert.equal(new Set(queue).size,ids.length);assert.notEqual(queue[0],ids[0]);assert.deepEqual(queue.slice().sort(),ids.slice().sort());}
-});
-test('Frame playback changes frame content, preserves final pose and cancels stale loads',async()=>{
- let pending=[],next=0,frames=new Map(),done=0;
- const win={Image:class{decode(){return new Promise(resolve=>pending.push(resolve));}},requestAnimationFrame(fn){frames.set(++next,fn);return next;},cancelAnimationFrame(id){frames.delete(id);}};
- const sprite={ownerDocument:{defaultView:win},style:{},dataset:{},isConnected:true},player=c.player(sprite,'resource://test/',()=>done++);
- const advance=now=>{const callbacks=[...frames.values()];frames.clear();callbacks.forEach(fn=>fn(now));};
- const first=player.play('pages');player.finish();pending.shift()();await first;assert.equal(frames.size,0);
- const play=player.play('thumbsup');pending.shift()();await play;
- advance(0);assert.equal(sprite.dataset.frame,'0');advance(62.5);assert.equal(sprite.dataset.frame,'1');advance(1437.5);assert.equal(sprite.dataset.frame,'23');advance(1500);assert.equal(done,1);assert.equal(frames.size,0);assert.equal(sprite.dataset.frame,'23');assert.match(sprite.style.backgroundImage,/thumbsup.png/);
- player.still('crossleg');assert.equal(sprite.dataset.frame,'23');assert.equal(sprite.dataset.gesture,'crossleg');player.dispose();assert.equal(frames.size,0);
-});
-
-test('page turning is never selected as a random hover or timed gesture',()=>{for(const ids of Object.values(c.sets)){assert.ok(!ids.includes('pages'));for(const id of ['magnify','notes','plane','tea','bow'])assert.ok(ids.includes(id));}assert.equal(c.frameCount,24);assert.equal(1000/c.frameMs,16);});
+function fixture(){let pending=[],next=0,frames=new Map(),draws=[],done=0;const canvas={style:{},getContext:()=>({clearRect(){},drawImage(...args){draws.push(args);}}),remove(){}};const win={Image:class{constructor(){this.complete=true;this.naturalWidth=1536;}decode(){return new Promise(resolve=>pending.push(resolve));}},requestAnimationFrame(fn){frames.set(++next,fn);return next;},cancelAnimationFrame(id){frames.delete(id);}};const sprite={ownerDocument:{defaultView:win,createElementNS:()=>canvas},style:{},dataset:{},isConnected:true,append(){}};const player=c.player(sprite,'asset:/',()=>done++);return {player,sprite,frames,draws,pending,advance(now){const calls=[...frames.values()];frames.clear();calls.forEach(fn=>fn(now));},get done(){return done;}};}
+test('functional gestures have dedicated rows and page direction is never randomly selected',()=>{const rows=new Set();for(const [state,ids] of Object.entries(c.sets)){assert.deepEqual(c.shuffled(ids,ids[0]),ids);for(const id of ids){assert.ok(c.gestures[id]);assert.ok(!id.startsWith('page-'));}if(state!=='ready')rows.add(JSON.stringify(c.gestures[ids[0]]));}assert.equal(rows.size,4);assert.equal(c.pageGesture(2,3),'page-forward');assert.equal(c.pageGesture(3,2),'page-backward');assert.equal(c.pageGesture(null,1),null);assert.equal(c.pageGesture(2,2),null);});
+test('every rendered cell preserves the crown, centre and foot baseline',()=>{for(const id of Object.keys(c.gestures))for(let f=0;f<c.frameCount;f++){const p=c.placement(id,f),[x,top,foot]=c.registration[p.sheet][p.row][f],scale=p.size/256;assert.ok(Math.abs(p.x+x*scale-143)<1e-8);assert.ok(Math.abs(p.y+top*scale-18)<1e-8);assert.ok(Math.abs(p.y+foot*scale-244)<1e-8);}});
+test('frame playback draws distinct art, cancels stale decodes and returns to shared neutral',async()=>{const f=fixture();const stale=f.player.play('page-forward');f.player.finish();f.pending.shift()();await stale;assert.equal(f.frames.size,0);const play=f.player.play('references');f.pending.shift()();await play;f.advance(0);assert.equal(f.sprite.dataset.frame,'0');f.advance(c.frameMs*3);assert.equal(f.sprite.dataset.frame,'3');assert.equal(f.draws.at(-1)[1],768);assert.equal(f.draws.at(-1)[2],256);f.advance(c.frameMs*6);assert.equal(f.sprite.dataset.gesture,'listening');assert.equal(f.frames.size,0);f.player.dispose();});
+module.exports={fixture};

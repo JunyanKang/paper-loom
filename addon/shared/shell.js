@@ -17,23 +17,17 @@ var PaperLoom = {
     this.references?.windows.set(win,item);
   },
   removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
-  navigation(doc,reader,active){
-    const nav=this.el(doc,'nav',null,'pl-navigation');nav.setAttribute('aria-label','Paper Loom');
-    const rows=[['listening','听读','听读',()=>this.voice.showPanel(reader)],['references','引文','引文与稍后读',()=>this.references.showPanel(reader)],['network','朋友圈','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['settings','设置','设置',()=>this.showSettings(reader,doc)]];
-    for(const [id,label,title,action] of rows){const b=this.button(doc,label,action);b.dataset.loomPage=id;b.setAttribute('aria-label',title);b.setAttribute('aria-current',id===active?'page':'false');nav.append(b);}
-    return nav;
-  },
   showHome(reader=this.currentReader(),doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document) {
     if(!this.started){this.showConflicts(doc);return;}
     this.style(doc);doc.querySelector('.pl-home')?._plClose?.();
     const U=this.referencesScope.CiteLensUI,dialog=U.dialog(doc,'Paper Loom',{className:'pl-home',reader}),{root,frame,close}=dialog;frame._plClose=close;
     root.append(this.el(doc,'p','从眼前的论文，读、听、发现。','pl-intro'));
     const grid=this.el(doc,'div',null,'pl-entry-grid');root.append(grid);
-    const entry=(title,detail,action)=>{const b=this.button(doc,'',async()=>{close();await action();});b.append(this.el(doc,'strong',title),this.el(doc,'span',detail));grid.append(b);};
-    entry('听读','划选 · 单句 · 段落 · 全文',()=>{if(reader)this.voice.showPanel(reader,true);else this.message('打开一篇 PDF，即可从划选或全文开始听读。',doc);});
-    entry('引文与稍后读','查阅摘要，保存和追踪研究线索',()=>{if(reader)this.references.showPanel(reader);else this.showQueue(doc);});
-    entry('朋友圈与学术履历','探索作者、合作论文与公开经历',()=>this.references.showNetwork(reader,{doc}));
-    entry('设置','声音下载 · 翻译 · 外观 · 快捷键',()=>this.showSettings(reader,doc));
+    const entry=(id,icon,title,detail,action)=>{const b=this.button(doc,'',async()=>{await action();});b.dataset.loomPage=id;const glyph=this.referencesScope.CiteLensUI.iconButton(doc,title,icon,()=>{}).querySelector('svg');glyph.classList.add('pl-entry-icon');b.append(glyph,this.el(doc,'strong',title),this.el(doc,'span',detail));grid.append(b);};
+    entry('listening','headphones','听读','划选 · 单句 · 段落 · 全文',()=>{if(reader)this.voice.showPanel(reader);else this.message('打开一篇 PDF，即可从划选或全文开始听读。',doc);});
+    entry('references','references','引文与稍后读','查阅摘要，保存和追踪研究线索',()=>{if(reader)this.references.showPanel(reader);else this.showQueue(doc);});
+    entry('network','authors','朋友圈与学术履历','探索作者、合作论文与公开经历',()=>this.references.showNetwork(reader,{doc}));
+    entry('settings','settings','设置','声音下载 · 翻译 · 外观 · 快捷键',()=>this.showSettings(reader,doc));
     const status=this.el(doc,'p',LoomRuntime.state.message,'pl-runtime-summary');status.dataset.loomStatus='true';root.append(status);
     return dialog;
   },
@@ -68,16 +62,18 @@ var PaperLoom = {
   async listen(text,reader=this.currentReader()) {
     if(!text?.trim())return;
     if(!reader){this.libraryReader||={_iframeWindow:Zotero.getMainWindow(),_window:Zotero.getMainWindow(),itemID:null};reader=this.libraryReader;}
-    this.voice.ensurePanel(reader);this.voice.showPanel(reader,true);
+    this.voice.ensurePanel(reader);this.voice.showPanel(reader);
     return this.voice.speak(text,reader,true);
   }
 };
 var LoomShellStyle = [
   '.pl-navigation{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px;margin:0 12px 10px;flex:none;border-radius:12px;background:var(--cl-soft,var(--pv-soft,#edf1e9));font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}.pl-navigation>button{appearance:none;min-width:0;min-height:34px!important;height:auto!important;padding:6px 3px!important;margin:0;border:0;border-radius:8px;background:transparent!important;color:var(--cl-muted,var(--pv-muted,#526461));font:inherit!important;font-weight:500!important;line-height:1.4!important;white-space:nowrap!important;cursor:pointer}.pl-navigation>button[aria-current=page]{background:var(--cl-bg,var(--pv-paper,#fff))!important;color:var(--cl-accent,var(--pv-accent,#176956));box-shadow:0 1px 4px #0000000d;font-weight:650!important}.pv-panel>.pl-navigation{margin:0 0 16px}.pv-panel:has(>.pl-navigation)>.pv-header{margin-bottom:12px}.pl-navigation>button:focus-visible{outline:2px solid var(--cl-accent,var(--pv-accent,#176956));outline-offset:1px}',
+  '.pl-entry-icon{width:25px;height:25px;flex:none;color:var(--cl-accent)}.pl-home-back{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px!important;height:32px!important;min-height:32px!important;padding:6px!important}.pl-home-back svg{width:20px;height:20px;flex:none}.pl-reader-workspace .cl-header-tools>[data-icon=settings],.pl-reader-workspace .cl-header-tools>[data-network-entry],.pl-reader-workspace .cl-header-tools>[data-list-entry]{display:none!important}.pl-reader-workspace .pv-header>[data-action=settings]{display:none!important}',
   '.pl-home{width:min(500px,calc(100vw - 32px))!important}.pl-intro{margin:0 0 18px;color:var(--cl-muted,#526461);font-size:14px}',
   '.pl-home .pl-entry-grid>button{height:auto!important;min-height:100px!important;white-space:normal!important;line-height:1.5!important;justify-content:flex-start!important;padding:16px!important}.pl-home .pl-entry-grid>button>strong,.pl-home .pl-entry-grid>button>span{display:block;height:auto;white-space:normal}.pl-entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pl-entry-grid>button{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:18px;border:1px solid var(--cl-line,#d9e3dc);border-radius:12px;background:var(--cl-paper,#f4f6f0);color:var(--cl-ink,#263b35);text-align:left;cursor:pointer}.pl-entry-grid>button:hover{background:var(--cl-soft,#dbe9e2)}.pl-entry-grid strong{font-size:15px}.pl-entry-grid span{font-size:12px;line-height:1.6;color:var(--cl-muted,#56675f)}',
-  '.pl-reader-workspace:has(.cl-root:not([hidden]),.cl-overlay:not([hidden])>.cl-dialog:not([hidden])) .pv-shell:not(.pl-embedded){right:18px!important;bottom:18px!important}',
+  '.pl-navigation>button{display:flex!important;align-items:center;justify-content:center;gap:6px}.pl-navigation svg{width:19px;height:19px;flex:none}.pl-nav-label{display:inline}.cl-summary-tools [data-loom-action=listen-abstract]{width:32px!important;min-width:32px!important;height:32px!important;padding:6px!important;flex:none}',
   '.pl-reader-workspace .cl-root{z-index:100000;bottom:120px}.pl-reader-workspace .pv-shell{z-index:100050}.pl-reader-workspace .cl-overlay:has(>.pl-home),.pl-reader-workspace .cl-overlay:has(>.pn-map-window){z-index:100000;pointer-events:none;background:transparent;padding-bottom:120px}.pl-reader-workspace .cl-overlay:has(>.pl-home)>.cl-dialog,.pl-reader-workspace .cl-overlay:has(>.pn-map-window)>.cl-dialog{pointer-events:auto;max-height:calc(100vh - 140px)}.pl-reader-workspace .pn-map-window{height:min(760px,calc(100vh - 140px))}.pl-reader-workspace .cl-context-page{z-index:100000}.pl-reader-workspace .cl-context-page .cl-dialog{max-height:calc(100vh - var(--cl-context-top) - 120px)}',
+  '.pl-reader-workspace{--pl-dock-right:18px;--pl-dock-bottom:114px}.pl-reader-workspace .cl-root,.pl-reader-workspace .cl-overlay>.cl-settings,.pl-reader-workspace .cl-overlay>.pn-map-window,.pl-reader-workspace .cl-overlay>.pl-home{position:fixed!important;inset:auto!important;right:var(--pl-dock-right)!important;bottom:var(--pl-dock-bottom)!important;margin:0!important;max-width:calc(100vw - 32px)!important;max-height:calc(100vh - var(--pl-dock-bottom) - 48px)!important;transform:none}.pl-reader-workspace .pv-panel{position:fixed!important;right:var(--pl-dock-right)!important;bottom:var(--pl-dock-bottom)!important;margin:0!important;height:auto!important;max-height:calc(100vh - var(--pl-dock-bottom) - 48px)!important}.pl-reader-workspace .cl-overlay:has(>.pn-map-window),.pl-reader-workspace .cl-overlay:has(>.pl-home){background:transparent;pointer-events:none}.pl-reader-workspace .cl-overlay>.pn-map-window,.pl-reader-workspace .cl-overlay>.pl-home{pointer-events:auto}',
   '.pl-library-entry{border:0;background:transparent;padding:3px;cursor:pointer}.pl-runtime-summary{font-size:12px;color:var(--cl-muted,#56675f);margin-bottom:0}',
   '.cl-settings.pl-settings{width:min(570px,calc(100vw - 24px))!important;max-height:calc(100vh - 40px)}.pl-settings .cl-settings-tabs{flex-wrap:wrap;gap:4px}.pl-settings .cl-dialog-body{overflow:auto}.pl-settings .cl-dialog-footer{flex-wrap:wrap;gap:6px}.pl-settings .pl-update-schedule{width:100%;margin:3px 0}.pl-settings [hidden]{display:none!important}',
   '.pl-embedded.pv-shell{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;z-index:auto!important}.pl-embedded .pv-panel{display:block;position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;max-height:none!important;box-shadow:none!important;outline:0!important;border:0!important;background:transparent!important;padding:0!important;opacity:1!important;visibility:visible!important;overflow:visible!important}.pl-embedded .pv-panel::before,.pl-embedded .pv-panel::after{display:none!important}.pl-embedded .pv-header,.pl-embedded .pv-mini,.pl-embedded .pv-settings-tabs,.pl-embedded .pv-updater,.pl-embedded .pv-about{display:none!important}.pl-embedded .pv-settings-content{padding:0;overflow:visible;max-height:none}.pl-embedded [data-action=configureLLM]{display:none!important}.pl-embedded [data-settings-pane=appearance]>:not(.pv-companion-row){display:none!important}',

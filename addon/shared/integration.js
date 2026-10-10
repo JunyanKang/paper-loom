@@ -30,24 +30,41 @@ Object.assign(PaperLoom,{
       R.readerToolbarEnabled=false;R.normalizeToolbar=doc=>{for(const node of doc.querySelectorAll('[data-cite-lens=toolbar],[data-paper-voice=toolbar]'))node.remove();};
       RS.CiteLensUI.logo=(doc,size)=>this.logo(doc,size);
       // One expanded workspace per document; each Reader keeps its own state.
-      RS.CiteLensUI.onPageActivate=doc=>{for(const [reader,ui] of V.panels)try{if(ui.root.ownerDocument===doc){V.dismissPanel(reader);ui.finishMotion();}}catch(_){V.panels.delete(reader);}};
+      const U=RS.CiteLensUI;
+      const readerUI=doc=>[...V.livePanels()].find(ui=>ui.root.ownerDocument===doc);
+      const fitWorkspace=doc=>{
+        if(!doc.documentElement.classList.contains('pl-reader-workspace'))return;
+        const ui=readerUI(doc);if(!ui)return;const win=doc.defaultView,o=ui.action('orb').getBoundingClientRect();
+        // Keep a useful reading surface even when the mascot has been dragged high.
+        const bottom=Math.max(8,Math.min(win.innerHeight-220,win.innerHeight-o.top+12));
+        doc.documentElement.style.setProperty('--pl-dock-right',Math.max(16,win.innerWidth-o.right)+'px');
+        doc.documentElement.style.setProperty('--pl-dock-bottom',bottom+'px');
+      };
+      U.fitPage=fitWorkspace;U.onDockProgress=(doc,p,m)=>readerUI(doc)?.dockCompanion(p,m);
+      U.onPageActivate=doc=>{const ui=readerUI(doc);if(!ui)return;for(const [reader,current] of V.panels)if(current===ui)V.dismissPanel(reader);return ui.waitMotion();};
       const showVoice=V.showPanel.bind(V);
       V.showPanel=(reader,toggle=false)=>{
         const ui=V.ensurePanel(reader),doc=ui.root.ownerDocument,expanded=ui.panel.dataset.pvVisible==='true'||(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false');
-        if(!toggle||!expanded){
-          const scope=RS.CiteLensUI.pageScopes.get(doc);if(scope)scope.serial++;
-          for(const view of RS.CiteLensUI.livePages(doc)){view.finish();view.snap(false);}
-          doc._clAbstract?.close(true);
-        }
-        return showVoice(reader,toggle);
+        if(toggle&&expanded)return showVoice(reader,true);
+        let scope=U.pageScopes.get(doc);if(!scope){scope={serial:0,queue:Promise.resolve()};U.pageScopes.set(doc,scope);}const ticket=++scope.serial;
+        const other=[...U.livePages(doc)].filter(view=>!view.container.hidden);
+        const open=()=>{if(ticket!==scope.serial||!ui.root.isConnected)return;fitWorkspace(doc);ui.setContext('listening');showVoice(reader,false);};
+        doc._clAbstract?.close(true);
+        if(!other.length){open();return;}
+        scope.queue=scope.queue.catch(e=>Zotero.logError(e)).then(async()=>{if(ticket!==scope.serial)return;await Promise.all(other.map(view=>view.hide(true)));open();});U.pageQueue=scope.queue;return scope.queue;
       };
 
       const page=RS.CiteLensUI.page.bind(RS.CiteLensUI);
       RS.CiteLensUI.page=(frame,options={})=>{
         const reader=options.reader,doc=frame.ownerDocument;
-        if(reader&&!frame.classList.contains('pl-home')&&!frame.querySelector(':scope>.pl-navigation')){
-          const active=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':'references';
-          const nav=this.navigation(doc,reader,active),head=frame.querySelector(':scope>header');if(head)head.after(nav);else frame.prepend(nav);
+        if(reader&&!frame.classList.contains('pl-home')){
+          const head=frame.querySelector(':scope>header');
+          if(head&&!head.querySelector('.pl-home-back')){const back=U.iconButton(doc,'返回首页','back',()=>this.showHome(reader,doc));back.classList.add('pl-home-back');(head.querySelector('.cl-row')||head).prepend(back);}
+        }
+        if(reader){
+          const context=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':frame.classList.contains('pl-home')?'ready':'references';
+          frame.addEventListener('cl-page-visible',()=>{const ui=readerUI(doc);ui?.setContext(context);ui?.performContext();});
+          fitWorkspace(doc);
         }
         return page(frame,options);
       };
@@ -57,7 +74,13 @@ Object.assign(PaperLoom,{
         this.style(ui.root.ownerDocument);if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html'))ui.root.ownerDocument.documentElement.classList.add('pl-reader-workspace');
         ui.root.querySelector('.pv-brand-icon').src=this.assetURI+'loom.png';
         ui.root.querySelector('.pv-orb>.pv-mascot:not(.pv-mascot-reading)').src=this.assetURI+'loom.png';
-        if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){ui.panel.querySelector('.pv-header').after(this.navigation(ui.root.ownerDocument,reader,'listening'));RS.CiteLensI18n.install(ui.root.ownerDocument);}
+        if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){
+          const doc=ui.root.ownerDocument,back=U.iconButton(doc,'返回首页','back',()=>this.showHome(reader,doc));back.classList.add('pl-home-back','pv-icon-button');back.querySelector('span').hidden=true;ui.panel.querySelector('.pv-header').prepend(back);ui.action('settings').hidden=true;
+          ui.action('orb').setAttribute('aria-label','打开或收起 Paper Loom');ui.action('orb').title='Paper Loom';
+          ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
+          RS.CiteLensI18n.install(doc);
+        }
+        const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=()=>{try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);}catch(_){}dispose();};refit();}
         ui.action('settings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument);
         ui.action('voiceSettings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument,'voice');
         for(const [action,key] of [['help','guide'],['feedback','feedback'],['privacy','privacy']])ui.action(action).onclick=()=>this.showInfo(key,ui.root.ownerDocument);

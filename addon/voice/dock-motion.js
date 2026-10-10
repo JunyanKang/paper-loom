@@ -90,7 +90,7 @@ var PaperVoiceDockMotion = {
  },
  create(panel,orb,fit) {
   const win=panel.ownerDocument.defaultView,query=win.matchMedia('(prefers-reduced-motion: reduce)');
-  let rendering=null,frame=0,progress=0,velocity=0,target=false,last=0,fallback=null,fallbackBox=null,disposed=false,companion=null;
+  let rendering=null,frame=0,progress=0,velocity=0,target=false,last=0,fallback=null,fallbackBox=null,disposed=false,companion=null;const settled=[];
   const notify=(moving)=>companion?.(Math.max(0,Math.min(1,progress)),moving,target);
   const paint=()=>{
    // Never fade two translucent surfaces over one another. Keep one fully
@@ -101,7 +101,7 @@ var PaperVoiceDockMotion = {
    win.cancelAnimationFrame(frame);frame=0;fallback?.cancel();fallback=null;rendering?.destroy();rendering=null;
    progress=show?1:0;velocity=0;panel.hidden=!show;panel.inert=!show;panel.style.pointerEvents=show?'':'none';
    panel.style.visibility='';panel.style.willChange='';panel.style.transformOrigin='';panel.dataset.pvVisible=String(show);
-   delete panel.dataset.dockMotion;delete panel.dataset.dockRenderer;notify(false);
+   delete panel.dataset.dockMotion;delete panel.dataset.dockRenderer;notify(false);for(const resolve of settled.splice(0))resolve();
   };
   const tick=now=>{
    if(disposed)return;
@@ -149,6 +149,6 @@ var PaperVoiceDockMotion = {
   const background=()=>{if(panel.ownerDocument.hidden&&(rendering||fallback))settle(target);};
   win.addEventListener('resize',refit);query.addEventListener('change',reduced);panel.ownerDocument.addEventListener('visibilitychange',background);
   panel._pvDockVisibility=show;
-  return {refit,setCompanion(listener){companion=listener;},finish(){if(rendering||fallback)settle(target);},dispose(){disposed=true;settle(false);delete panel._pvDockVisibility;win.removeEventListener('resize',refit);query.removeEventListener('change',reduced);panel.ownerDocument.removeEventListener('visibilitychange',background);}};
+  return {whenSettled(){return rendering||fallback?new Promise(resolve=>settled.push(resolve)):Promise.resolve();},refit,setCompanion(listener){companion=listener;},finish(){if(rendering||fallback)settle(target);},dispose(){disposed=true;settle(false);delete panel._pvDockVisibility;win.removeEventListener('resize',refit);query.removeEventListener('change',reduced);panel.ownerDocument.removeEventListener('visibilitychange',background);}};
  }
 };
