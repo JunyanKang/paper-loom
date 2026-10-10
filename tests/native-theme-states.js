@@ -15,7 +15,7 @@ try{
   ui.panel.querySelector('[data-loom-page=references]').click();await settle();const panel=doc.querySelector('.cl-root'),tabs=[...panel.querySelectorAll('.cl-header>.cl-tabs button')];
   for(const tab of tabs){tab.click();await Zotero.Promise.delay(250);const active=win.getComputedStyle(tab),other=win.getComputedStyle(tabs.find(t=>t!==tab));check(theme.id+' '+tab.dataset.view+' selected background',tab.getAttribute('aria-selected')==='true'&&active.backgroundColor!=='rgba(0, 0, 0, 0)'&&active.backgroundColor!==other.backgroundColor);check(theme.id+' '+tab.dataset.view+' readable foreground',contrast(active.color,active.backgroundColor)>=4.5);}
   tabs[0].click();await Zotero.Promise.delay(200);await capture(panel,theme.id+'-references');
-  const nav=panel.querySelector('.pl-main-actions [aria-current=page]'),style=win.getComputedStyle(nav);check(theme.id+' active header contrast',contrast(style.color,style.backgroundColor)>=4.5);
+  const nav=panel.querySelector('.pl-main-actions [aria-current=page]'),style=win.getComputedStyle(nav);check(theme.id+' active navigation readable',contrast(style.color,win.getComputedStyle(panel,'::before').backgroundColor)>=4.5);check(theme.id+' navigation has no stacked fill',style.backgroundColor==='rgba(0, 0, 0, 0)'&&win.getComputedStyle(nav,'::after').display==='none');
  }
  return {passed:true,version:Zotero.version,checks};
 }catch(e){return {passed:false,checks,error:String(e),stack:e.stack};}

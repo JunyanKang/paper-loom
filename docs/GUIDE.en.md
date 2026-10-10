@@ -4,7 +4,7 @@
 
 ## Open and collapse
 
-Click the book in the library toolbar or the lower-right corner of a PDF to open the listening window directly. The upper-right headphones, papers, authors, and gear icons open listening, references and the reading list, author networks, and settings. Hover over an icon for its name. All four main windows share these icons, with a soft tinted background for the current function. Each page keeps its own controls below the header. Click outside the workspace in Zotero or the PDF, click the book again, or press Esc to collapse. Hover over the book for listening shortcuts and drag to reposition it.
+Click the book in the library toolbar or the lower-right corner of a PDF to open the listening window directly. The bottom authors, headphones, papers, and gear icons open author networks, listening, references and the reading list, and settings. Hover over an icon for its name. All four main windows share these icons, with a theme-colored outline and icon for the current function. The active tab connects to its page; each page keeps its own controls above the navigation. Click outside the workspace in Zotero or the PDF, click the book again, or press Esc to collapse. Hover over the book for listening shortcuts and drag to reposition it.
 
 Each document shows one expanded main panel at a time: listening, references, network, or settings. Switching panels transitions directly to the destination without stopping speech. Reopening references or the network resumes the existing view. PDF tabs and separate reader windows keep their own panel states. Detail and editing dialogs open above their parent and return to it when closed.
 
@@ -22,6 +22,8 @@ Each document shows one expanded main panel at a time: listening, references, ne
 Hover over the book for quick controls. Hover over the leftmost mode icon to choose directly from a column of four icons; hover over an icon for its name. Pause and resume share one main button. Hover over it for sentence/paragraph navigation and Stop. Pause keeps your current position; Stop ends the current reading task. Adjust speed, repeats, and voice in the panel and voice settings. You can disable automatic selection reading in Settings.
 
 The PDF must contain extractable text. OCR scanned pages first. Complex tables, equations, and unusual layouts may not read as expected. Text processing handles citation markers and running headers; figure-caption reading is configurable.
+
+Language choices use flags; translation services and model providers use logos. Hover over a provider logo for its name. Select the LLM service and use the gear beside its logo to configure your provider and model. The LLM symbol changes to your provider logo after configuration. In Settings, the four category icons open reading and translation, voices, shortcuts, and appearance. Update options are at the bottom of Appearance.
 
 ## Compare a translation
 

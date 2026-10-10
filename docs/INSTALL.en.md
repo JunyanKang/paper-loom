@@ -32,6 +32,6 @@ If audio fails, run **Check installed voices** first. Use **Resume / retry** for
 
 ## Existing settings and removal
 
-If Paper Voice or Paper Nexus is still active, Paper Loom offers to import settings and disable the earlier plugin to avoid duplicate controls and audio. Original settings and papers are retained. You can import a previous translation configuration from Settings when available.
+If Paper Voice or Paper Nexus is still active, Paper Loom offers to import settings and disable the earlier plugin to avoid duplicate controls and audio. Original settings and papers are retained.
 
 Disable or remove Paper Loom in Zotero’s plugin manager. Removing the plugin does not automatically delete its downloaded engines or local records. See [Privacy & data](PRIVACY.en.md) for cleanup locations.

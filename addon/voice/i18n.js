@@ -1034,6 +1034,7 @@ var PaperVoiceI18n = (() => {
  };
  for(const [lang,values] of Object.entries({en:['Hover to choose reading mode','Hover for languages · Click for translated audio · Double-click to toggle translation'],ja:['ホバーで読み上げモードを選択','ホバーで言語選択・クリックで訳文読み上げ・ダブルクリックで翻訳切替'],fr:['Survoler pour choisir le mode','Survoler pour les langues · Cliquer pour lire la traduction · Double-cliquer pour activer la traduction'],de:['Lesemodus beim Zeigen wählen','Sprachen beim Zeigen · Klick: Übersetzung vorlesen · Doppelklick: Übersetzung umschalten']})){catalogs[lang]['悬停选择朗读模式']=values[0];catalogs[lang]['悬停选择语言 · 单击朗读译文 · 双击开关翻译']=values[1];}
  for(const [lang,values] of Object.entries({en:['End this reading','Hover for navigation and stop'],ja:['読み上げを終了','ホバーで移動と停止'],fr:['Terminer la lecture','Survoler pour naviguer ou arrêter'],de:['Vorlesen beenden','Navigation und Stopp beim Zeigen']})){catalogs[lang]['结束本次朗读']=values[0];catalogs[lang]['悬停展开导航与停止']=values[1];}
+ for(const [source,values] of Object.entries({'重读句子':['Replay sentence','文を再生','Répéter la phrase','Satz wiederholen'],'重读段落':['Replay paragraph','段落を再生','Répéter le paragraphe','Absatz wiederholen'],'暂无声音':['No voice','音声なし','Voix indisponible','Keine Stimme'],'朗读':['Listen','読み上げ','Écouter','Vorlesen']}))for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][source]=values[i];
  function translate(value,language){
   if(!value)return value;
   language=resolveLanguage(language);

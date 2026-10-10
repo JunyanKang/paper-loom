@@ -4,6 +4,9 @@
 
 ## 1.0.2 · 2026-10-10
 
+- Settings categories share a fixed height and consistent row spacing. Appearance moves to the last tab and includes update options. Model configuration opens below its gear without replacing the current page.
+- Bottom navigation stays in place with the active tab connected to its page. Artwork in listening, references, and settings stays anchored at the bottom left. Citation styles use a compact right-aligned menu with Cell, Nature, and Science first, followed by alphabetical entries.
+- Listening, references, and settings now share a width and type scale; flags and provider logos use aligned compact menus, and workspace switching no longer fades through transparency.
 - Restore hover navigation, add four icon-only mode choices and direct language selection, and keep translation controls visible when disabled.
 - Group pause and stop under one control; hide scrollbars and align translated tabs, buttons, and settings rows.
 - Softer theme tints for selected tabs and primary actions in both light and dark themes.

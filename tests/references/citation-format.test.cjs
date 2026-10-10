@@ -21,3 +21,18 @@ test('cached bibliographic enrichment cannot overwrite edits or borrow a differe
 test('CSL accepts date-only metadata and chapter container aliases',()=>{
  const r=F.item({title:'Chapter',type:'bookSection',containerTitle:'Methods',date:'2022-05-06',publisher:'Press'});assert.equal(r['container-title'],'Methods');assert.equal(r.issued['date-parts'][0][0],2022);
 });
+test('citation menu pins CNS, sorts other labels, and retains installed CSL identities',async()=>{
+ const custom=[{styleID:F.id('zoology'),title:'Zoology (author-date)'},{styleID:F.id('alpha-notes'),title:'Alpha (notes)'},{styleID:F.id('alpha-numeric'),title:'Alpha (numeric)'},{styleID:F.id('nature'),title:'Nature'}];
+ ctx.Zotero={Styles:{init:async()=>{},getVisible:()=>custom}};
+ const rows=await F.choices();
+ assert.deepEqual(Array.from(rows.slice(0,3),r=>r[1]),['Cell','Nature','Science']);
+ const labels=Array.from(rows.slice(3),r=>r[1]);assert.deepEqual(labels,[...labels].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base',numeric:true})));
+ assert.equal(new Set(rows.map(r=>r[0])).size,rows.length);
+ for(const entry of custom){const row=rows.find(r=>r[0]===entry.styleID);assert.ok(row);assert.equal(row[2],entry.title);}
+ assert.equal(rows.find(r=>r[0]===F.id('zoology'))[1],'Zoology · Author–year');
+ assert.notEqual(rows.find(r=>r[0]===F.id('alpha-notes'))[1],rows.find(r=>r[0]===F.id('alpha-numeric'))[1]);
+});
+
+test('installed style qualifiers remain distinct with concise edition labels',()=>{
+ for(const [title,short] of [['ACS Guide (2026 revision)','ACS 2026'],['APSA Style Manual (revised 2018 edition)','APSA 2018'],['ASA Style Guide (6th/7th edition)','ASA 6/7'],['Chicago Manual of Style 18th edition (notes and bibliography)','Chicago 18 · Notes'],['Chicago Manual of Style 18th edition (shortened notes and bibliography)','Chicago 18 · Short notes'],['Cite Them Right 12th edition (author-date/Harvard)','Cite Them Right 12 · Harvard']])assert.equal(F.shortLabel('custom',title),short);
+});

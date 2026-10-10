@@ -22,6 +22,7 @@ Object.assign(PaperLoom,{
         this[name+'Scope']=scope;
       }
       const VS=this.voiceScope,RS=this.referencesScope,V=this.voice=VS.PaperVoice,R=this.references=RS.CiteLens;
+      V.providerMeta=code=>this.providerMeta(code);RS.CiteLensControls.providerMeta=code=>this.providerMeta(code);V.flagURI=code=>this.flagURI(code);RS.CiteLensControls.flagURI=code=>this.flagURI(code);
       V.version=R.version=this.version;R.rootURI=this.rootURI+'references/';V.assetURI='resource://'+this.resource+'/voice/assets/';V.cssText=VS.PaperVoiceStyle;
       // One main-window and Reader entry; the original companion stays available.
       V.addWindow=()=>{};V.removeWindow=()=>{};V.onToolbar=({reader})=>{if(reader)V.attachReader(reader);};V.watchToolbar=()=>{};
@@ -56,8 +57,8 @@ Object.assign(PaperLoom,{
         const reader=options.reader,doc=frame.ownerDocument;
         if(frame.matches('.cl-root,.cl-settings,.pn-map-window')){
           const active=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-map-window')?'network':'references';
-          const head=frame.querySelector(':scope>header'),workspaceReader=reader||this.workspaceReaders?.get(doc);
-          if(head&&workspaceReader&&!head.querySelector('.pl-main-actions')){frame.classList.add('pl-workspace-page');(head.querySelector('.cl-row')||head).append(this.mainNavigation(doc,workspaceReader,active));}
+          const workspaceReader=reader||this.workspaceReaders?.get(doc)||{_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};
+          this.mountWorkspace(frame,workspaceReader,active);
         }
         if(reader){
           const context=frame.classList.contains('pv-panel')?'listening':frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':frame.classList.contains('pl-home')?'ready':'references';
@@ -79,7 +80,7 @@ Object.assign(PaperLoom,{
           const originalDispose=ui.dispose;ui.dispose=()=>{view.destroy();originalDispose();};
           ui.panel.addEventListener('cl-page-visible',()=>{ui.setContext('listening');});
           this.installOutsideCollapse(ui,reader);
-          ui.panel.querySelector('.pv-header').append(this.mainNavigation(doc,reader));ui.action('settings').hidden=true;ui.action('close').hidden=true;ui.panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();e.stopPropagation();V.dismissPanel(reader);}});
+          this.mountWorkspace(ui.panel,reader,'listening');ui.action('settings').hidden=true;ui.action('close').hidden=true;ui.panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();e.stopPropagation();V.dismissPanel(reader);}});
           ui.action('orb').setAttribute('aria-label','打开或收起 Paper Loom');ui.action('orb').title='Paper Loom';
           ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
           RS.CiteLensI18n.install(doc);

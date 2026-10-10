@@ -32,6 +32,6 @@ Intel Mac、原生 Windows ARM 和 Linux 暂无对应的自动声音包；文献
 
 ## 已有配置与卸载
 
-如检测到 Paper Voice 或 Paper Nexus 仍在运行，Paper Loom 会提示导入并停用旧插件，避免重复按钮与声音；原始配置和文献保留。如曾使用不同翻译服务，可在设置中导入对应旧配置。
+如检测到 Paper Voice 或 Paper Nexus 仍在运行，Paper Loom 会提示导入并停用旧插件，避免重复按钮与声音；原始配置和文献保留。
 
 在 Zotero 插件管理器中停用或移除 Paper Loom 即可停止其功能。声音包和本地记录不会随着移除插件自动删除；完整清理路径见[隐私与数据](PRIVACY.md)。

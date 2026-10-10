@@ -282,3 +282,20 @@
 .pv-choice-popover.pv-mode-popover{width:41px;min-width:41px;right:-5px}.pv-quick .pv-mode-popover button{width:31px;min-width:31px;padding:0;justify-content:center}
 .pv-language-popover{bottom:calc(100% + 5px);padding:6px}.pv-language-popover[data-side=below]{top:calc(100% + 5px);padding:6px}.pv-translation-tools:after{content:"";position:absolute;bottom:100%;right:0;width:100%;height:8px}
 .pv-stop-row{justify-content:flex-end}.pv-stop-row>span{flex:1}.pv-stop-row button{color:var(--pv-muted)}
+
+.pv-language-popover{min-width:41px;width:41px;right:-5px;padding:5px}.pv-quick .pv-language-popover button{min-width:31px;width:31px;padding:0;justify-content:center}.pv-language-popover[data-side=below]{padding:5px}.pv-language-token{display:flex;align-items:center;justify-content:center}.pv-quick .pl-flag{width:22px!important;height:15px!important}
+
+/* One icon row, sharing the quick bar's right edge. */
+.pv-nav-card{display:flex;align-items:center;gap:5px;width:max-content;max-width:calc(100vw - 16px);padding:7px;box-sizing:border-box}.pv-nav-row{display:contents}.pv-nav-row>span{display:none!important}.pv-nav-row+.pv-nav-row{margin:0}.pv-quick .pv-nav-row button{flex:none;width:30px;height:30px;border-radius:8px;background:transparent}.pv-quick .pv-nav-row .pv-icon{width:20px;height:20px}.pv-quick .pv-nav-row button:hover{background:var(--pv-soft)}
+
+/* A single continuous surface for the quick bar and its expanding controls. */
+.pv-quick-surface{position:absolute;z-index:-1;pointer-events:none;filter:drop-shadow(0 3px 9px #172c3d20)}.pv-quick-fill{width:100%;height:100%;background-color:var(--pv-paper);background-image:linear-gradient(var(--pv-control-mask),var(--pv-control-mask)),var(--pv-art);background-size:cover;background-position:center;opacity:var(--pv-art-opacity,1)}
+.pv-shell[data-theme] .pv-quick[data-connected=true]{box-shadow:none!important;outline:none!important;backdrop-filter:none!important;background:transparent!important}.pv-quick[data-connected=true]::before{display:none!important}
+.pv-choice-popover,.pv-shell[data-theme] .pv-nav-card{background:transparent!important;box-shadow:none!important;outline:none!important;backdrop-filter:none!important}.pv-shell[data-theme] .pv-nav-card::before{display:none!important}
+.pv-choice-popover.pv-mode-popover,.pv-choice-popover.pv-language-popover{bottom:calc(100% + 5px);padding:5px 5px 2px;border-radius:0}.pv-choice-popover.pv-mode-popover[data-side=below],.pv-choice-popover.pv-language-popover[data-side=below]{top:calc(100% + 5px);bottom:auto;padding:2px 5px 5px}
+.pv-nav-popover{padding-bottom:5px}.pv-nav-popover[data-side=below]{padding-top:5px}.pv-nav-card{padding:7px}
+
+/* Pause is the fixed centre of one vertical transport column. */
+.pv-nav-popover{padding:0;pointer-events:none}.pv-nav-card{display:contents}.pv-nav-scopes{position:absolute;bottom:calc(100% + 5px);right:-5px;box-sizing:border-box;width:41px;padding:5px 5px 2px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;pointer-events:auto;scrollbar-width:none}
+.pv-nav-scopes .pv-nav-row{display:contents}.pv-quick .pv-nav-row button{width:31px;min-width:31px;height:31px;padding:0;justify-content:center}
+.pv-nav-popover .pv-stop-row{position:absolute;top:calc(100% + 5px);right:-5px;box-sizing:border-box;display:flex;width:41px;padding:2px 5px 5px;margin:0;pointer-events:auto}

@@ -1925,3 +1925,5 @@ for(const [source,values] of Object.entries({
  '下载已取消，已完成的分片会保留。':['ダウンロードを中止しました。完了部分は再開用に保存されます。','Téléchargement annulé. Les parties terminées sont conservées.','Download abgebrochen. Fertige Teile bleiben zum Fortsetzen erhalten.'],
  '声音不可用：':['音声を利用できません：','Voix indisponibles : ','Stimmen nicht verfügbar: ']
 }))for(const [i,lang] of ['ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
+
+for(const [source,values] of Object.entries({'已安装':['Installed','インストール済み','Installé','Installiert'],'尚未安装':['Not installed','未インストール','Non installé','Nicht installiert'],'修复声音':['Repair voices','音声を修復','Réparer les voix','Stimmen reparieren'],'下载声音':['Download voices','音声をダウンロード','Télécharger les voix','Stimmen laden'],'检查声音':['Check voices','音声を確認','Vérifier les voix','Stimmen prüfen']}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
