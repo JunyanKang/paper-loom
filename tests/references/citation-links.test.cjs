@@ -1,0 +1,71 @@
+process.chdir(require('node:path').resolve(__dirname,'../..'));
+const {test}=require('node:test'),assert=require('node:assert/strict');global.CiteLensCore=require('../../addon/references/core.js');const C=global.CiteLensCore,L=require('../../addon/references/citation-links.js');
+const ref=(author,year,suffix='',second='')=>({title:author+' '+year+suffix+' retinal development',author,year,suffix,creators:[{lastName:author},...(second?[{lastName:second}]:[])]});
+test('repeated years, suffix shorthand, and second author retain independent identity',()=>{
+ const refs=[ref('Smith','2020','a'),ref('Smith','2020','b'),ref('Smith','2021'),ref('Jones','2008','','Brown'),ref('Jones','2008','','Green')];
+ assert.deepEqual(C.findCitations('Smith, 2020a,b, 2021; Jones and Brown, 2008',refs),refs.slice(0,4));assert.deepEqual(C.findCitations('Jones and Black, 2008',refs),[]);
+});
+test('numbered references reject ambiguous numbers, reversed and oversized ranges',()=>{assert.equal(C.findCitations('[2]',[{number:2,title:'one'},{number:2,title:'other'}]).length,0);for(const x of ['[3–1]','[1–999]'])assert.equal(C.findCitations(x,[{number:1}]).length,0);});
+test('source group excludes wrong native destinations and neighboring parentheses',()=>{
+ const text='Text (Smith, 2020, 2021; Jones, 2008), more (Brown, 2002).',chars=[...text].map((c,offset)=>({c,offset})),refs=[ref('Smith','2020'),ref('Smith','2021'),ref('Jones','2008'),ref('Brown','2002')];
+ const o={word:chars.slice(6,11),references:[refs[3]]},out=L.resolve(o,L.page(chars),refs);assert.deepEqual(out.records,refs.slice(0,3));assert.equal(out.expected,3);assert.equal(out.status,'matched');
+});
+test('partial groups disclose unresolved identities and never adopt unverified destination',()=>{const text='Smith, 2020, 2021',chars=[...text].map((c,offset)=>({c,offset}));const r=L.resolve({word:chars.slice(0,5),references:[ref('Jones','2008')]},L.page(chars),[ref('Smith','2020')]);assert.equal(r.records.length,1);assert.equal(r.unresolved.length,1);assert.equal(r.status,'partial');});
+test('missing source text cannot validate native targets',()=>assert.equal(L.resolve({references:[ref('Smith','2020')]},null,[]).records.length,0));
+test('metadata candidates with major conflicts are discarded before user selection',()=>{const original={...ref('Smith','2020'),DOI:'10.1234/a',creators:['Smith','Jones','Brown'].map(lastName=>({lastName}))};for(const bad of [{title:'Quantum black hole physics'},{author:'Jones',creators:[{lastName:'Jones'}]},{year:'2017'},{DOI:'10.1234/b'},{creators:['Smith','Black','White'].map(lastName=>({lastName}))}])assert.equal(C.decide(original,[{...original,...bad}]).status,'missing');assert.equal(C.decide(original,[{...original,year:'2021'}]).status,'review');});
+function raised(base,number,{body=10,size=6,y=104,offset=0}={}){let x=20;return [...base,...number].map((c,i)=>{const raised=i>=base.length,fontSize=raised?size:body,width=fontSize*.5,rect=[x,raised?y:100,x+width,(raised?y:100)+fontSize];x+=width;return {c,offset:offset+i,fontSize,baseline:raised?y:100,rotation:0,rect};});}
+test('superscript identity uses the whole raised group when the native word loses its first digit',()=>{const chars=raised('RPB1','26'),refs=[{number:6,title:'Wrong sixth reference'},{number:26,title:'Correct twenty-sixth reference'}],page=L.page(chars,[{type:'citation',word:[chars.at(-1)]}]);for(const word of [[chars.at(-1)],[chars.at(-2)],[...chars.slice(-3)]]){const result=L.resolve({word},page,refs);assert.equal(result.text,'26');assert.deepEqual(result.records,[refs[1]]);}for(const c of chars.slice(-2))assert.deepEqual(L.atPoint(page,[(c.rect[0]+c.rect[2])/2,106],refs).records,[refs[1]]);});
+test('raised comma lists and ranges keep all cited references together',()=>{const chars=raised('program','8–13'),refs=Array.from({length:6},(_,i)=>({number:i+8,title:'Reference '+(i+8)}));assert.deepEqual(L.resolve({word:[chars.at(-1)]},L.page(chars),refs).records,refs);const list=raised('DSBs','5,6');assert.deepEqual(L.resolve({word:list.slice(-1)},L.page(list),[{number:5,title:'Fifth'},{number:6,title:'Sixth'}]).records.map(r=>r.number),[5,6]);});
+test('baseline numbers, numeric powers, single-letter exponents and units are not inferred citations',()=>{for(const chars of [raised('RPB','26',{size:10,y:100}),raised('10','2'),raised('x','2'),raised('cm','2'),raised('µm','3')])assert.equal(L.superscripts(chars).length,0);});
+test('unlinked superscripts require established citation scaling and exclude affiliation typography',()=>{const linked=raised('testis','1'),affiliation=raised('Alexander','1,2',{body:9.2,size:6.14,offset:100}),missing=raised('Bowtie2','79',{offset:200}),refs=[{number:1,title:'First'},{number:79,title:'Bowtie reference'}],page=L.page([...linked,...affiliation,...missing],[{type:'citation',word:[linked.at(-1)]}]);const point=c=>[(c.rect[0]+c.rect[2])/2,(c.rect[1]+c.rect[3])/2];assert.equal(page.pointRuns.length,2);assert.equal(L.atPoint(L.page(affiliation),point(affiliation.at(-1)),refs),null);assert.equal(page.pointRuns.some(r=>r.offsets.includes(affiliation.at(-1).offset)),false);assert.equal(L.atPoint(L.page(missing),point(missing.at(-1)),refs),null);});
+test('reverse citation index keeps multiple source mentions and excludes bibliography text',()=>{const refs=[{...ref('Smith','2020'),position:{pageIndex:1,rects:[[0,0,500,20]]}}],make=(text,y)=>[...text].map((c,offset)=>({c,offset,rect:[offset*3,y,offset*3+3,y+10]})),pages=new Map([[0,L.page(make('Work (Smith, 2020), then Smith, 2020.',30))],[1,L.page(make('Smith, 2020. Retinal development.',2))]]),index=L.occurrences(pages,refs),hits=index.get(C.identity(refs[0]));assert.equal(hits.length,2);assert.ok(hits.every(h=>h.position.pageIndex===0&&h.position.rects.length>0));});
+test('reverse citation index does not use incorrect native destinations',()=>{const refs=[ref('Smith','2020'),ref('Jones','1990')],chars=[...'Smith, 2020'].map((c,offset)=>({c,offset,rect:[offset,20,offset+1,30]})),page=L.page(chars,[{type:'citation',word:chars,references:[refs[1]]}]),index=L.occurrences(new Map([[0,page]]),refs);assert.equal(index.get(C.identity(refs[0])).length,1);assert.equal(index.has(C.identity(refs[1])),false);});
+
+test('current citation distinguishes same-page occurrences and never guesses from page alone',()=>{
+ const a={start:10,end:20,position:{pageIndex:2,rects:[[0,0,10,10]]}},b={start:30,end:40,position:{pageIndex:2,rects:[[0,20,10,30]]}},c={start:5,end:15,position:{pageIndex:3,rects:[[0,0,10,10]]}},rows=[a,b,c];
+ assert.equal(L.currentOccurrence(rows,{citationPosition:{pageIndex:2,rects:[[5,25,5,25]]}}),b);
+ assert.equal(L.currentOccurrence(rows,{citationPosition:{pageIndex:2,rects:[]},citationOffset:15}),a);
+ assert.equal(L.currentOccurrence(rows,{citationPosition:{pageIndex:2,rects:[]},citationRange:[25,45]}),b);
+ assert.equal(L.currentOccurrence(rows,{citationPosition:{pageIndex:2,rects:[]}}),null);
+ assert.equal(L.currentOccurrence(rows,{citationPosition:{pageIndex:2,rects:[]},citationRange:[0,45]}),null);
+ assert.equal(L.currentOccurrence(rows,null),null);
+});
+
+test('publisher internal links resolve split author-year groups from source geometry, not target page',()=>{
+ const text='Work (Fedorov et al., 2014; Hampton et al., 2013). Figure 2A',chars=[...text].map((c,offset)=>({c,offset,rect:[(offset%25)*5,100-Math.floor(offset/25)*12,(offset%25)*5+5,110-Math.floor(offset/25)*12]})),page=L.page(chars),refs=[ref('Fedorov','2014','','Jones'),ref('Hampton','2013','','Jones')].map(r=>({...r,creators:[...r.creators,{lastName:'Brown'}]}));
+ for(const range of [[6,15],[26,38]]){const selected=chars.slice(...range),overlay={type:'internal-link',position:{rects:selected.map(c=>c.rect)},destinationPosition:{pageIndex:20}};assert.deepEqual(L.internalLink(overlay,page,refs).records,refs);}
+ assert.equal(L.internalLink({type:'internal-link',position:{rects:chars.slice(49).map(c=>c.rect)}},page,refs),null);
+ assert.equal(L.internalLink({type:'internal-link',position:{rects:chars.slice(6,15).map(c=>c.rect)}},page,[ref('Jones','2014')]),null);
+});
+test('detached PDF accents preserve complete surnames and original source offsets',()=>{
+ const r=C.parse('Wilson, C., and Gonza´ lez-Billault, C. (2015). Regulation of cytoskeletal dynamics by redox signaling and oxidative stress. Front. Cell. Neurosci. 9, 381.');assert.equal(r.creators[1].lastName,'González-Billault');
+ for(const surname of ['Gonza ́ lez-Billault','Gonza´ lez-Billault','González-Billault']){const text='Evidence (Wilson and '+surname+', 2015).',m=C.citationMentions(text)[0];assert.equal(m.keys[0].author,'Wilson');assert.equal(m.keys[0].second,'González-Billault');assert.deepEqual(C.resolveMention(m,[r]).records,[r]);assert.equal(text.slice(m.start,m.end).trim(),m.text.trim());}
+ assert.equal(C.repairPDFAccents('van der Waals'),'van der Waals');assert.equal(C.repairPDFAccents('O’Connor'),'O’Connor');
+});
+
+test('pointer selects the exact author-year within a shared publisher link',()=>{
+ const text='Work (Andrews, 2007; Barnes, 1989; Carey et al., 2003; Geiser, 2004).',chars=[...text].map((c,offset)=>({c,offset,rect:[offset%35*5,100-Math.floor(offset/35)*12,offset%35*5+5,110-Math.floor(offset/35)*12]})),page=L.page(chars),refs=[ref('Andrews','2007'),ref('Barnes','1989'),{...ref('Carey','2003'),creators:[]},ref('Geiser','2004')];
+ for(const r of refs)for(const word of [r.author,r.year]){const c=chars[text.indexOf(word)+1];assert.deepEqual(L.pointed(page,[(c.rect[0]+c.rect[2])/2,(c.rect[1]+c.rect[3])/2],refs).records,[r]);}
+ assert.equal(L.pointed(page,[0,300],refs),null);
+});
+test('pointer distinguishes repeated years and suffixes but preserves ambiguous shared author',()=>{
+ const text='Smith, 2020a,b, 2021',refs=[ref('Smith','2020','a'),ref('Smith','2020','b'),ref('Smith','2021')],m=C.citationMentions(text)[0];
+ assert.deepEqual(L.precise(m,text.indexOf('2020'),refs).records,[refs[0]]);assert.deepEqual(L.precise(m,text.indexOf('b'),refs).records,[refs[1]]);assert.deepEqual(L.precise(m,text.indexOf('2021'),refs).records,[refs[2]]);assert.deepEqual(L.precise(m,2,refs).records,refs);
+});
+test('numeric pointer keeps dash range and selects individual printed numbers',()=>{
+ const m=C.citationMentions('[8–13, 20]')[0],refs=Array.from({length:20},(_,i)=>({number:i+1,title:'Paper '+(i+1)}));
+ assert.deepEqual(L.precise(m,1,refs).records,[refs[7]]);assert.deepEqual(L.precise(m,3,refs).records,[refs[12]]);assert.equal(L.precise(m,2,refs).records.length,7);assert.deepEqual(L.precise(m,7,refs).records,[refs[19]]);
+});
+test('citations divided by a page boundary retain the same paper on both pages',()=>{
+ const chars=(t)=>[...t].map((c,offset)=>({c,offset,rect:[offset,10,offset+1,20]})),pages=new Map([[0,L.page(chars('Evidence from Kolb '))],[1,L.page(chars('and Smith, 2001, shows this.'))]]);L.bridgePages(pages);const refs=[ref('Kolb','2001','','Smith')];assert.deepEqual(L.pointed(pages.get(0),[15.5,15],refs).records,refs);assert.deepEqual(L.pointed(pages.get(1),[6.5,15],refs).records,refs);
+});
+
+test('spatial lookup preserves glyph order at tile boundaries and limits malformed bounds',()=>{
+ const refs=[ref('Smith','2020'),ref('Jones','2021')],text='Smith, 2020; Jones, 2021',chars=[...text].map((c,offset)=>({c,offset,rect:[offset*4,30,offset*4+4,34]})),page=L.page(chars);
+ for(const point of [[32,32],[64,32],[32,30]]){const glyph=chars.find(c=>point[0]>=c.rect[0]&&point[0]<=c.rect[2]&&point[1]>=c.rect[1]&&point[1]<=c.rect[3]),m=page.mentions.find(m=>glyph.offset>=m.start&&glyph.offset<m.end);assert.deepEqual(L.pointed(page,point,refs),m?L.precise(m,glyph.offset-m.start,refs):null);}
+ page.chars=[{...chars[0],rect:[-1e20,-1e20,1e20,1e20]},...chars];const idx=L.pointerIndex(page);assert.ok(idx.grid.size<20);assert.equal(idx.wide.length,1);assert.deepEqual(L.pointed(page,[65,32],refs).records,[refs[0]]);
+ page.chars=chars;assert.deepEqual(L.pointed(page,[65,32],refs).records,[refs[1]]);
+});
+test('reference index preserves ambiguity and rebuilds for replaced and extended arrays',()=>{
+ const refs=[{number:2,title:'First'}],mention=C.citationMentions('[2]');assert.equal(L.result(mention,refs).records.length,1);refs.push({number:2,title:'Conflicting'});assert.equal(L.result(mention,refs).records.length,0);const replacement=[{number:2,title:'Replacement'}];assert.equal(L.result(mention,replacement).records[0].title,'Replacement');
+});

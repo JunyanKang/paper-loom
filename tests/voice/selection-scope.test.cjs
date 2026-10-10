@@ -1,0 +1,8 @@
+process.chdir(require('node:path').resolve(__dirname,'../..'));
+const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../../addon/voice/core.js');
+const item=(str,x=0,eol=false)=>({str,transform:[12,0,0,12,x,100],width:str.length*6,height:12,hasEOL:eol});
+function complete(source,part,start=source.indexOf(part)){return core.completeSelection([item(source)],{text:part},core.anchorText(source.slice(0,start)).length);}
+test('completes both cut word edges without expanding beyond whole words',()=>{assert.equal(complete('The photoreceptors receive light.','torecep'),'photoreceptors');assert.equal(complete('Retinal cells transform light.','tinal cells trans'),'Retinal cells transform');assert.equal(complete('cone-specific effects','ne-speci'),'cone-specific');assert.equal(complete("Bumsted O'Brien showed this.","Bri"),"O'Brien");assert.equal(complete('20 μm wide','μ'),'μm');});
+test('geometry offsets disambiguate identical fragments',()=>{const source='Cells respond. Cellularity varies.';assert.equal(complete(source,'Cell',source.lastIndexOf('Cell')),'Cellularity');assert.equal(core.completeSelection([item(source)],{text:'Cell'},null),'Cell');});
+test('Asian selections are not expanded to a whole sentence',()=>{assert.equal(complete('视网膜将光转化为神经信号。','神经'),'神经');assert.equal(complete('網膜は光を信号に変える。','信号'),'信号');});
+test('normalizes PDF ligatures and line-break hyphenation before completing words',()=>{assert.equal(complete('The reﬂex is central.','ﬂ'),'reflex');const items=[item('photo-',0,true),item('receptors',0,true)];assert.equal(core.completeSelection(items,{text:'recept'},5),'photoreceptors');});

@@ -1,0 +1,1 @@
+const r=L.qaReader||L.currentReader(),p=r._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfDocument,data=await p.getPageData(Components.utils.cloneInto({pageIndex:0},r._internalReader._primaryView._iframeWindow));return {keys:Object.keys(data||{}),characters:data?.chars?.length,char:data?.chars?.[0],runtime:Runtime.state,result:L.qaRuntimeResult};

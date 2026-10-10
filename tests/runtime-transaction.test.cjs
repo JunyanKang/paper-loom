@@ -1,0 +1,16 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+function setup(){
+ const files=new Map(),removed=[],prefs=new Map([['engineAutoPath','/existing/engine']]),h={failSynthesis:false,failReceipt:false,cancelSynthesis:false};
+ const rows=[{name:'worker.py',bytes:1,sha256:'file'}],catalog={id:'fixture',platform:'macOS-arm64',files:rows,packages:[{sha256:'archive',bytes:1,parts:[]}]};files.set('/cache/archive.zip',1);
+ let cursor=0;
+ const zip={open(){cursor=0;},close(){},findEntries(){return {hasMore:()=>cursor<1,getNext:()=>{cursor++;return 'engine/worker.py';}};},getEntry:()=>({realSize:1,permissions:0o644}),extract:(_,p)=>files.set(p,1)};
+ const io={makeDirectory:async()=>{},remove:async p=>removed.push(p),move:async(a,b)=>{files.set(b,files.get(a));files.delete(a);},writeUTF8:async(p,s)=>files.set(p,s),writeJSON:async()=>{if(h.failReceipt)throw Error('receipt failure');},setPermissions:async()=>{}};
+ const ctx={PathUtils:{join:path.join,parent:path.dirname},IOUtils:io,Components:{classes:{'@mozilla.org/libjar/zip-reader;1':{createInstance:()=>zip}},interfaces:{}},Services:{prefs:{savePrefFile(){}}},LoomRuntimeCore:{safePath:()=>true},Zotero:{isWin:false,File:{pathToFile:p=>p},Promise:{delay:async()=>{}},getMainWindow:()=>({fetch:async()=>({text:async()=> 'worker'})}),logError(){}}};
+ vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../addon/shared/runtime.js'),'utf8'),ctx);const R=ctx.LoomRuntime;
+ Object.assign(R,{root:'/runtime',cache:'/cache',catalog,valid:async p=>files.has(p),owner:{rootURI:'fixture/',voice:{set:(k,v)=>prefs.set(k,v),syncSettings(){},testEngineFolder:async()=>{if(h.cancelSynthesis)R.cancel();if(h.failSynthesis)throw Error('synthesis failure');}}}});
+ return Object.assign(h,{R,files,removed,prefs});
+}
+test('failed synthesis preserves the working engine and cleans staging',async()=>{const h=setup();h.failSynthesis=true;await assert.rejects(h.R.install(),/synthesis failure/);assert.equal(h.prefs.get('engineAutoPath'),'/existing/engine');assert.equal(h.R.state.phase,'error');assert.equal(h.R.job,null);assert.ok(h.removed.some(p=>p.includes('/.install-')));});
+test('cancellation before activation preserves old engine and verified archive',async()=>{const h=setup();h.cancelSynthesis=true;await assert.rejects(h.R.install(),/取消/);assert.equal(h.prefs.get('engineAutoPath'),'/existing/engine');assert.equal(h.R.state.phase,'cancelled');assert.ok(h.files.has('/cache/archive.zip'));h.cancelSynthesis=false;await h.R.install();assert.equal(h.R.state.phase,'ready');assert.notEqual(h.prefs.get('engineAutoPath'),'/existing/engine');});
+test('receipt write failure cannot activate an incomplete installation',async()=>{const h=setup();h.failReceipt=true;await assert.rejects(h.R.install(),/receipt failure/);assert.equal(h.prefs.get('engineAutoPath'),'/existing/engine');});
+test('concurrent install requests share one transaction and release busy state',async()=>{const h=setup();let finish,n=0;h.R.run=async()=>{n++;return new Promise(r=>finish=r);};const a=h.R.install(),b=h.R.install();assert.equal(n,1);finish('ready');assert.equal(await a,await b);assert.equal(h.R.job,null);});

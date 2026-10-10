@@ -1,0 +1,14 @@
+qa-profile*/
+qa-library*/
+qa-archive*/
+qa-cache*/
+runtime-qa/
+test-results*/
+dist/
+__pycache__/
+.DS_Store
+!tests/
+!tests/**
+.build/
+.release-assets/
+*.log

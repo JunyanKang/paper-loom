@@ -1,0 +1,23 @@
+name: Windows native voices
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Zotero and validate in-plugin voice download
+        run: python scripts/test_windows.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-native-results
+          path: |
+            test-results-windows/*.json
+            test-results-windows/zotero.log

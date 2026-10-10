@@ -1,0 +1,19 @@
+{
+  "addons": {
+    "paper-loom@local.research": {
+      "updates": [
+        {
+          "version": "1.0.0",
+          "update_link": "https://github.com/JunyanKang/paper-loom/releases/download/v1.0.0/paper-loom-1.0.0.xpi",
+          "update_hash": "sha512:15e33e7a50c98c80f88f79eac7daa04cc8c3daf7d78f97c8a46844df952dd877d639198ce2a06f9d1510db117c03d91c68065a22987f4b9fc6a89dff1d130b55",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "10.0.5-beta.1",
+              "strict_max_version": "11.0.*"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

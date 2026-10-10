@@ -1,0 +1,2 @@
+const r=L.qaReader||L.currentReader(),internal=r?._internalReader,p=internal?._primaryView;
+return {ready:L.references.readerReady(r),readerKeys:Object.keys(r||{}),internalKeys:Object.keys(internal||{}),viewKeys:Object.keys(p||{}),iframeLocation:String(p?._iframeWindow?.location),pdfjs:!!p?._iframeWindow?.PDFViewerApplication,pdfDocument:!!p?._iframeWindow?.PDFViewerApplication?.pdfDocument,docBody:!!r?._iframeWindow?.document?.body,viewState:internal?._state?.primaryViewState};

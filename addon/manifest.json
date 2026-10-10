@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "Paper Loom · 文织",
+  "version": "1.0.0",
+  "description": "在 Zotero 中连贯听读、对照翻译、追踪引文、探索作者合作与学术履历。",
+  "author": "Junyan Kang",
+  "applications": {
+    "zotero": {
+      "id": "paper-loom@local.research",
+      "strict_min_version": "10.0.5-beta.1",
+      "strict_max_version": "11.0.*",
+      "update_url": "https://kanglab.cool/paper-loom/updates.json"
+    }
+  },
+  "icons": {
+    "48": "assets/loom.png",
+    "96": "assets/loom.png"
+  }
+}

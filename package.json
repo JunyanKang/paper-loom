@@ -1,0 +1,12 @@
+{
+  "name": "paper-loom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Read, listen, and follow research connections in Zotero",
+  "license": "MIT",
+  "scripts": {
+    "build": "python3 scripts/build.py",
+    "test": "node --test tests/*.test.cjs tests/voice/*.test.cjs tests/references/*.test.cjs",
+    "verify": "python3 scripts/verify_package.py"
+  }
+}

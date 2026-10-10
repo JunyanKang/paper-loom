@@ -1,0 +1,2 @@
+const r=L.qaReader||L.currentReader(),v=r._internalReader._primaryView,p=v._iframeWindow.PDFViewerApplication.pdfDocument;
+const data=await v._documentData.ensurePage(0);return {ensureSource:v._documentData.ensurePage.toString().slice(0,4000),pageSource:p.getPageData.toString().slice(0,1500),keys:Object.keys(data||{}),stored:Object.keys(v._documentData.pages[0]||{}),char:v._documentData.pages[0]?.chars?.[0],overlays:v._documentData.pages[0]?.overlays?.length};
