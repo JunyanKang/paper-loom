@@ -46,9 +46,10 @@ Object.assign(PaperLoom,{
       U.onPageActivate=doc=>doc._clAbstract?.close(true);
       RS.CiteLensDockMotion.create=(panel,orb,fit,settled,progress)=>{const motion=VS.PaperVoiceDockMotion.create(panel,orb,fit);motion.setSettled(settled);motion.setCompanion(progress);return motion;};
       V.showPanel=(reader,toggle=false)=>{
-        V.scheduleWarmup();const ui=V.ensurePanel(reader),view=ui.panel._clPage;
-        if(!view)return;
-        ui.setContext('listening');return toggle&&!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'?view.dismiss():view.activate();
+        V.scheduleWarmup();V.ensurePanel(reader);const doc=reader._iframeWindow.document;
+        const active=[...U.livePages(doc)].find(v=>!v.container.hidden);
+        if(toggle&&active)return active.dismiss();
+        return this.showSettings(reader,doc);
       };
       V.onOutsideInteraction=(reader,event)=>V.panels.get(reader)?._outside?.(event);
 
@@ -75,12 +76,10 @@ Object.assign(PaperLoom,{
         ui.root.querySelector('.pv-orb>.pv-mascot:not(.pv-mascot-reading)').src=this.assetURI+'loom.png';
         if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){
           const doc=ui.root.ownerDocument;
-          ui.panel.tabIndex=-1;const view=U.page(ui.panel,{reader,retain:true,autoOpen:false,dockMotion:ui.dockMotion});
-          ui.panel._pvDockVisibility=visible=>visible?view.activate():view.dismiss();
-          const originalDispose=ui.dispose;ui.dispose=()=>{view.destroy();originalDispose();};
-          ui.panel.addEventListener('cl-page-visible',()=>{ui.setContext('listening');});
+          // The companion owns no listening page. Settings owns all preferences.
+          ui.panel.hidden=true;ui.panel.inert=true;ui.panel.style.display='none';
+          ui.panel._pvDockVisibility=()=>{};
           this.installOutsideCollapse(ui,reader);
-          this.mountWorkspace(ui.panel,reader,'listening');ui.action('settings').hidden=true;ui.action('close').hidden=true;ui.panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();e.stopPropagation();V.dismissPanel(reader);}});
           ui.action('orb').setAttribute('aria-label','打开或收起 Paper Loom');ui.action('orb').title='Paper Loom';
           ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
           RS.CiteLensI18n.install(doc);

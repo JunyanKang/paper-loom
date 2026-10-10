@@ -14,36 +14,10 @@ var PaperVoiceUI = {
   animation.finished.then(()=>{if(element._pvFade!==animation)return;element.hidden=!visible;animation.cancel();element._pvFade=null;},()=>{});
  },
  bindQuickReveal(root,bar,orb,onHide) {
-  const doc=root.ownerDocument,win=doc.defaultView;let timer=null,animation=null,opened=false,overOrb=false,overBar=false,disposed=false;
-  const listen=(el,type,fn,capture=false)=>{el.addEventListener(type,fn,capture);return ()=>el.removeEventListener(type,fn,capture);},off=[];
-  const clear=()=>{win.clearTimeout(timer);timer=null;};
-  const keyboardInside=()=>{const el=doc.activeElement;return (el===orb||bar.contains(el))&&el?.matches(':focus-visible');};
-  const layout=()=>{
-   if(bar.hidden)return;bar.style.top='auto';bar.style.right=(orb.offsetWidth+7)+'px';bar.style.bottom=Math.max(0,(orb.offsetHeight-bar.offsetHeight)/2)+'px';bar.dataset.placement='side';
-   const o=orb.getBoundingClientRect();if(o.left-7-bar.offsetWidth<8){bar.style.right='0px';bar.style.bottom=(orb.offsetHeight+8)+'px';bar.dataset.placement='above';if(o.top-8-bar.offsetHeight<8){bar.style.bottom='auto';bar.style.top=(orb.offsetHeight+8)+'px';bar.dataset.placement='below';}const left=o.right-bar.offsetWidth;if(left<8)bar.style.right=(left-8)+'px';}
-  };
-  const setOpen=show=>{
-   if(disposed||opened===show)return;opened=show;clear();
-   const hidden=bar.hidden,style=win.getComputedStyle(bar),from={opacity:hidden?'0':style.opacity,transform:hidden?'translateX(9px) scale(.97)':style.transform};
-   animation?.cancel();animation=null;bar.dataset.revealed=String(show);bar.inert=!show;bar.style.pointerEvents=show?'':'none';
-   if(!show)onHide();bar.hidden=false;if(show)layout();
-   if(win.matchMedia('(prefers-reduced-motion: reduce)').matches||!bar.animate){bar.hidden=!show;return;}
-   const offset=bar.dataset.placement==='above'?'translateY(7px)':bar.dataset.placement==='below'?'translateY(-7px)':'translateX(9px)';if(hidden)from.transform=offset+' scale(.97)';
-   const end=show?{opacity:1,transform:'none'}:{opacity:0,transform:offset+' scale(.98)'};
-   const current=animation=bar.animate([from,end],{duration:show?240:180,easing:show?'cubic-bezier(.16,1,.3,1)':'cubic-bezier(.4,0,1,1)',fill:'both'});
-   current.finished.then(()=>{if(animation!==current)return;bar.hidden=!show;current.cancel();animation=null;},()=>{});
-  };
-  const leave=()=>{clear();timer=win.setTimeout(()=>{if(!overOrb&&!overBar&&!keyboardInside())setOpen(false);},420);};
-  const hide=()=>{clear();overOrb=overBar=false;setOpen(false);};
-  // DOM order gives keyboard users the controls immediately after the mascot.
-  orb.after(bar);bar.hidden=true;bar.inert=true;bar.dataset.revealed='false';bar.setAttribute('role','group');bar.setAttribute('aria-label','Paper Loom 朗读控制');
-  off.push(listen(orb,'pointerenter',()=>{overOrb=true;clear();setOpen(true);}),listen(orb,'pointerleave',()=>{overOrb=false;leave();}));
-  off.push(listen(bar,'pointerenter',()=>{overBar=true;clear();}),listen(bar,'pointerleave',()=>{overBar=false;leave();}));
-  for(const el of [orb,bar]){off.push(listen(el,'focusin',e=>{if(e.target.matches(':focus-visible')){clear();setOpen(true);}}),listen(el,'focusout',()=>{overOrb=orb.matches(':hover');overBar=bar.matches(':hover');leave();}));}
-  off.push(listen(orb,'keydown',e=>{if(e.key==='Tab'&&!e.shiftKey){setOpen(true);}else if(e.key==='ArrowLeft'){e.preventDefault();setOpen(true);bar.querySelector('button:not([hidden]):not(:disabled)')?.focus();}}));
-  off.push(listen(doc,'pointerdown',e=>{if(!orb.contains(e.target)&&!bar.contains(e.target))hide();},true),listen(win,'blur',hide),listen(win,'resize',()=>{onHide();layout();}),listen(doc,'visibilitychange',()=>{if(doc.hidden)hide();}));
-  const observer=new win.ResizeObserver(()=>{if(opened)layout();});observer.observe(bar);observer.observe(orb);
-  return {hide,layout,dispose(){disposed=true;clear();animation?.cancel();observer.disconnect();for(const remove of off)remove();}};
+  // Keep the internal bindings available to shared state, but never reveal a
+  // companion hover toolbar. Transport lives beside the translation caption.
+  bar.hidden=true;bar.inert=true;bar.style.display='none';
+  return {hide(){bar.hidden=true;onHide();},layout(){},dispose(){}};
  },
  // Zotero's reader can leave native range pointer input inert. Keep the native
  // input for keyboard/accessibility, and handle primary pointer gestures locally.
@@ -114,7 +88,7 @@ var PaperVoiceUI = {
    if(label.dataset.voice===code)return;label.dataset.voice=code;label.classList.add('pl-voice-symbol');
    const flagImage=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','img'),avatar=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','span');flagImage.className='pl-flag';flagImage.alt='';flagImage.src=controller.flagURI(voice.accent==='US'?'en-US':voice.accent==='GB'?'en':voice.language);avatar.className='pl-voice-avatar';avatar.setAttribute('aria-hidden','true');avatar.dataset.voice=code;
    const portrait={af_heart:0,af_bella:1,bf_emma:2,zf_xiaobei:3,zf_xiaoxiao:4,jf_tebukuro:5,jf_alpha:6,ff_siwis:7,am_michael:8,am_fenrir:9,bm_george:10,zm_yunxi:11,zm_yunjian:12,jm_kumo:13}[code],col=portrait%4,row=Math.floor(portrait/4),xs=[0,314,627,940,1254],ys=[0,314,622,930,1254],x=xs[col],y=ys[row],width=xs[col+1]-x,height=ys[row+1]-y;
-   avatar.style.backgroundImage='url("'+controller.assetURI+'voices/portraits.png")';avatar.style.backgroundSize=(1254/width*100)+'% '+(1254/height*100)+'%';avatar.style.backgroundPosition=(x/(1254-width)*100)+'% '+(y/(1254-height)*100)+'%';label.replaceChildren(flagImage,avatar);return;
+   avatar.style.backgroundImage='url("'+controller.assetURI+'voices/portraits.png")';avatar.style.backgroundSize=(1254/width*100)+'% '+(1254/height*100)+'%';avatar.style.backgroundPosition=(x/(1254-width)*100)+'% '+(y/(1254-height)*100)+'%';label.replaceChildren(avatar,flagImage);return;
   }if(isLanguage(select)){flag(label,code);return;}const meta=controller.providerMeta(code);let img=label.querySelector('img');if(!img){img=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','img');img.alt='';label.replaceChildren(img);}img.className='pl-provider-icon';if(img.getAttribute('src')!==meta.uri)img.src=meta.uri;img.dataset.provider=meta.id;};
   let active=null,index=-1,typeAhead='',typeTimer=null;
   const close=()=>{if(active){active.button.setAttribute('aria-expanded','false');active.button.removeAttribute('aria-activedescendant');}active=null;PaperVoiceUI.visibility(menu,false);if(portal&&menu.matches(':popover-open'))menu.hidePopover();};
@@ -231,6 +205,12 @@ var PaperVoiceUI = {
   const settings=(open)=>{root._pvCloseThemePicker?.();cancelShortcutRecording?.();if(!open)find('llmKey').value='';find('home').hidden=open;find('settingsPage').hidden=!open;action('settings').querySelector('img').src=controller.assetURI+'icons/'+(open?'chevron-left':'settings')+'.svg';action('settings').setAttribute('aria-label',open?'返回播放控制':'声音与翻译设置');controller.localize?.(root);};
   action('settings').onclick=()=>{settings(find('settingsPage').hidden);controller.loadUpdateSettings();fit();};
   const fit=()=>{const right=parseFloat(root.style.right)||18,bottom=parseFloat(root.style.bottom)||18;panel.style.transform=`translate(${Math.max(0,right+panel.offsetWidth+8-win.innerWidth)}px,${Math.max(0,bottom+root.offsetHeight+8-win.innerHeight)}px)`;};
+  const voicePane=root.querySelector('[data-settings-pane=voice]');
+  const modesRow=doc.createElement('div');modesRow.className='pv-setting-row pv-reading-modes';
+  const modesLabel=doc.createElement('span');modesLabel.textContent='朗读模式';modesRow.append(modesLabel,root.querySelector('.pv-mode-options'));
+  const start=action('primary');start.className='pv-icon-button';modesRow.append(start);
+  voicePane.prepend(modesRow,find('repeatRow'),find('documentRow'));
+  for(const name of ['repeatRow','documentRow'])find(name).className='pv-setting-row';
   action('orb').onclick=()=>controller.showPanel(reader,true);action('close').onclick=()=>{root._pvCloseThemePicker?.();cancelShortcutRecording();find('llmKey').value='';visible(panel,false);};
   const dockMotion=PaperVoiceDockMotion.create(panel,action('orb'),fit);
   const selectSettingsTab=name=>{

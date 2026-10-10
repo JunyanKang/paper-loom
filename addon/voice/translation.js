@@ -293,8 +293,9 @@ var PaperVoiceTranslation = {
   const doc=c.box.ownerDocument,win=doc.defaultView,make=(tag,cls)=>{const el=doc.createElement(tag);el.className=cls;return el;};
   const tools=make('div','pv-caption-tools');tools.hidden=true;tools.setAttribute('role','toolbar');
   const style=make('style','');style.textContent=`
-   .pv-caption-tools{position:absolute;z-index:21;display:flex;align-items:center;gap:8px;box-sizing:border-box;padding:4px 6px;border-radius:0 10px 10px 10px;background:var(--pv-paper,#f6f8f5);color:var(--pv-ink,#253c33);box-shadow:0 5px 16px #15342920;font:12px/1.4 system-ui,sans-serif;isolation:isolate}
+   .pv-caption-tools{position:absolute;z-index:21;display:flex;flex-direction:column;align-items:flex-end;gap:4px;box-sizing:border-box;padding:4px 6px;border-radius:0 10px 10px 10px;background:var(--pv-paper,#f6f8f5);color:var(--pv-ink,#253c33);box-shadow:0 5px 16px #15342920;font:12px/1.4 system-ui,sans-serif;isolation:isolate}
    .pv-caption-tools[hidden],.pv-caption-tools [hidden]{display:none!important}
+   .pv-caption-tools-row{display:flex;align-items:center;gap:8px}
    .pv-caption-tools-group{display:flex;align-items:center;gap:2px}
    .pv-caption-tools button{appearance:none;box-sizing:border-box;flex:none;display:flex;align-items:center;justify-content:center;position:relative;width:var(--pv-caption-button,26px);height:28px;margin:0;padding:4px;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
    .pv-caption-tools button:is(:hover,:focus-visible),.pv-caption-tools button[aria-pressed=true]{background:color-mix(in srgb,var(--pv-accent,#386c59) 14%,transparent);color:var(--pv-accent,#386c59)}
@@ -317,7 +318,8 @@ var PaperVoiceTranslation = {
   const pause=button(transport,'pause','暂停',()=>this.primary(c.reader));pause.dataset.captionAction='pause';
   button(transport,'square','停止',()=>this.stop()).dataset.captionAction='stop';
   const modes=group();for(const mode of PaperVoiceCore.modes){const b=button(modes,mode.icon,mode.short,()=>this.setMode(mode.id));b.dataset.captionMode=mode.id;}
-  const languageHost=group();languageHost.classList.add('pv-caption-language-tools');
+  const secondRow=make('div','pv-caption-tools-row');tools.append(secondRow);secondRow.append(modes);
+  const languageHost=group();secondRow.append(languageHost);languageHost.classList.add('pv-caption-language-tools');
   const language=button(languageHost,'languages','译文语言',e=>this.quickTranslationClick(e));language.dataset.captionAction='translation';language.replaceChildren();language.removeAttribute('title');language.setAttribute('aria-haspopup','true');language.setAttribute('aria-expanded','false');
   const flag=make('img','pl-flag');flag.alt='';const badge=make('span','pv-caption-audio-badge');badge.append(icon('headphones'));badge.setAttribute('aria-hidden','true');language.append(flag,badge);
   language.ondblclick=e=>{e.preventDefault();e.stopPropagation();this.quickTranslationDoubleClick();};
@@ -326,7 +328,7 @@ var PaperVoiceTranslation = {
   let timer=null,languageTimer=null,animation=null;
   const closeLanguages=()=>{win.clearTimeout(languageTimer);menu.hidden=true;language.setAttribute('aria-expanded','false');};
   const hide=()=>{win.clearTimeout(timer);closeLanguages();tools.hidden=true;};
-  const layout=()=>{if(c.box.style.visibility==='hidden'||!c.box.isConnected){hide();return;}const b=c.box.getBoundingClientRect(),parent=tools.parentElement.getBoundingClientRect(),frame=c.frame.getBoundingClientRect();tools.style.setProperty('--pv-caption-button',Math.max(16,Math.min(26,(frame.width-56)/13))+'px');const width=tools.getBoundingClientRect().width;tools.style.left=(Math.max(frame.left+4,Math.min(b.left,frame.right-width-4))-parent.left)+'px';tools.style.top=(b.bottom-parent.top-1)+'px';};
+  const layout=()=>{if(c.box.style.visibility==='hidden'||!c.box.isConnected){hide();return;}const b=c.box.getBoundingClientRect(),parent=tools.parentElement.getBoundingClientRect(),frame=c.frame.getBoundingClientRect();tools.style.setProperty('--pv-caption-button',Math.max(16,Math.min(26,(frame.width-34)/8))+'px');const width=tools.getBoundingClientRect().width;tools.style.left=(Math.max(frame.left+4,Math.min(b.left,frame.right-width-4))-parent.left)+'px';tools.style.top=(b.bottom-parent.top-1)+'px';};
   const show=()=>{win.clearTimeout(timer);if(c.box.style.visibility==='hidden')return;tools.hidden=false;layout();this.panels?.get(c.reader)?.closeNavigation?.();};
   const leave=()=>{win.clearTimeout(timer);timer=win.setTimeout(()=>{if(!c.box.matches(':hover')&&!tools.matches(':hover,:focus-within'))hide();},220);};
   const openLanguages=()=>{show();win.clearTimeout(languageTimer);menu.hidden=false;const anchor=language.getBoundingClientRect();menu.dataset.side='above';menu.style.maxHeight=Math.max(32,anchor.top-c.frame.getBoundingClientRect().top-8)+'px';language.setAttribute('aria-expanded','true');};
@@ -399,7 +401,7 @@ var PaperVoiceTranslation = {
   // Short captions hug their text; the detected source column remains the
   // wrapping limit for longer translations and larger user-selected fonts.
   box.style.width='max-content';box.style.maxWidth=width+'px';box.style.maxHeight=Math.max(56,fr.height*.55)+'px';
-  const height=box.getBoundingClientRect().height,bottomInset=c.controls?48:12;
+  const height=box.getBoundingClientRect().height,bottomInset=c.controls?80:12;
   let top=block.bottom+8;c.inline=true;box.dataset.placement='below-source';
   if(this.get('captionPlacement','below')==='above'){
    const room=block.top-20;

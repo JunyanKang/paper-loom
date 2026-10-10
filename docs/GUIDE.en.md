@@ -4,11 +4,11 @@
 
 ## Open and collapse
 
-Click the book in the library toolbar or the lower-right corner of a PDF to open the listening window directly. The bottom authors, headphones, papers, and gear icons open author networks, listening, references and the reading list, and settings. Hover over an icon for its name. All four main windows share these icons, with a theme-colored outline and icon for the current function. The active tab connects to its page; each page keeps its own controls above the navigation. Click outside the workspace in Zotero or the PDF, click the book again, or press Esc to collapse. Hover over the book for listening shortcuts and drag to reposition it.
+Click the book in the library toolbar or a PDF to open Settings. The bottom icons switch between authors, papers, and settings. Click outside the workspace or click the book again to collapse it. Drag the book to reposition it.
 
-Each document shows one expanded main panel at a time: listening, references, network, or settings. Switching panels transitions directly to the destination without stopping speech. Reopening references or the network resumes the existing view. PDF tabs and separate reader windows keep their own panel states. Detail and editing dialogs open above their parent and return to it when closed.
+Each document shows one expanded panel at a time. Switching between settings, references, and the network keeps the navigation anchored and does not stop reading. PDF tabs and separate reader windows retain their own panel state.
 
-![Listening panel](images/listening-en.png)
+![Settings](images/voices-en.png)
 
 ## Choose a reading scope
 
@@ -19,7 +19,7 @@ Each document shows one expanded main panel at a time: listening, references, ne
 | Paragraph | Select within a paragraph to hear the full paragraph and set repeats |
 | Full text | Read from the beginning, a selected position, or saved progress |
 
-Hover over the book for quick controls. Hover over the leftmost mode icon to choose directly from a column of four icons; hover over an icon for its name. Pause and resume share one main button. When a translation caption is visible, hover over it for a single row of sentence/paragraph controls, pause/resume, Stop, four reading modes, and the current language flag. The selected mode is highlighted. Hover over the flag to reveal other languages in a column above it; click to toggle translated audio or double-click to toggle translation. Without a visible caption, hovering over Pause opens a compact transport row. Pause keeps your current position; Stop ends the current reading task. Adjust speed, repeats, and voice in the panel and voice settings. Repeat choices are 1, 2, 3, 5, 10, or ∞ (continuous). You can disable automatic selection reading in Settings.
+Hover over a translation caption to reveal two rows below it. The first contains sentence and paragraph navigation, pause/resume, and Stop. The second shows all four modes and one current language flag. The active mode is highlighted. Hover over the flag for an upward column of languages; click to toggle translated audio, or double-click to toggle translation. Pause keeps your position; Stop ends the task. Reading mode, repeats (1, 2, 3, 5, 10, ∞), document starting point, speed, and voice are in Settings → Voices & engine. The floating book opens Settings without a hover toolbar.
 
 The PDF must contain extractable text. OCR scanned pages first. Complex tables, equations, and unusual layouts may not read as expected. Text processing handles citation markers and running headers; figure-caption reading is configurable.
 
@@ -29,7 +29,7 @@ Language choices use flags; translation services and model providers use logos. 
 
 Translation display is enabled by default. Hover over the language icon to choose a target directly. Click the current language icon once to toggle **Read translation**. Double-click to toggle translation display: a soft background marks the enabled state, and the icon remains available when disabled. With spoken translation enabled, the language list contains only supported voice languages; turn it off to restore all text-translation languages. The translation target and interface language are separate choices. Targets without a bundled voice can still be displayed. Online translation requires connectivity; built-in services may rate-limit requests, or you can use your own model provider.
 
-The selection translation card has a flag synchronized with the quick bar. Changing it refreshes the translation. Three scope icons select sentence, selection, or paragraph; hovering over the headphones button reveals four equal mode areas. Click Sentence, Selection, Paragraph, or Document to start one reading; Document starts at the selected passage.
+The selection translation card has a flag synchronized with the caption controls. Changing it refreshes the translation. Three scope icons select sentence, selection, or paragraph; hovering over the headphones button reveals four equal mode areas. Click Sentence, Selection, Paragraph, or Document to start one reading; Document starts at the selected passage.
 
 ![Translation caption controls](images/caption-controls-en.png)
 

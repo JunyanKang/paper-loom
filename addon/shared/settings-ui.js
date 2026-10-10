@@ -15,6 +15,9 @@ PaperLoom.extendSettings=async function(ctx) {
   const fake={_iframeWindow:embedded.contentWindow,_window:embedded.contentWindow,itemID:reader?.itemID},V=this.voice;
   const ui=this.voiceScope.PaperVoiceUI.create(V,fake);ui.root.classList.add('pl-embedded');ui.root.dataset.loomSettings='true';ui.panel.hidden=false;ui.panel.dataset.pvVisible='true';
   V.panels.set(fake,ui);ui.settings(true);V.syncSettings();
+  const shortcut=e=>V.handlePlaybackShortcut(e,reader||V.currentReader);
+  embedded.contentWindow.addEventListener('keydown',shortcut,true);
+  cleanups.push(()=>{try{embedded.contentWindow.removeEventListener('keydown',shortcut,true);}catch(_){}});
   // The main Zotero window and Reader belong to different Gecko docgroups;
   // create the switch in its host document rather than adopting iframe nodes.
   const originalSelection=ui.find('selectionTranslation'),originalFind=ui.find,selectionRow=this.el(doc,'label',null,'cl-setting-row'),selection=this.el(doc,'input');
@@ -27,6 +30,7 @@ PaperLoom.extendSettings=async function(ctx) {
   frame.querySelector('[data-translation-setting=translationSize]')?.closest('.cl-setting-row')?.remove();
   // Keep the complete original event wiring; display each control only once.
   for(const field of ['provider','target'])ui.find(field)?.closest('.pv-setting-row')?.setAttribute('hidden','');
+  ui.action('primary').onclick=()=>{const active=reader?.itemID?reader:this.currentReader();if(active?.itemID)V.primary(active);};ui.action('primary').disabled=!reader?.itemID;
   ui.action('sample').onclick=()=>this.listen(this.voiceScope.PaperVoiceCore.speechLanguages.find(l=>l.id===V.settingsVoiceLanguage()).sample,reader);
   ui.action('previewCompanion').onclick=()=>{const live=[...V.livePanels()].find(p=>p.root.ownerDocument===doc&&!p.root.classList.contains('pl-embedded'));live?.previewCompanion();};
   ui.action('settings').onclick=()=>{};

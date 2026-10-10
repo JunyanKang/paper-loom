@@ -8,12 +8,10 @@ const check=(name,ok,detail)=>checks.push({name,ok:!!ok,detail});
 const same=(name,actual,expected)=>check(name,Math.abs(actual-expected)<1,{actual,expected});
 try{for(const reader of [r,null]){const doc=reader?reader._iframeWindow.document:Zotero.getMainWindow().document;Zotero.getMainWindow().Zotero_Tabs.select(reader?(r._tabID||r.tabID):'zotero-pane');
  for(const lang of ['en','zh']){
- S.state.settings.interfaceLanguage=lang;H.refresh();V.setLanguage(lang);const label=(reader?'PDF ':'library ')+lang,ui=L.showHome(reader,doc);
- const settle=async()=>{await U.pageScopes.get(doc)?.queue;await ui.waitMotion();await wait(250);};await settle();
- const home=ui.panel.querySelector('[data-field=home]'),frame=rect(ui.panel),left=frame.left+20,right=frame.right-20;
- for(const el of home.querySelectorAll('.pv-context-row,.pv-preview,.pv-progress-track'))if(visible(el)){same(label+' listening left '+el.className,rect(el).left,left);same(label+' listening right '+el.className,rect(el).right,right);}
- const nav=rect(ui.panel.querySelector('.pl-main-actions>button'));
- await L.showSettings(reader,doc);await settle();const f=doc.querySelector('.cl-settings');
+ S.state.settings.interfaceLanguage=lang;H.refresh();V.setLanguage(lang);const label=(reader?'PDF ':'library ')+lang,result=await L.showHome(reader,doc);
+ const settle=async()=>{await U.pageScopes.get(doc)?.queue;await wait(250);};await settle();
+ const f=doc.querySelector('.cl-settings'),frame=rect(f),left=frame.left+20,right=frame.right-20;
+ const nav=rect(f.querySelector('.pl-main-actions>button'));
  for(const tab of ['general','voice','shortcuts','appearance']){f._plSelect(tab);await wait(240);const inside=f.querySelector('iframe').contentDocument;
   for(const d of [doc,inside])for(const row of d.querySelectorAll('.cl-settings .cl-setting-row,.pl-embedded .pv-setting-row,.pl-embedded .pv-shortcut-row')){if(!visible(row)||row.closest('.cl-llm-popover'))continue;same(label+' '+tab+' row left',rect(row).left,left);same(label+' '+tab+' row right',rect(row).right,right);
    for(const c of row.querySelectorAll(':scope>input[type=checkbox]'))same(label+' '+tab+' switch right',rect(c).right,right);

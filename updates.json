@@ -5,7 +5,7 @@
         {
           "version": "1.0.4",
           "update_link": "https://github.com/JunyanKang/paper-loom/releases/download/v1.0.4/paper-loom-1.0.4.xpi",
-          "update_hash": "sha512:8c3884809dc402a9377e159f19d18625e735ccfc98acf2aedc96eec4b69487b6d9c569a1cd775bc0f29bed87644b47ae3171cd266d08ba324353f55143163be4",
+          "update_hash": "sha512:46a4d70af76a38526007b5c7dd011c67cbc4c2fe5cd0193e80fa73e58d7f0f19d2c1e134013cadad3425f0958003d45a82a62ccec6dc4c2c1c9e5e89e1dbb688",
           "applications": {
             "zotero": {
               "strict_min_version": "10.0.5-beta.1",

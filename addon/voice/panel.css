@@ -320,3 +320,9 @@
 .pv-nav-popover{display:flex;align-items:center;gap:6px;padding:5px;box-sizing:border-box;pointer-events:auto}
 .pv-nav-scopes{position:static;display:flex;flex-direction:row;width:auto;padding:0;gap:2px;overflow:visible}
 .pv-nav-popover .pv-stop-row{position:static;width:auto;padding:0;margin:0}
+
+/* Reading preferences share the voice settings grid. */
+.pv-reading-modes .pv-mode-options{display:flex;gap:2px;margin:0;padding:0;background:none}
+.pv-reading-modes .pv-mode-options button{width:28px;height:28px;min-width:28px;margin:0;padding:5px;border:0;background:transparent}
+.pv-reading-modes .pv-mode-options button span{display:none}
+.pv-reading-modes .pv-mode-options button[aria-pressed=true]{background:var(--pv-soft);border-radius:6px}

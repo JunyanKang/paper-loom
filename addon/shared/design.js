@@ -203,7 +203,7 @@ html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-pag
 .pl-workspace-content{background:transparent;box-shadow:none;border-radius:0}
 .cl-settings.pl-settings .cl-dialog-body{background:transparent;box-shadow:none}
 .cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button[aria-selected=true]::after{display:none}
-.pl-workspace-page>.pl-main-actions{position:relative;--pl-selected-right:calc(var(--pl-nav-right,58px) + (3 - var(--pl-active-index,0))*60px)}
+.pl-workspace-page>.pl-main-actions{position:relative;--pl-selected-right:calc(var(--pl-nav-right,58px) + (var(--pl-page-count,3) - 1 - var(--pl-active-index,0))*60px)}
 .pl-workspace-page>.pl-main-actions::before,.pl-workspace-page>.pl-main-actions::after{content:'';position:absolute;top:0;height:1px;background:var(--pl-tab-line);pointer-events:none}
 .pl-workspace-page>.pl-main-actions::before{left:12px;right:calc(var(--pl-selected-right) + 48px)}
 .pl-workspace-page>.pl-main-actions::after{left:calc(100% - var(--pl-selected-right));right:12px}
@@ -235,4 +235,13 @@ html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-pag
 :is(.cl-select-popover,.pv-select-popover,.cl-menu,.cl-citation-locations){mask-image:none!important;scroll-padding-block:5px}
 :is(.cl-select-trigger,.pv-select-trigger,.pl-settings [role=combobox])[aria-expanded=true],
 :is(.cl-select-trigger,.pv-select-trigger)[aria-expanded=true]::before{background:transparent!important;box-shadow:none!important;transition:none!important}
+
+.pl-embedded .pv-reading-modes .pv-mode-options{display:flex!important;grid-template-columns:none!important;gap:2px!important;margin:0!important;padding:0!important;background:transparent!important;border-radius:0!important}
+.pl-embedded .pv-reading-modes .pv-mode-options button{flex:none!important;width:28px!important;height:28px!important;min-height:28px!important;min-width:28px!important;padding:5px!important;margin:0!important}
+.pl-embedded .pv-reading-modes .pv-mode-options button span{display:none!important}
+
+.pl-embedded .pv-reading-modes{gap:4px!important}
+.pl-embedded .pv-reading-modes>span{margin-right:auto}
+.pl-embedded .pv-reading-modes>[data-action=primary]{flex:none!important;width:28px!important;height:28px!important;min-width:28px!important;padding:5px!important}
+.pl-embedded .pv-reading-modes [data-field=primaryLabel]{display:none!important}
 `;

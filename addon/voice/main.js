@@ -73,38 +73,42 @@ var PaperVoice = {
           this.clearSelectionTimers();
         }
       };
-      const key = e => {
-        if(e.target.closest?.('.pv-mode-tools,.pv-translation-tools,.pv-playback-tools')&&!e.altKey&&!e.ctrlKey&&!e.metaKey&&['ArrowUp','ArrowDown','Home','End','Escape','Enter',' '].includes(e.key))return;
-        const transport=e.target.closest?.('[data-action="primary"],[data-action="previous"],[data-action="next"],[data-action="quickPause"],[data-action="quickMode"],[data-action="quickStop"],[data-action="quickTranslate"],[data-action="orb"]');
-        if(e.isComposing||(!transport&&e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],button,[role="button"],[role="menu"],[role="listbox"],[role="combobox"],[role="tree"],[role="slider"],.pv-panel,[data-field="playbackTools"]')))return;
-        if(!transport&&['PageUp','PageDown','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))this.dismissPanel(reader);
-        const active=this.currentReader===reader&&['playing','paused','loading'].includes(this.state);
-        if(!active)return;
-        const action=PaperVoiceShortcuts.match(this.get('shortcuts',null),e,Zotero.isMac);
-        if(!action)return;
-        e.preventDefault();e.stopPropagation();
-        if(e.repeat)return;
-        if(action==='pause')this.togglePause();
-        else if(action==='stop')this.stop();
-        else if(action==='translation')this.toggleTranslation();
-        else if(action==='readTranslation')this.setReadTranslation(!this.get('readTranslation',false));
-        else if(this.currentUnit){
-          const navigation={previousSentence:[-1,'sentence'],replaySentence:[0,'sentence'],nextSentence:[1,'sentence'],previousParagraph:[-1,'paragraph'],replayParagraph:[0,'paragraph'],nextParagraph:[1,'paragraph']}[action];
-          if(navigation)this.navigateScope(navigation[0],reader,navigation[1]);
-        }
-      };
+      const key = e => this.handlePlaybackShortcut(e,reader);
       d.addEventListener('pointerdown', down, true);d.addEventListener('wheel',wheel,{capture:true,passive:true});d.defaultView.addEventListener('keydown', key, true);
       hooks.push({doc:d, down, key, wheel});
     };
-    hookDocument(doc);
-    for (const frame of doc.querySelectorAll('iframe')) {
-      try { if (frame.contentDocument) hookDocument(frame.contentDocument); } catch (_) {}
-    }
+    const scan=d=>{hookDocument(d);for(const frame of d.querySelectorAll('iframe,browser')){try{if(frame.contentDocument)scan(frame.contentDocument);}catch(_){}}};
+    scan(doc);
+    // Zotero's PDF browser can expose no contentDocument through the outer
+    // iframe wrapper. Use the Reader view's window for both split panes.
+    for(const view of [reader._internalReader?._primaryView,reader._internalReader?._secondaryView])try{if(view?._iframeWindow?.document)scan(view._iframeWindow.document);}catch(_){}
+    // Key events do not bubble across Reader/PDF/settings iframe boundaries.
+    try{for(let win=doc.defaultView;win?.frameElement;){win=win.frameElement.ownerDocument.defaultView;hookDocument(win.document);}}catch(_){}
+    if(reader._window?.document)hookDocument(reader._window.document);
     if (false) { // The product owns the single shared Reader entry.
       const toolbar = doc.querySelector('.toolbar .end') || doc.querySelector('.toolbar');
       if (toolbar) toolbar.append(this.toolbarButton(doc, reader));
     }
     this.watchToolbar(doc,reader);this.normalizeToolbar(doc);
+  },
+  handlePlaybackShortcut(e,reader=this.currentReader) {
+    if(e.defaultPrevented||e.isComposing||this.currentReader!==reader||!['playing','paused','loading'].includes(this.state))return;
+    const target=e.target;
+    // Editors, choice widgets and shortcut recording keep their own keys.
+    if(target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="menu"],[role="listbox"],[role="combobox"],[role="tree"],[role="slider"],[role="tab"],[data-shortcut],.pv-select-trigger,.cl-select-trigger'))return;
+    const transport=target.closest?.('[data-caption-action],[data-caption-scope],[data-caption-mode],[data-action="primary"],[data-action="previous"],[data-action="next"],[data-action="quickPause"],[data-action="quickMode"],[data-action="quickStop"],[data-action="quickTranslate"],[data-action="orb"]');
+    if(!transport&&target.closest?.('button,[role="button"],.pv-panel,[data-field="playbackTools"]'))return;
+    const action=PaperVoiceShortcuts.match(this.get('shortcuts',null),e,Zotero.isMac);
+    if(!action)return;
+    e.preventDefault();e.stopPropagation();if(e.repeat)return;
+    if(action==='pause')this.togglePause();
+    else if(action==='stop')this.stop();
+    else if(action==='translation')this.toggleTranslation();
+    else if(action==='readTranslation')this.setReadTranslation(!this.get('readTranslation',false));
+    else if(this.currentUnit){
+      const navigation={previousSentence:[-1,'sentence'],replaySentence:[0,'sentence'],nextSentence:[1,'sentence'],previousParagraph:[-1,'paragraph'],replayParagraph:[0,'paragraph'],nextParagraph:[1,'paragraph']}[action];
+      if(navigation)this.navigateScope(navigation[0],reader,navigation[1]);
+    }
   },
   dismissPanel(reader) {try{const ui=this.panels.get(reader);if(ui&&!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false')ui.action('close').click();}catch(_){this.panels.delete(reader);}},
   detachReader(reader) {

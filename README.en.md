@@ -6,7 +6,7 @@
 
 Paper Loom keeps the next step close to the paper you are reading. Listen to a difficult paragraph, compare its translation, inspect a cited paper’s abstract, save it for later, and explore the author’s collaborations without leaving Zotero.
 
-![Paper Loom listening controls in Zotero](docs/images/listening-en.png)
+![Paper Loom listening controls in Zotero](docs/images/caption-controls-en.png)
 
 
 ## Get started
@@ -14,7 +14,7 @@ Paper Loom keeps the next step close to the paper you are reading. Listen to a d
 1. Download **paper-loom-1.0.1.xpi** from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest).
 2. In Zotero, choose **Tools → Plugins → gear → Install Plugin From File…** and select the XPI. Restart if Zotero asks.
 3. Click the **small book in the left toolbar**, then **Settings → Voices & engine → Download engine & voices**. Paper Loom detects your operating system and processor.
-4. Open a PDF. The floating book appears automatically; select text to listen or click it to open the listening window, with bottom icons for papers, authors, and settings.
+4. Open a PDF. Select text to listen, or click the floating book to open Settings. Bottom icons switch to papers and author networks.
 
 One XPI installs the plugin. Speech is an optional in-plugin download; references, reading lists, translation, and author tools do not require it. You do not need Python, a terminal, or a separate application.
 
@@ -33,7 +33,7 @@ See [installation and updates](docs/INSTALL.en.md) for platform details, importi
 - **Selection, sentence, paragraph, and full text:** start at the right scale, repeat a sentence or paragraph, pause and resume, and move backward or forward.
 - **Reading-aware text handling:** multi-column order, cross-page passages, citation markers, running headers, and configurable figure-caption reading.
 - **Four speech languages, 14 voices:** English, Mandarin Chinese, Japanese, and French, including US and UK English choices. Natural-sounding local TTS, not human recordings.
-- **A compact companion:** hover over the floating book for quick controls, click for the listening window, and drag it out of the way. Customize shortcuts and restore your listening position.
+- **Compact reading controls:** hover over the translation caption for two rows of playback, mode, and language controls. Click the floating book for Settings; customize shortcuts and restore your reading position.
 
 ## Understand a passage and its references
 
