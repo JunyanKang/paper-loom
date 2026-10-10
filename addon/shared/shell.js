@@ -17,19 +17,16 @@ var PaperLoom = {
     this.references?.windows.set(win,item);
   },
   removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
+  mainNavigation(doc,reader){
+    const nav=this.el(doc,'nav',null,'pl-main-actions');nav.setAttribute('aria-label','Paper Loom');
+    const entries=[['listening','headphones','听读',()=>this.voice.showPanel(reader)],['references','references','引文与稍后读',()=>this.references.showPanel(reader,{view:reader.itemID?'references':'queue'})],['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];
+    for(const [id,icon,label,run] of entries){const button=this.referencesScope.CiteLensUI.iconButton(doc,label,icon,run);button.dataset.loomPage=id;button.setAttribute('aria-current',id==='listening'?'page':'false');nav.append(button);}return nav;
+  },
   showHome(reader=this.currentReader(),doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document) {
     if(!this.started){this.showConflicts(doc);return;}
-    this.style(doc);doc.querySelector('.pl-home')?._plClose?.();
-    const U=this.referencesScope.CiteLensUI,dialog=U.dialog(doc,'Paper Loom',{className:'pl-home',reader}),{root,frame,close}=dialog;frame._plClose=close;
-    root.append(this.el(doc,'p','从眼前的论文，读、听、发现。','pl-intro'));
-    const grid=this.el(doc,'div',null,'pl-entry-grid');root.append(grid);
-    const entry=(id,icon,title,detail,action)=>{const b=this.button(doc,'',async()=>{await action();});b.dataset.loomPage=id;const glyph=this.referencesScope.CiteLensUI.iconButton(doc,title,icon,()=>{}).querySelector('svg');glyph.classList.add('pl-entry-icon');b.append(glyph,this.el(doc,'strong',title),this.el(doc,'span',detail));grid.append(b);};
-    entry('listening','headphones','听读','划选 · 单句 · 段落 · 全文',()=>{if(reader)this.voice.showPanel(reader);else this.message('打开一篇 PDF，即可从划选或全文开始听读。',doc);});
-    entry('references','references','引文与稍后读','查阅摘要，保存和追踪研究线索',()=>{if(reader)this.references.showPanel(reader);else this.showQueue(doc);});
-    entry('network','authors','朋友圈与学术履历','探索作者、合作论文与公开经历',()=>this.references.showNetwork(reader,{doc}));
-    entry('settings','settings','设置','声音下载 · 翻译 · 外观 · 快捷键',()=>this.showSettings(reader,doc));
-    const status=this.el(doc,'p',LoomRuntime.state.message,'pl-runtime-summary');status.dataset.loomStatus='true';root.append(status);
-    return dialog;
+    this.style(doc);
+    if(!reader){this.workspaceReaders||=new WeakMap();reader=this.workspaceReaders.get(doc);if(!reader){reader={_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};this.workspaceReaders.set(doc,reader);}}
+    this.voice.showPanel(reader);return this.voice.ensurePanel(reader);
   },
   showQueue(doc=Zotero.getMainWindow().document) {
     this.queueReaders||=new WeakMap();let reader=this.queueReaders.get(doc);if(!reader){reader={_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};this.queueReaders.set(doc,reader);}
@@ -68,6 +65,7 @@ var PaperLoom = {
 };
 var LoomShellStyle = [
   '.pl-navigation{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px;margin:0 12px 10px;flex:none;border-radius:12px;background:var(--cl-soft,var(--pv-soft,#edf1e9));font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}.pl-navigation>button{appearance:none;min-width:0;min-height:34px!important;height:auto!important;padding:6px 3px!important;margin:0;border:0;border-radius:8px;background:transparent!important;color:var(--cl-muted,var(--pv-muted,#526461));font:inherit!important;font-weight:500!important;line-height:1.4!important;white-space:nowrap!important;cursor:pointer}.pl-navigation>button[aria-current=page]{background:var(--cl-bg,var(--pv-paper,#fff))!important;color:var(--cl-accent,var(--pv-accent,#176956));box-shadow:0 1px 4px #0000000d;font-weight:650!important}.pv-panel>.pl-navigation{margin:0 0 16px}.pv-panel:has(>.pl-navigation)>.pv-header{margin-bottom:12px}.pl-navigation>button:focus-visible{outline:2px solid var(--cl-accent,var(--pv-accent,#176956));outline-offset:1px}',
+  '.pl-main-actions{display:flex;gap:2px;align-items:center;flex:none;margin-left:auto}.pl-main-actions button{display:flex;align-items:center;justify-content:center;width:28px!important;height:30px!important;min-width:28px!important;min-height:30px!important;padding:5px!important;border-radius:8px!important}.pl-main-actions svg{width:18px;height:18px;flex:none}.pl-main-actions button[aria-current=page]{color:var(--pv-accent);background:var(--pv-soft)}.pv-header:has(.pl-main-actions){gap:8px;margin-bottom:16px}.pv-header:has(.pl-main-actions) .pv-brand{font-size:17px;white-space:nowrap}.pv-header:has(.pl-main-actions) .pv-brand-icon{width:27px;height:27px}.pv-header:has(.pl-main-actions) .pv-brand>span{display:none!important}.pv-header:has(.pl-main-actions)>[data-action=close],.pv-header:has(.pl-main-actions)>[data-action=settings]{display:none!important}',
   '.pl-entry-icon{width:25px;height:25px;flex:none;color:var(--cl-accent)}.pl-home-back{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px!important;height:32px!important;min-height:32px!important;padding:6px!important}.pl-home-back svg{width:20px;height:20px;flex:none}.pl-reader-workspace .cl-header-tools>[data-icon=settings],.pl-reader-workspace .cl-header-tools>[data-network-entry],.pl-reader-workspace .cl-header-tools>[data-list-entry]{display:none!important}.pl-reader-workspace .pv-header>[data-action=settings]{display:none!important}',
   '.pl-home{width:min(500px,calc(100vw - 32px))!important}.pl-intro{margin:0 0 18px;color:var(--cl-muted,#526461);font-size:14px}',
   '.pl-home .pl-entry-grid>button{height:auto!important;min-height:100px!important;white-space:normal!important;line-height:1.5!important;justify-content:flex-start!important;padding:16px!important}.pl-home .pl-entry-grid>button>strong,.pl-home .pl-entry-grid>button>span{display:block;height:auto;white-space:normal}.pl-entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pl-entry-grid>button{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:18px;border:1px solid var(--cl-line,#d9e3dc);border-radius:12px;background:var(--cl-paper,#f4f6f0);color:var(--cl-ink,#263b35);text-align:left;cursor:pointer}.pl-entry-grid>button:hover{background:var(--cl-soft,#dbe9e2)}.pl-entry-grid strong{font-size:15px}.pl-entry-grid span{font-size:12px;line-height:1.6;color:var(--cl-muted,#56675f)}',

@@ -1897,3 +1897,5 @@ Object.assign(CiteLensI18n.catalogs.en,{'听摘要':'Listen','文献记录':'Pap
 Object.assign(CiteLensI18n.catalogs.en,{"听读":"Read","引文":"Papers","朋友圈":"Authors","设置":"Settings","导入并启用":"Import & enable","检测到旧版插件正在运行。":"An earlier plugin is running.","导入设置后将停用旧插件，原有数据会保留。":"Import your settings and disable the earlier plugin. Your original data is kept."});
 
 Object.assign(CiteLensI18n.catalogs.en,{'返回首页':'Back to home','打开或收起 Paper Loom':'Open or collapse Paper Loom'});
+
+Object.assign(CiteLensI18n.catalogs.en,{'返回听读':'Back to listening'});

@@ -14,7 +14,7 @@ Paper Loom keeps the next step close to the paper you are reading. Listen to a d
 1. Download **paper-loom-1.0.1.xpi** from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest).
 2. In Zotero, choose **Tools → Plugins → gear → Install Plugin From File…** and select the XPI. Restart if Zotero asks.
 3. Click the **small book in the left toolbar**, then **Settings → Voices & engine → Download engine & voices**. Paper Loom detects your operating system and processor.
-4. Open a PDF. The floating book appears automatically; select text to listen or click it to open Home for listening, papers, authors, and settings.
+4. Open a PDF. The floating book appears automatically; select text to listen or click it to open the listening window, with upper-right icons for papers, authors, and settings.
 
 One XPI installs the plugin. Speech is an optional in-plugin download; references, reading lists, translation, and author tools do not require it. You do not need Python, a terminal, or a separate application.
 
@@ -33,7 +33,7 @@ See [installation and updates](docs/INSTALL.en.md) for platform details, importi
 - **Selection, sentence, paragraph, and full text:** start at the right scale, repeat a sentence or paragraph, pause and resume, and move backward or forward.
 - **Reading-aware text handling:** multi-column order, cross-page passages, citation markers, running headers, and configurable figure-caption reading.
 - **Four speech languages, 14 voices:** English, Mandarin Chinese, Japanese, and French, including US and UK English choices. Natural-sounding local TTS, not human recordings.
-- **A compact companion:** hover over the floating book for quick controls, click for Home, and drag it out of the way. Customize shortcuts and restore your listening position.
+- **A compact companion:** hover over the floating book for quick controls, click for the listening window, and drag it out of the way. Customize shortcuts and restore your listening position.
 
 ## Understand a passage and its references
 

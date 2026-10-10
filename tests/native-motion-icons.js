@@ -2,6 +2,7 @@ const loomQAPath=PathUtils.parent(Services.dirsvc.get('ProfD',Components.interfa
 if(!Zotero.Reader._readers.some(r=>r._tabID||r.tabID)){const a=await Zotero.Attachments.importFromFile({file:PathUtils.join(loomQAPath,'docs','demo','reading-demo.pdf')});const reader=await Zotero.Reader.open(a.id);await reader._initPromise;for(let i=0;i<100&&!L.voice.panels.has(reader);i++)await Zotero.Promise.delay(100);await Zotero.Promise.delay(800);}
 const wait=ms=>Zotero.Promise.delay(ms),checks=[],check=(name,ok,detail)=>{checks.push({name,ok:!!ok,detail});if(!ok)throw Error(name);},V=L.voice,U=L.referencesScope.CiteLensUI;
 const r=Zotero.Reader._readers.find(r=>r._tabID||r.tabID),doc=r._iframeWindow.document,win=doc.defaultView,ui=V.ensurePanel(r),C=L.voiceScope.PaperVoiceCompanion,base=PathUtils.parent(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path),out=PathUtils.join(base,PathUtils.filename(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path).replace('qa-profile','test-results'));
+Zotero.getMainWindow().Zotero_Tabs.select(r._tabID||r.tabID);await wait(250);
 const before=V.get('companionInteractions',true),motionPref=Services.prefs.prefHasUserValue('ui.prefersReducedMotion')?Services.prefs.getIntPref('ui.prefersReducedMotion'):null;Services.prefs.setIntPref('ui.prefersReducedMotion',0);V.set('companionInteractions',true);await wait(200);
 const settle=async()=>{await U.pageScopes.get(doc)?.queue;await ui.waitMotion();for(let i=0;i<80&&doc.querySelector('[data-dock-motion]');i++)await wait(50);await wait(160);};
 try{
@@ -13,7 +14,7 @@ try{
  }
  check('four functions have different visible performances',new Set(hashes).size===4,{distinct:new Set(hashes).size});
  await IOUtils.write(PathUtils.join(out,'motion-actual-size.png'),Uint8Array.from(win.atob(board.toDataURL().split(',')[1]),v=>v.charCodeAt(0)));
- const bus=r._internalReader._primaryView._iframeWindow.PDFViewerApplication.eventBus;
+ const bus=r._internalReader._primaryView._iframeWindow.PDFViewerApplication.eventBus;bus.dispatch('pagechanging',Components.utils.cloneInto({pageNumber:1},r._internalReader._primaryView._iframeWindow));await wait(1200);
  bus.dispatch('pagechanging',Components.utils.cloneInto({pageNumber:2},r._internalReader._primaryView._iframeWindow));await wait(330);check('forward page has dedicated motion',surface.dataset.gesture==='page-forward');bus.dispatch('pagechanging',Components.utils.cloneInto({pageNumber:1},r._internalReader._primaryView._iframeWindow));await wait(330);check('backward page has different motion',surface.dataset.gesture==='page-backward');await wait(1200);
  const boxes=[];V.showPanel(r);await settle();boxes.push(ui.panel.getBoundingClientRect().toJSON());
  const refs=L.references.showPanel(r);await settle();boxes.push(refs.getBoundingClientRect().toJSON());

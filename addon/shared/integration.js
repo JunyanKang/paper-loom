@@ -59,7 +59,7 @@ Object.assign(PaperLoom,{
         const reader=options.reader,doc=frame.ownerDocument;
         if(reader&&!frame.classList.contains('pl-home')){
           const head=frame.querySelector(':scope>header');
-          if(head&&!head.querySelector('.pl-home-back')){const back=U.iconButton(doc,'返回首页','back',()=>this.showHome(reader,doc));back.classList.add('pl-home-back');(head.querySelector('.cl-row')||head).prepend(back);}
+          if(head&&!head.querySelector('.pl-home-back')){const back=U.iconButton(doc,'返回听读','back',()=>this.showHome(reader,doc));back.classList.add('pl-home-back');(head.querySelector('.cl-row')||head).prepend(back);}
         }
         if(reader){
           const context=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':frame.classList.contains('pl-home')?'ready':'references';
@@ -75,9 +75,9 @@ Object.assign(PaperLoom,{
         ui.root.querySelector('.pv-brand-icon').src=this.assetURI+'loom.png';
         ui.root.querySelector('.pv-orb>.pv-mascot:not(.pv-mascot-reading)').src=this.assetURI+'loom.png';
         if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){
-          const doc=ui.root.ownerDocument,back=U.iconButton(doc,'返回首页','back',()=>this.showHome(reader,doc));back.classList.add('pl-home-back','pv-icon-button');back.querySelector('span').hidden=true;ui.panel.querySelector('.pv-header').prepend(back);ui.action('settings').hidden=true;
+          const doc=ui.root.ownerDocument;ui.panel.querySelector('.pv-header').append(this.mainNavigation(doc,reader));ui.action('settings').hidden=true;ui.action('close').hidden=true;ui.panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();e.stopPropagation();V.dismissPanel(reader);}});
           ui.action('orb').setAttribute('aria-label','打开或收起 Paper Loom');ui.action('orb').title='Paper Loom';
-          ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
+          ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
           RS.CiteLensI18n.install(doc);
         }
         const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=()=>{try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);}catch(_){}dispose();};refit();}

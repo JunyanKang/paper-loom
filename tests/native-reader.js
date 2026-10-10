@@ -17,7 +17,7 @@ const pdf=reader._internalReader._primaryView._iframeWindow.PDFViewerApplication
 check('actual PDF character data is available',processed.pages[0]?.chars?.length>100);
 const units=await L.voice.documentUnits(reader);check('cross-column full-text reading units',units.some(u=>u.text.includes('retinal cells')&&u.text.includes('photoreceptors')));
 check('reference extraction completes',Array.isArray(await L.references.references(reader)));
-check('single floating Reader entry with Home navigation',!doc.querySelector('[data-cite-lens=toolbar],[data-paper-voice=toolbar]')&&!!L.voice.panels.get(reader)?.root.querySelector('.pl-home-back'));
+check('single floating Reader entry with compact header navigation',!doc.querySelector('[data-cite-lens=toolbar],[data-paper-voice=toolbar]')&&!!L.voice.panels.get(reader)?.root.querySelector('.pl-main-actions'));
 const panel=L.voice.ensurePanel(reader);L.voice.showPanel(reader);
 check('four reading modes',panel.root.querySelectorAll('[data-mode]').length===4);
 check('companion quick controls retained',!!panel.action('quickPause')&&!!panel.action('quickPrevious')&&!!panel.action('quickTranslate'));

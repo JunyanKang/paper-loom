@@ -4,7 +4,7 @@
 
 ## Open and collapse
 
-Click the book in the library toolbar or the lower-right corner of a PDF to open Home. Home provides listening, references and reading list, author networks, and settings. Inside a feature, use the upper-left arrow to return Home or the close button to collapse. Each page shows only its own controls. Hover over the book for listening shortcuts and drag to reposition it. Clicking the book while a panel is open collapses that panel.
+Click the book in the library toolbar or the lower-right corner of a PDF to open the listening window directly. The upper-right headphones, papers, authors, and gear icons open listening, references and the reading list, author networks, and settings. Hover over an icon for its name. Other pages provide an upper-left return button and only their own controls. Click the book again or press Esc to collapse. Hover over the book for listening shortcuts and drag to reposition it.
 
 Each document shows one expanded main panel at a time: listening, references, network, or settings. Switching panels collapses the previous one without stopping speech. Reopening references or the network resumes the existing view. PDF tabs and separate reader windows keep their own panel states. Detail and editing dialogs open above their parent and return to it when closed.
 
