@@ -363,7 +363,7 @@ button[data-cite-lens]:is(:hover,:focus-visible){background:var(--cl-soft);color
 .cl-native-host{box-shadow:var(--cl-shadow),inset 0 0 0 1px var(--cl-surface-rim),inset 0 1px 0 var(--cl-rim-light)!important}
 
 /* Quiet actions share one hit area; selection and primary actions keep their emphasis. */
-:is(.cl-root,.cl-dialog,.cl-card,.cl-floating,.cl-summary,.cl-menu) button:is(.cl-icon-button,.cl-more,.cl-dismiss):not(.cl-primary):not([aria-pressed=true]){background:transparent!important}
+:is(.cl-root,.cl-dialog,.cl-card,.cl-floating,.cl-summary,.cl-menu) button:is(.cl-icon-button,.cl-more,.cl-dismiss):not(.cl-primary):not([aria-pressed=true]):not([aria-selected=true]):not([aria-current=page]){background:transparent!important}
 :is(.cl-root,.cl-dialog,.cl-card,.cl-floating,.cl-summary,.cl-menu) button:is(.cl-icon-button,.cl-more,.cl-dismiss):not(.cl-primary):is(:hover,:focus-visible){background:color-mix(in srgb,var(--cl-accent) 10%,transparent)!important}
 :is(.cl-card-tools,.cl-summary-modes,.pn-model-controls,.pn-inspector-tools){align-items:center}
 :is(.cl-card-tools,.cl-summary-modes,.pn-model-controls,.pn-inspector-tools)>.cl-icon-button{width:var(--cl-control-height);height:var(--cl-control-height);min-height:var(--cl-control-height);padding:4px;display:inline-flex;align-items:center;justify-content:center}

@@ -13,4 +13,15 @@ var LoomDesignStyle = `
 :is(.cl-root,.cl-dialog,.pl-conflicts) :is(button,input,select):focus-visible{outline:2px solid var(--cl-accent);outline-offset:2px;box-shadow:none}
 @media(max-width:600px){.cl-dialog-header,.cl-header{padding:12px 14px}.cl-dialog-body{padding:14px}.pn-map-controls{display:flex;flex-wrap:wrap}.pn-map-controls>select,.pn-map-controls>.cl-select-trigger{flex:1;min-width:100px}.pn-map-search{flex:1 1 100%;min-width:0}.pn-map-inspector{width:44%;max-width:44%;padding:10px}.pl-navigation{margin-left:8px;margin-right:8px}.pn-career-identity h2{font-size:19px}}
 @media(max-height:560px){.pv-shell .pv-panel{padding:14px;max-height:calc(100vh - 96px)}.pv-shell .pv-preview{margin:10px 0}.pv-shell .pv-transport{margin:10px 0}.pl-navigation>button{min-height:30px!important}.pl-reader-workspace .cl-root{top:12px}}
+
+/* One persistent header vocabulary across the four workspaces. */
+.pl-workspace-page>header .cl-header-tools,.pl-workspace-page>header .cl-dismiss,.pl-workspace-page>header .pl-home-back{display:none!important}
+.pl-workspace-page>header .cl-brand,.pl-workspace-page>header h2{flex:1;justify-content:flex-start;text-align:left;min-width:0;white-space:nowrap}
+.pl-workspace-page>header .cl-row,.pl-workspace-page>.cl-dialog-header{display:flex;align-items:center;gap:8px}
+.pl-main-actions button[aria-current=page]{background:var(--cl-accent,var(--pv-accent))!important;color:var(--cl-on-accent,var(--pv-primary-ink))!important}
+/* Selection stays distinct from both idle and hover, including icon-only tabs. */
+:is(.cl-root,.cl-dialog,.cl-card,.cl-summary) :is(.cl-tabs,.pn-task-tabs,.pn-map-views,.pn-career-filters,.pn-ref-filters,.pn-topic-chips,.cl-summary-modes)>button:is([aria-selected=true],[aria-pressed=true]){background:var(--cl-accent)!important;color:var(--cl-on-accent)!important;border-color:transparent;box-shadow:0 2px 5px #00000012;font-weight:650}
+.pv-shell :is(.pv-mode-options,.pv-settings-tabs)>button:is([aria-pressed=true],[aria-selected=true]){background:var(--pv-accent)!important;color:var(--pv-primary-ink)!important;box-shadow:0 2px 5px #00000012}
+.pv-shell .pv-mode-options>button[aria-pressed=true] .pv-icon{filter:var(--pv-primary-filter);opacity:1}
+.pv-shell .pv-mode-options>button[aria-pressed=true]::after{display:none}
 `;

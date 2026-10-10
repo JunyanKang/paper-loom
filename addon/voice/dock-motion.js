@@ -20,7 +20,7 @@ var PaperVoiceDockMotion = {
  mesh(panel,orb) {
   const doc=panel.ownerDocument,win=doc.defaultView,b=panel.getBoundingClientRect(),o=orb.getBoundingClientRect();
   const anchor={x:o.x+o.width/2-b.x,y:o.y+o.height*.54-b.y},pad=32;
-  const source=doc.createElement('canvas'),ratio=Math.min(2,win.devicePixelRatio||1);
+  const source=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas'),ratio=Math.min(2,win.devicePixelRatio||1);
   source.width=Math.ceil((b.width+pad*2)*ratio);source.height=Math.ceil((b.height+pad*2)*ratio);
   const ctx=source.getContext('2d'),style=win.getComputedStyle(panel),radius=parseFloat(style.borderRadius)||22;
   if(!ctx?.drawWindow)throw Error('Window capture unavailable');
@@ -29,20 +29,20 @@ var PaperVoiceDockMotion = {
   // Capture only the actual foreground (with its user/theme alpha), never a
   // flattened screenshot containing PDF text. All overrides are restored in
   // the same task before a browser frame can be displayed.
-  const isolation=doc.createElement('style');
-  isolation.textContent='html,body{background:transparent!important}body > :not(.pv-shell){opacity:0!important}.pv-shell > :not(.pv-panel){opacity:0!important}.pv-panel{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
-  doc.head.append(isolation);
+  const isolation=doc.createElementNS('http://www.w3.org/1999/xhtml','style');
+  isolation.textContent='html,body{background:transparent!important}:is(body,window) > :not(.pv-shell){opacity:0!important}.pv-shell > :not(.pv-panel){opacity:0!important}.pv-panel{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
+  (doc.head||doc.documentElement).append(isolation);
   try{ctx.drawWindow(win,b.x-pad,b.y-pad,b.width+pad*2,b.height+pad*2,'rgba(0,0,0,0)');}finally{isolation.remove();}
   const left=Math.floor(Math.min(b.x-pad,o.x-pad)),top=Math.floor(Math.min(b.y-pad,o.y-pad));
   const width=Math.ceil(Math.max(b.right+pad,o.right+pad)-left),height=Math.ceil(Math.max(b.bottom+pad,o.bottom+pad)-top);
-  const blurPad=72,background=doc.createElement('canvas'),blurred=doc.createElement('canvas');
+  const blurPad=72,background=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas'),blurred=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas');
   background.width=blurred.width=Math.ceil((width+blurPad*2)*ratio);background.height=blurred.height=Math.ceil((height+blurPad*2)*ratio);
   const bg=background.getContext('2d'),visibility=panel.style.visibility;bg.scale(ratio,ratio);panel.style.visibility='hidden';
   try{bg.drawWindow(win,left-blurPad,top-blurPad,width+blurPad*2,height+blurPad*2,'rgba(0,0,0,0)');}finally{panel.style.visibility=visibility;}
   const blurredContext=blurred.getContext('2d');
   blurredContext.filter=(style.backdropFilter||'none').replace(/([\d.]+)px/g,(_,n)=>(Number(n)*ratio)+'px');
   blurredContext.drawImage(background,0,0);background.width=background.height=0;
-  const canvas=doc.createElement('canvas');canvas.className='pv-dock-motion';canvas.setAttribute('aria-hidden','true');
+  const canvas=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas');canvas.className='pv-dock-motion';canvas.setAttribute('aria-hidden','true');
   canvas.style.cssText=`position:fixed;left:${left}px;top:${top}px;width:${width}px;height:${height}px;pointer-events:none;z-index:20;`;
   canvas.width=Math.ceil(width*ratio);canvas.height=Math.ceil(height*ratio);
   const gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:true,depth:false,stencil:false});

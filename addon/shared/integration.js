@@ -57,9 +57,10 @@ Object.assign(PaperLoom,{
       const page=RS.CiteLensUI.page.bind(RS.CiteLensUI);
       RS.CiteLensUI.page=(frame,options={})=>{
         const reader=options.reader,doc=frame.ownerDocument;
-        if(reader&&!frame.classList.contains('pl-home')){
-          const head=frame.querySelector(':scope>header');
-          if(head&&!head.querySelector('.pl-home-back')){const back=U.iconButton(doc,'返回听读','back',()=>this.showHome(reader,doc));back.classList.add('pl-home-back');(head.querySelector('.cl-row')||head).prepend(back);}
+        if(frame.matches('.cl-root,.cl-settings,.pn-map-window')){
+          const active=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-map-window')?'network':'references';
+          const head=frame.querySelector(':scope>header'),workspaceReader=reader||this.workspaceReaders?.get(doc);
+          if(head&&workspaceReader&&!head.querySelector('.pl-main-actions')){frame.classList.add('pl-workspace-page');(head.querySelector('.cl-row')||head).append(this.mainNavigation(doc,workspaceReader,active));}
         }
         if(reader){
           const context=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':frame.classList.contains('pl-home')?'ready':'references';

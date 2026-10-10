@@ -75,12 +75,12 @@ var PaperVoiceUI = {
  },
  syncSelects(root) {root._pvSelects?.sync();},
  installTooltips(root,controller) {
-  const doc=root.ownerDocument,win=doc.defaultView,tip=doc.createElement('div');tip.className='pv-tooltip';tip.setAttribute('role','tooltip');tip.id='pv-tooltip';tip.hidden=true;root.append(tip);
+  const doc=root.ownerDocument,win=doc.defaultView,tip=doc.createElementNS('http://www.w3.org/1999/xhtml','div');tip.className='pv-tooltip';tip.setAttribute('role','tooltip');tip.id='pv-tooltip';tip.hidden=true;root.append(tip);
   let target=null,timer=null,description=null;
   const owns=el=>el?.closest?.('[data-paper-voice]')&&!!el.closest('[data-paper-voice="shell"],[data-paper-voice="selection-card"],[data-paper-voice="toolbar"],[data-paper-voice="selection"],[data-paper-voice="translation"]');
   const collect=el=>{if(!owns(el))return;if(el.matches('[data-paper-voice=toolbar],[data-action=settings],[data-action=close],[data-action=llmBack],[data-action=orb]')){delete el.dataset.pvTooltip;el.removeAttribute('title');return;}const hasTitle=el.hasAttribute('title');if(!hasTitle&&el.dataset.pvTooltip)return;const text=hasTitle?el.getAttribute('title'):el.matches('button,a')&&!el.textContent.trim()?el.getAttribute('aria-label'):null;if(text===null)return;const labelled=el.matches('[data-theme-choice],[data-mode],[data-settings-tab]')||el.textContent.trim()===text||el.closest('.pv-panel')&&el.matches('button')&&!el.matches('.pv-select-trigger,[data-action=llmRemoveKey]')&&!!el.textContent.trim();if(text&&!labelled)el.dataset.pvTooltip=text;else delete el.dataset.pvTooltip;if(hasTitle)el.removeAttribute('title');};
-  const scan=el=>{collect(el);el.querySelectorAll?.('[title],[aria-label]').forEach(collect);};scan(doc.body);
-  const observer=new win.MutationObserver(records=>{for(const rec of records){if(rec.type==='attributes')collect(rec.target);else rec.addedNodes.forEach(scan);}});observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:['title','aria-label']});
+  const scan=el=>{collect(el);el.querySelectorAll?.('[title],[aria-label]').forEach(collect);};scan(doc.body||doc.documentElement);
+  const observer=new win.MutationObserver(records=>{for(const rec of records){if(rec.type==='attributes')collect(rec.target);else rec.addedNodes.forEach(scan);}});observer.observe(doc.body||doc.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['title','aria-label']});
   const hide=()=>{win.clearTimeout(timer);if(target){if(description===null)target.removeAttribute('aria-describedby');else target.setAttribute('aria-describedby',description);}target=null;PaperVoiceUI.visibility(tip,false);};
   const show=el=>{
    if(el.closest('[data-paper-voice=toolbar]')||!el.isConnected||el.matches(':disabled')||el.getAttribute('aria-expanded')==='true')return;const value=el.querySelector('.pv-select-value');if(value&&value.scrollWidth<=value.clientWidth+1)return;
@@ -100,7 +100,7 @@ var PaperVoiceUI = {
  },
  installSelects(root,controller) {
   const doc=root.ownerDocument,win=doc.defaultView,entries=[];
-  const menu=doc.createElement('div');menu.className='pv-select-popover';menu.dataset.field='selectPopover';menu.hidden=true;menu.setAttribute('role','listbox');root.append(menu);
+  const menu=doc.createElementNS('http://www.w3.org/1999/xhtml','div');menu.className='pv-select-popover';menu.dataset.field='selectPopover';menu.hidden=true;menu.setAttribute('role','listbox');root.append(menu);
   let active=null,index=-1,typeAhead='',typeTimer=null;
   const close=()=>{if(active){active.button.setAttribute('aria-expanded','false');active.button.removeAttribute('aria-activedescendant');}active=null;PaperVoiceUI.visibility(menu,false);};
   const choose=i=>{if(!active)return;const entry=active,option=entry.select.options[i];if(!option||option.disabled)return;entry.select.selectedIndex=i;close();entry.select.dispatchEvent(new win.Event('change',{bubbles:true}));entry.button.focus();sync();};
@@ -108,17 +108,17 @@ var PaperVoiceUI = {
   const open=entry=>{
    if(entry.select.disabled)return;
    close();active=entry;menu.replaceChildren();menu.id=entry.button.id+'-list';entry.button.setAttribute('aria-controls',menu.id);entry.button.setAttribute('aria-expanded','true');menu.setAttribute('aria-label',entry.button.getAttribute('aria-label')||entry.button.textContent);
-   Array.from(entry.select.options).forEach((option,i)=>{const row=doc.createElement('div');row.id=menu.id+'-'+i;row.dataset.index=String(i);row.setAttribute('role','option');row.setAttribute('aria-selected',String(option.selected));row.setAttribute('aria-disabled',String(option.disabled));const label=doc.createElement('span');label.textContent=option.textContent;row.append(label);const mark=doc.createElement('span');mark.className='pv-select-check';mark.textContent=option.selected?'✓':'';mark.setAttribute('aria-hidden','true');row.append(mark);row.onpointermove=()=>highlight(i);row.onpointerdown=e=>e.preventDefault();row.onclick=()=>choose(i);menu.append(row);});
+   Array.from(entry.select.options).forEach((option,i)=>{const row=doc.createElementNS('http://www.w3.org/1999/xhtml','div');row.id=menu.id+'-'+i;row.dataset.index=String(i);row.setAttribute('role','option');row.setAttribute('aria-selected',String(option.selected));row.setAttribute('aria-disabled',String(option.disabled));const label=doc.createElementNS('http://www.w3.org/1999/xhtml','span');label.textContent=option.textContent;row.append(label);const mark=doc.createElementNS('http://www.w3.org/1999/xhtml','span');mark.className='pv-select-check';mark.textContent=option.selected?'✓':'';mark.setAttribute('aria-hidden','true');row.append(mark);row.onpointermove=()=>highlight(i);row.onpointerdown=e=>e.preventDefault();row.onclick=()=>choose(i);menu.append(row);});
    menu.style.maxHeight='230px';menu.style.width='max-content';menu.style.maxWidth=Math.max(80,win.innerWidth-16)+'px';menu.style.left='8px';menu.style.top='8px';PaperVoiceUI.visibility(menu,true);
    const b=entry.button.getBoundingClientRect(),width=Math.min(Math.max(menu.offsetWidth,b.width),win.innerWidth-16),below=win.innerHeight-b.bottom-12,above=b.top-12,down=below>=Math.min(menu.scrollHeight,230)||below>=above,room=Math.max(36,down?below:above);
    menu.style.width=width+'px';menu.style.maxHeight=Math.min(230,room)+'px';menu.style.left=Math.max(8,Math.min(b.right-width,win.innerWidth-width-8))+'px';menu.style.top=(down?b.bottom+5:Math.max(8,b.top-menu.offsetHeight-5))+'px';highlight(entry.select.selectedIndex);
   };
   for(const [i,select] of Array.from(root.querySelectorAll('select')).entries()){
-   const wrapper=doc.createElement('span');wrapper.className='pv-select';wrapper.dataset.selectField=select.dataset.field;
+   const wrapper=doc.createElementNS('http://www.w3.org/1999/xhtml','span');wrapper.className='pv-select';wrapper.dataset.selectField=select.dataset.field;
    select.before(wrapper);wrapper.append(select);select.hidden=true;select.tabIndex=-1;
-   const button=doc.createElement('button');button.type='button';button.className='pv-select-trigger';button.setAttribute('role','combobox');button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');
+   const button=doc.createElementNS('http://www.w3.org/1999/xhtml','button');button.type='button';button.className='pv-select-trigger';button.setAttribute('role','combobox');button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');
    const id=select.id||'pv-select-'+i;select.id=id+'-native';button.id=id;button.setAttribute('aria-label',select.getAttribute('aria-label')||doc.querySelector(`label[for="${id}"]`)?.textContent||'');
-   const label=doc.createElement('span');label.className='pv-select-value';button.append(label);const caret=doc.createElement('span');caret.className='pv-select-arrow';caret.setAttribute('aria-hidden','true');button.append(caret);wrapper.append(button);
+   const label=doc.createElementNS('http://www.w3.org/1999/xhtml','span');label.className='pv-select-value';button.append(label);const caret=doc.createElementNS('http://www.w3.org/1999/xhtml','span');caret.className='pv-select-arrow';caret.setAttribute('aria-hidden','true');button.append(caret);wrapper.append(button);
    const entry={select,button,label,wrapper};entries.push(entry);button.onclick=()=>active===entry?close():open(entry);
    button.onkeydown=e=>{
     if(['ArrowDown','ArrowUp','Home','End','Enter',' ','Escape','Tab'].includes(e.key)){
@@ -144,7 +144,7 @@ var PaperVoiceUI = {
   root.replaceChildren(...[...parsed.head.children,...parsed.body.childNodes].map(node=>doc.importNode(node,true)));
  },
  create(controller, reader) {
-  const doc=reader._iframeWindow.document,win=doc.defaultView,root=doc.createElement('div');let disposed=false;
+  const doc=reader._iframeWindow.document,win=doc.defaultView,root=doc.createElementNS('http://www.w3.org/1999/xhtml','div');let disposed=false;
   root.className='pv-shell';root.dataset.paperVoice='shell';root.dataset.state='idle';
   const icon=name=>`<img class="pv-icon" src="${controller.assetURI}icons/${name}.svg" alt=""/>`;
   const themeTile=t=>`<button type="button" data-theme-choice="${t.id}" aria-label="${t.name}" aria-pressed="false"><span class="pv-theme-swatch" style="background-color:${t.paper};background-image:url('${controller.assetURI}themes/${t.art}');color:${t.accent};--pv-swatch-mask:${t.paper}99;--pv-swatch-accent:${t.accent};--pv-swatch-text:${t.ink};--pv-swatch-ink:${t.dark?t.paper:'#ffffff'}"><i></i><i></i><span class="pv-theme-name">${t.name}</span></span></button>`;
@@ -212,7 +212,7 @@ var PaperVoiceUI = {
   const visible=(el,show)=>PaperVoiceUI.visibility(el,show);
   const find=name=>root.querySelector(`[data-field="${name}"]`),action=name=>root.querySelector(`[data-action="${name}"]`),panel=root.querySelector('.pv-panel');
   if(controller.version)find('aboutVersion').textContent='v'+controller.version+' · Junyan Kang';
-  for(const v of PaperVoiceCore.voices){const o=doc.createElement('option');o.value=v.id;o.textContent=v.label;find('voice').append(o);}
+  for(const v of PaperVoiceCore.voices){const o=doc.createElementNS('http://www.w3.org/1999/xhtml','option');o.value=v.id;o.textContent=v.label;find('voice').append(o);}
   const settings=(open)=>{root._pvCloseThemePicker?.();cancelShortcutRecording?.();if(!open)find('llmKey').value='';find('home').hidden=open;find('settingsPage').hidden=!open;action('settings').querySelector('img').src=controller.assetURI+'icons/'+(open?'chevron-left':'settings')+'.svg';action('settings').setAttribute('aria-label',open?'返回播放控制':'声音与翻译设置');controller.localize?.(root);};
   action('settings').onclick=()=>{settings(find('settingsPage').hidden);controller.loadUpdateSettings();fit();};action('voiceSettings').onclick=()=>{settings(true);selectSettingsTab('voice');controller.loadUpdateSettings();fit();};
   const fit=()=>{const right=parseFloat(root.style.right)||18,bottom=parseFloat(root.style.bottom)||18;panel.style.transform=`translate(${Math.max(0,right+panel.offsetWidth+8-win.innerWidth)}px,${Math.max(0,bottom+root.offsetHeight+8-win.innerHeight)}px)`;};
@@ -492,6 +492,6 @@ var PaperVoiceUI = {
    nextInteraction=now+controller.companionIntervalMs();playCompanion(takeBreak?'rest':undefined);
   };
   const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();win.removeEventListener('keydown',themeEscape,true);doc.removeEventListener('pointerdown',closeThemesOutside,true);doc.removeEventListener('focusin',closeThemesOutside);themePicker._pvFade?.cancel();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);win.clearTimeout(audioCloseTimer);player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
-  doc.body.append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,find,action,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
+  (doc.body||doc.documentElement).append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,find,action,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
  }
 };
