@@ -1938,3 +1938,5 @@ for(const [i,lang] of ['en','ja','fr','de'].entries())Object.assign(CiteLensI18n
  '发音环境':['Speech environment','音声環境','Environnement vocal','Sprachumgebung'][i],
  '文献网络；可搜索定位，方向键平移，加减号缩放，Enter 查看当前节点':['Library network; search to locate, arrow keys to pan, plus/minus to zoom, Enter to inspect the current node','文献ネットワーク。検索で移動、方向キーでパン、＋/−で拡大縮小、Enter でノードを表示','Réseau bibliographique ; rechercher, déplacer avec les flèches, zoomer avec +/−, Entrée pour ouvrir le nœud','Literaturnetzwerk; suchen, mit Pfeiltasten verschieben, mit +/− zoomen, Eingabe öffnet den Knoten'][i]
 });
+
+for(const [source,values] of Object.entries({"当前范围暂无可关联作者，可选择其他文献夹。": ["No connected authors here. Choose another collection.", "関連する著者がいません。別のコレクションを選択してください。", "Aucun auteur associé ici. Choisissez une autre collection.", "Keine verbundenen Autoren. Wählen Sie eine andere Sammlung."], "已是最新版本": ["Up to date", "最新版です", "À jour", "Aktuell"]}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];

@@ -28,3 +28,5 @@ test('new locales translate controls and dynamic counters without changing sourc
  assert.equal(i18n.translate('朗读完成 · 2 页无文字，已跳过','de'),'Fertig · 2 Seiten ohne Text übersprungen');
  assert.equal(i18n.translate('普通话 · 男声 Yunxi','de'),'Mandarin · Männlich Yunxi');
 });
+
+test('current release notice does not leave a Chinese version suffix',()=>{for(const language of ['en','fr','de'])assert.doesNotMatch(i18n.translate('已是最新版本',language),/[\u3400-\u9fff]/);});
