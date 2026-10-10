@@ -1,7 +1,7 @@
 """Upgrade a supplied previous XPI through the live public feed in a disposable profile."""
 from pathlib import Path
 import json,os,subprocess,sys,time,zipfile
-r=Path(__file__).resolve().parents[1];source=Path(sys.argv[1]).resolve();profile=r/'qa-profile-upgrade';results=r/'test-results-upgrade';library=r/'qa-library-upgrade'
+r=Path(__file__).resolve().parents[1];source=Path(sys.argv[1]).resolve();profile=r/'qa-profile-upgrade101';results=r/'test-results-upgrade101';library=r/'qa-library-upgrade101'
 for p in [profile/'extensions',results,library]:p.mkdir(parents=True,exist_ok=True)
 if (profile/'extensions.json').exists():raise SystemExit('Use a fresh upgrade QA profile')
 prefs={'extensions.zotero.dataDir':str(library),'extensions.zotero.useDataDir':True,'extensions.zotero.firstRun2':False,'extensions.zotero.firstRunGuidance':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,'app.update.auto':False,'extensions.update.enabled':False}

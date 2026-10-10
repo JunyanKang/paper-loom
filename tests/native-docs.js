@@ -12,12 +12,12 @@ let items=await collection.getChildItems();
 if(!items.length){for(let n=0;n<titles.length;n++){const item=new Zotero.Item('journalArticle');item.setField('title',titles[n]);item.setField('date',String(2026-(n%3)));item.setField('publicationTitle','Paper Loom demonstration library');item.setField('abstractNote','The retina transforms light into signals that allow us to see the world. This illustrative reading example introduces a workflow for listening to a passage, comparing a translation, and following a reference. It is a demonstration document, not a scientific publication.');item.setCreators(combos[n].map(i=>({creatorType:'author',firstName:people[i][0],lastName:people[i][1]})));item.addToCollection(collection.id);await item.saveTx();items.push(item);}}
 const parent=items.find(i=>i.getField('title')===titles[0]);let attachment=parent.getAttachments().map(id=>Zotero.Items.get(id))[0];if(!attachment)attachment=await Zotero.Attachments.importFromFile({file:PathUtils.join(base,'docs','demo','reading-demo.pdf'),parentItemID:parent.id});
 // No manual attachReader or ensurePanel here: opening the PDF must create the companion automatically.
-const reader=await Zotero.Reader.open(attachment.id);await reader._initPromise;await until(()=>L.voice.panels.get(reader)?.root.isConnected,'automatic companion');await wait(1800);
+const reader=(await Zotero.Reader.open(attachment.id))||Zotero.Reader._readers.find(r=>r.itemID===attachment.id);await reader._initPromise;await until(()=>L.voice.panels.get(reader)?.root.isConnected,'automatic companion');await wait(1800);
 const rd=reader._iframeWindow.document,ui=L.voice.panels.get(reader),checks=[];
 const orb=ui.action('orb'),rect=orb.getBoundingClientRect();checks.push({name:'new PDF automatically shows floating book',ok:rect.width>30&&rect.height>30&&rect.right<=rd.defaultView.innerWidth&&rect.bottom<=rd.defaultView.innerHeight});
 const host=d.getElementById('zotero-items-toolbar'),entry=host.querySelector('.pl-library-entry'),spacer=[...host.children].find(e=>e.localName==='spacer');checks.push({name:'launcher precedes flexible spacer',ok:!!(entry.compareDocumentPosition(spacer)&4)});
 L.demoReader=reader;L.demoParent=parent;L.captureDocs=capture;
-S.state.settings.theme='paper';S.state.settings.transparency=0;L.voice.set('companionInteractions',false);L.voice.set('translationProvider','tencenttransmart');L.voice.set('translationTarget','zh-Hans');
+S.state.settings.theme='porcelain';S.state.settings.transparency=0;L.voice.set('companionInteractions',false);L.voice.set('translationProvider','tencenttransmart');L.voice.set('translationTarget','zh-Hans');
 const images=[];
 for(const lang of ['zh','en']){
  S.state.settings.interfaceLanguage=lang;await S.persist();H.refresh();I.refresh?.();L.voice.setLanguage(lang);await wait(500);

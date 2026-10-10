@@ -1,24 +1,27 @@
 var CiteLensUI = {
   sequence:0,
-  pageViews:new Set(),pageSerial:0,pageQueue:Promise.resolve(),
+  pageViews:new Set(),pageScopes:new WeakMap(),pageQueue:Promise.resolve(),
+  *livePages(doc=null){
+    for(const view of this.pageViews)try{if(!view.frame.isConnected){view.destroy();continue;}if(!doc||view.frame.ownerDocument===doc)yield view;}catch(_){this.pageViews.delete(view);}
+  },
   pageAnchor(doc,reader){
-    const main=Zotero.getMainWindow()?.document,candidates=[reader?._iframeWindow?.document?.querySelector('[data-cite-lens=toolbar]'),doc.querySelector('[data-cite-lens=toolbar]'),main?.querySelector('.cl-library-entry')];
+    const main=Zotero.getMainWindow()?.document,candidates=[doc.querySelector('.pv-orb'),reader?._iframeWindow?.document?.querySelector('[data-cite-lens=toolbar]'),doc.querySelector('[data-cite-lens=toolbar]'),main?.querySelector('.cl-library-entry')];
     const anchor=candidates.find(el=>el?.isConnected&&el.getBoundingClientRect().width&&el.getBoundingClientRect().height);if(!anchor)return null;
     if(anchor.ownerDocument===doc)return anchor;
     return {focus:options=>anchor.focus(options),getBoundingClientRect:()=>{const r=anchor.getBoundingClientRect(),from=anchor.ownerDocument.defaultView,to=doc.defaultView,x=r.x+from.mozInnerScreenX-to.mozInnerScreenX,y=r.y+from.mozInnerScreenY-to.mozInnerScreenY;return {x,y,width:r.width,height:r.height,right:x+r.width,bottom:y+r.height};}};
   },
   page(frame,{container=frame,reader=null,dispose=()=>{},visibility=()=>{},retain=false}={}){
-    const U=this,win=frame.ownerDocument.defaultView,modality=frame.getAttribute('aria-modal');const releaseBackdrop=closing=>{if(container!==frame)container.classList.toggle('cl-page-closing',closing);if(modality!==null)frame.setAttribute('aria-modal',closing?'false':modality);};let dead=false,resolveMotion=null,motion=null,pending=null,wanted=false,transition=null;
+    const U=this,doc=frame.ownerDocument;let scope=this.pageScopes.get(doc);if(!scope){scope={serial:0,queue:Promise.resolve()};this.pageScopes.set(doc,scope);}const win=doc.defaultView,modality=frame.getAttribute('aria-modal');const releaseBackdrop=closing=>{if(container!==frame)container.classList.toggle('cl-page-closing',closing);if(modality!==null)frame.setAttribute('aria-modal',closing?'false':modality);};let dead=false,resolveMotion=null,motion=null,pending=null,wanted=false,transition=null;
     const settle=visible=>{container.hidden=!visible;visibility(visible);if(!visible)frame.dispatchEvent(new win.Event('cl-page-hidden'));if(visible){frame.dispatchEvent(new win.Event('cl-page-visible'));frame.focus({preventScroll:true});}const done=resolveMotion;resolveMotion=null;pending=null;done?.();};
     const anchor=this.pageAnchor(frame.ownerDocument,reader);if(anchor)motion=CiteLensDockMotion.create(frame,anchor,()=>{},settle);
     const snap=visible=>{releaseBackdrop(!visible);wanted=visible;if(!visible)frame.ownerDocument._clAbstract?.close(true);if(visible&&container!==frame)container.hidden=false;if(motion)motion.snap(visible);else{frame.hidden=!visible;frame.inert=!visible;settle(visible);}};
     const animate=visible=>{if(dead||!frame.isConnected)return Promise.resolve();if(pending&&wanted===visible)return pending;if(pending)motion?.finish();if(frame.hidden===!visible&&!frame.dataset.dockMotion)return Promise.resolve();wanted=visible;releaseBackdrop(!visible);const promise=new Promise(resolve=>resolveMotion=resolve);pending=promise;if(visible&&container!==frame)container.hidden=false;else if(!visible)frame.ownerDocument._clAbstract?.close(true);if(motion)motion.show(visible);else snap(visible);return promise;};
-    const view={frame,container,reader,finish(){transition?.finish();motion?.finish();},activate(){if(dead)return;for(const existing of U.pageViews)existing.finish();const ticket=++U.pageSerial;U.pageQueue=U.pageQueue.catch(e=>Zotero.logError(e)).then(async()=>{
-      if(ticket!==U.pageSerial||dead)return;const other=[...U.pageViews].find(x=>x!==view&&!x.container.hidden);
+    const view={frame,container,reader,finish(){transition?.finish();motion?.finish();},activate(){if(dead)return;U.onPageActivate?.(doc);for(const existing of U.livePages(doc))existing.finish();const ticket=++scope.serial;scope.queue=scope.queue.catch(e=>Zotero.logError(e)).then(async()=>{
+      if(ticket!==scope.serial||dead)return;const other=[...U.livePages(doc)].find(x=>x!==view&&!x.container.hidden);
       if(other){const r=other.frame.getBoundingClientRect(),ow=other.frame.ownerDocument.defaultView,source={x:r.x+ow.mozInnerScreenX-win.mozInnerScreenX,y:r.y+ow.mozInnerScreenY-win.mozInnerScreenY,width:r.width,height:r.height};other.snap(false);frame.ownerDocument._clAbstract?.close(true);container.hidden=false;snap(true);const dest=frame.getBoundingClientRect();
         if(!win.matchMedia('(prefers-reduced-motion: reduce)').matches&&source.width&&dest.width&&frame.animate){const base=win.getComputedStyle(frame).transform,transform=base==='none'?'':base;frame.inert=true;transition=frame.animate([{transform:`translate(${source.x-dest.x}px,${source.y-dest.y}px) scale(${source.width/dest.width},${source.height/dest.height}) ${transform}`,opacity:.65,transformOrigin:'0 0'},{transform:base,opacity:1,transformOrigin:'0 0'}],{duration:220,easing:'cubic-bezier(.22,.8,.25,1)'});try{await transition.finished;}catch(_){}transition=null;if(!dead){frame.inert=false;}}
       }else{await animate(true);}
-    });return U.pageQueue;},snap,hide(keep=true){if(dead)return Promise.resolve();transition?.cancel();return animate(false).then(()=>{if(!keep)view.destroy();});},dismiss(){++U.pageSerial;return view.hide(retain);},destroy(){if(dead)return;dead=true;try{transition?.cancel();motion?.dispose();}catch(_){}const done=resolveMotion;resolveMotion=null;done?.();U.pageViews.delete(view);dispose();}};
+    });U.pageQueue=scope.queue;return scope.queue;},snap,hide(keep=true){if(dead)return Promise.resolve();transition?.cancel();return animate(false).then(()=>{if(!keep)view.destroy();});},dismiss(){++scope.serial;return view.hide(retain);},destroy(){if(dead)return;dead=true;try{transition?.cancel();motion?.dispose();}catch(_){}const done=resolveMotion;resolveMotion=null;done?.();U.pageViews.delete(view);dispose();}};
     frame.hidden=true;container.hidden=true;frame._clPage=view;this.pageViews.add(view);view.activate();return view;
   },
 
@@ -262,7 +265,7 @@ var CiteLensUI = {
   appearance(doc) {
     const s=CiteLensServices.state.settings,html=doc.documentElement;
     CiteLensThemes.apply(doc);
-    html.style.setProperty('--cl-size','13px');html.style.setProperty('--cl-user-size','13px');
+    html.style.setProperty('--cl-size','14px');html.style.setProperty('--cl-user-size','13px');
     const font='system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans","Microsoft YaHei","Yu Gothic UI",sans-serif';
     html.style.setProperty('--cl-reading-font',font);
     html.style.setProperty('--cl-translation-font',Zotero.PaperLoom?.voice?.captionFontFamily()||font);html.style.setProperty('--cl-translation-size',Math.max(10,Math.min(20,Number(CiteLensTranslation.get('translationSize','13'))||13))+'px');
@@ -323,8 +326,8 @@ var CiteLensUI = {
     if(!item||item.deleted)throw Error('条目已移除，请刷新文献库');
     const attachment=item.isAttachment?.()?item:await item.getBestAttachment?.(),readable=attachment&&!attachment.deleted&&['application/pdf','application/epub+zip','text/html'].includes(attachment.attachmentContentType);
     const main=Zotero.getMainWindow();
-    for(const surface of new Set([doc,main.document])){surface._clAbstract?.close(true);for(const view of surface.querySelectorAll('.pn-network'))view._pnClose?.();for(const settings of surface.querySelectorAll('.cl-settings'))settings._clClose?.();for(const popup of surface.querySelectorAll('.cl-floating'))popup.remove();}
-    for(const panel of CiteLens.panels.values()){panel.hidden=true;panel.inert=true;}
+    for(const surface of new Set([doc])){surface._clAbstract?.close(true);for(const view of surface.querySelectorAll('.pn-network'))view._pnClose?.();for(const settings of surface.querySelectorAll('.cl-settings'))settings._clClose?.();for(const popup of surface.querySelectorAll('.cl-floating'))popup.remove();}
+    for(const panel of CiteLens.panels.values())if(panel.ownerDocument===doc)panel._clSetOpen?.(false);
     if(readable){const reader=await Zotero.Reader.open(attachment.id);const tab=reader?._tabID||reader?.tabID;if(tab)main.Zotero_Tabs.select(tab);main.focus();return {kind:'reader',itemID:attachment.id};}
     main.Zotero_Tabs.select('zotero-pane');await main.ZoteroPane.selectItem(item.id);main.focus();return {kind:'item',itemID:item.id};
   },
@@ -509,11 +512,11 @@ var CiteLensUI = {
   },
   dialog(doc,title,{onClose=null,className='',header=true,keepParentVisible=false,reader=null}={}) {
     this.style(doc);
-    const workspace=['cl-settings','pn-network pn-map-window'].includes(className),previous=doc.activeElement,parent=workspace?null:[...doc.querySelectorAll('.cl-overlay,.cl-root')].reverse().find(x=>!x.hidden),overlay=this.el(doc,'div',null,'cl-overlay'),frame=this.el(doc,'section',null,'cl-dialog '+className),head=this.el(doc,'header',null,'cl-dialog-header'),root=this.el(doc,'div',null,'cl-dialog-body'),footer=this.el(doc,'footer',null,'cl-dialog-footer');
+    const workspace=['cl-settings','pn-network pn-map-window','pl-home'].includes(className),previous=doc.activeElement,parent=workspace?null:[...doc.querySelectorAll('.cl-overlay,.cl-root')].reverse().find(x=>!x.hidden),overlay=this.el(doc,'div',null,'cl-overlay'),frame=this.el(doc,'section',null,'cl-dialog '+className),head=this.el(doc,'header',null,'cl-dialog-header'),root=this.el(doc,'div',null,'cl-dialog-body'),footer=this.el(doc,'footer',null,'cl-dialog-footer');
     const heading=this.el(doc,'h2',title);heading.id='cl-dialog-title-'+(++this.sequence);
     frame.setAttribute('role','dialog');frame.setAttribute('aria-modal',String(className!=='cl-settings'));if(header)frame.setAttribute('aria-labelledby',heading.id);else frame.setAttribute('aria-label',title);frame.tabIndex=-1;
     let closed=false,busy=false,page=null;const win=doc.defaultView;
-    doc._clAbstract?.close(true);doc.querySelector('.cl-menu')?._close?.();
+    this.onPageActivate?.(doc);doc._clAbstract?.close(true);doc.querySelector('.cl-menu')?._close?.();
     const rect=parent?.classList.contains('cl-root')?parent.getBoundingClientRect():null;
     if(parent&&className!=='cl-settings'){if(!keepParentVisible)parent.hidden=true;parent.inert=true;}
     if(className==='cl-settings'){overlay.classList.add('cl-context-page');overlay.style.setProperty('--cl-context-right',(rect?Math.max(8,win.innerWidth-rect.right):12)+'px');overlay.style.setProperty('--cl-context-top',(rect?Math.max(8,rect.top):48)+'px');}
@@ -756,9 +759,9 @@ var CiteLensUI = {
     const panel=CiteLens.panels.get(reader);
     const cleanups=[];let unsubscribe=()=>{},unsubscribeModels=()=>{},testTicket=0;
     const {root,footer,close}=this.dialog(doc,'Paper Loom',{className:'cl-settings',reader,onClose:()=>{testTicket++;unsubscribe();unsubscribeModels();for(const cleanup of cleanups.splice(0))cleanup();}}),status=this.el(doc,'div','','cl-status');
-    const frame=root.parentElement,head=frame.querySelector('.cl-dialog-header'),tools=this.el(doc,'div',null,'cl-header-tools'),network=this.iconButton(doc,'文献网络','network',()=>{CiteLens.showNetwork(reader||null,{doc:reader?Zotero.getMainWindow().document:doc});});
-    const outside=e=>{if(!frame.isConnected||frame.hidden||frame.inert||frame.contains(e.target)||e.target.closest?.('.cl-select-popover,.cl-tooltip,.cl-overlay,[data-cite-lens=toolbar]')||[...doc.querySelectorAll('.cl-overlay')].some(x=>x!==frame.parentElement&&!x.hidden&&(frame.parentElement.compareDocumentPosition(x)&4)))return;close();};
-    const surfaces=new Set([doc,Zotero.getMainWindow()?.document,reader?._iframeWindow?.document,reader?._internalReader?._primaryView?._iframeWindow?.document,reader?._internalReader?._secondaryView?._iframeWindow?.document]);
+    const frame=root.parentElement,head=frame.querySelector('.cl-dialog-header'),tools=this.el(doc,'div',null,'cl-header-tools'),network=this.iconButton(doc,'文献网络','network',()=>{CiteLens.showNetwork(reader||null,{doc});});
+    const outside=e=>{if(!frame.isConnected||frame.hidden||frame.inert||frame.contains(e.target)||e.target.closest?.('.cl-select-popover,.cl-tooltip,.cl-overlay,[data-cite-lens=toolbar]')||[...doc.querySelectorAll('.cl-overlay')].some(x=>x!==frame.parentElement&&!x.hidden&&(frame.parentElement.compareDocumentPosition(x)&4)))return;frame._clPage?.hide(true);};
+    const surfaces=new Set([doc,reader?._iframeWindow?.document,reader?._internalReader?._primaryView?._iframeWindow?.document,reader?._internalReader?._secondaryView?._iframeWindow?.document]);
     for(const surface of surfaces)if(surface)for(const type of ['pointerdown','mousedown']){surface.addEventListener(type,outside,true);cleanups.push(()=>surface.removeEventListener(type,outside,true));}
     frame._clReader=reader;frame._clClose=close;network.dataset.networkEntry='true';if(reader){const list=this.iconButton(doc,'文献列表','references',()=>CiteLens.returnToList(reader));list.dataset.listEntry='true';tools.append(list);}tools.append(network,head.querySelector('.cl-dismiss'));head.append(tools);
     const version=this.quiet(doc,'v'+CiteLens.version,()=>Zotero.launchURL(CiteLens.homepage+'/releases/latest'));version.title='版本说明与插件下载';version.classList.add('cl-version');
@@ -817,12 +820,13 @@ var CiteLensUI = {
       const model=row(llm,'模型',task+'Model',this.el(doc,'input')),endpoint=row(llm,'地址',task+'Endpoint',this.el(doc,'input')),secret=row(llm,'密钥',task+'Key',this.el(doc,'input'));model.dataset.llm='model';endpoint.dataset.llm='endpoint';secret.dataset.llm='key';secret.type='password';secret.autocomplete='off';secret.spellcheck=false;
       const holder=this.el(doc,'span',null,'cl-model-combo'),choices=this.el(doc,'select');model.setAttribute('aria-label','翻译模型');model.before(holder);holder.append(model,choices);choices.dataset.editableFor=model.id;choices.setAttribute('aria-label',model.getAttribute('aria-label'));
       const refreshModels=()=>{choices.replaceChildren(...T.modelChoices(service.value,task,model.value).map(value=>{const option=this.el(doc,'option',T.modelChoiceLabel(service.value,value));option.value=value;return option;}));choices.value=model.value;};
-      const load=()=>{const config=T.llmTaskConfig(task,service.value);endpoint.value=config.endpoint;model.value=config.model;secret.value='';secret.placeholder=T.llmKey(config)?'已保存 · 留空保留':'填写服务商密钥';status.textContent='';status.classList.remove('cl-error');refreshModels();};service.addEventListener('change',load);
-      const remove=this.iconButton(doc,'移除密钥','remove',()=>{T.removeLLMKey(T.llmTaskConfig(task,service.value));load();status.textContent='密钥已移除';});secret.closest('.cl-setting-row').append(remove);
+      let keyLoad=0;
+      const load=async()=>{const ticket=++keyLoad,config=T.llmTaskConfig(task,service.value);endpoint.value=config.endpoint;model.value=config.model;secret.value='';secret.placeholder='填写服务商密钥';status.textContent='';status.classList.remove('cl-error');refreshModels();try{const saved=await T.llmKey(config);if(ticket===keyLoad)secret.placeholder=saved?'已保存 · 留空保留':'填写服务商密钥';}catch(e){if(ticket===keyLoad){status.textContent=e.message;status.classList.add('cl-error');}}};service.addEventListener('change',load);
+      const remove=this.iconButton(doc,'移除密钥','remove',async()=>{if(busy)return;setBusy(true);try{await T.removeLLMKey(T.llmTaskConfig(task,service.value));await load();status.textContent='密钥已移除';}catch(e){status.textContent=e.message;status.classList.add('cl-error');}finally{setBusy(false);}});secret.closest('.cl-setting-row').append(remove);
       const setBusy=value=>{busy=value;for(const control of llm.querySelectorAll('input,select,button'))if(control!==back)control.disabled=value;};
       const save=async test=>{
         if(busy)return;const currentVisit=visit,config={...T.llmTaskConfig(task,service.value),endpoint:endpoint.value,model:model.value},key=secret.value;setBusy(true);status.classList.remove('cl-error');status.textContent=test?'连接中…':'保存中…';
-        try{await T.saveLLM(config,key,{activateTranslation:false});if(currentVisit===visit){secret.value='';load();}syncTranslation();
+        try{await T.saveLLM(config,key,{activateTranslation:false});if(currentVisit===visit){secret.value='';await load();}syncTranslation();
           if(test){const result=await T.testLLM(T.llmTaskConfig(task,config.id));if(root.isConnected&&currentVisit===visit){status.textContent=result[task].ok?'连接成功':result[task].message;status.classList.toggle('cl-error',!result[task].ok);}}
           else if(root.isConnected&&currentVisit===visit)status.textContent='已保存';
         }catch(e){if(root.isConnected&&currentVisit===visit){status.textContent=e.message;status.classList.add('cl-error');}}finally{setBusy(false);}

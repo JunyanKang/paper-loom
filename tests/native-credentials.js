@@ -1,0 +1,31 @@
+const profile=Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path;
+if(!/qa-profile/.test(profile))throw Error('Dedicated QA profile required');
+const checks=[],check=(name,ok)=>{checks.push({name,ok:!!ok});if(!ok)throw Error(name);};
+const {nsLoginInfo}=ChromeUtils.importESModule('resource://gre/modules/LoginInfo.sys.mjs');
+const origin='https://paper-loom-credentials.invalid',endpoint=origin+'/v1',username='custom '+endpoint;
+const remove=login=>(Services.logins.removeLoginAsync?.bind(Services.logins)||Services.logins.removeLogin.bind(Services.logins))(login);
+for(const login of await Services.logins.searchLoginsAsync({origin}))await remove(login);
+const add=async(realm,password)=>{const login=new nsLoginInfo();login.init(origin,null,realm,username,password,'','');await Services.logins.addLoginAsync(login);};
+const scope={Services,Zotero,IOUtils,PathUtils,ChromeUtils,Components};Services.scriptloader.loadSubScript(L.rootURI+'shared/settings.js',scope);
+const M=scope.LoomSettings,T=L.referencesScope.CiteLensTranslation,config={...T.llmConfig('custom'),endpoint,model:'fixture-model'};
+try{
+ await add('Paper Voice API','fixture-voice');await add('Paper Nexus API','fixture-nexus');
+ Services.prefs.setIntPref('extensions.paperLoom.migrationVersion',0);await M.migrate();
+ check('migration prefers latest Nexus for identical provider',await T.llmKey(config)==='fixture-nexus');
+ check('Voice shares credential lookup',await L.voice.llmKey(config)==='fixture-nexus');
+ await T.saveLLM(config,'fixture-new');check('replace saved key',await T.llmKey(config)==='fixture-new');
+ Services.prefs.setIntPref('extensions.paperLoom.migrationVersion',0);await M.migrate();
+ check('retry preserves current key',await T.llmKey(config)==='fixture-new');
+ check('retry does not duplicate key',(await T.llmLogins(config)).length===1);
+ T.set('previousTranslationProfiles',JSON.stringify({voice:{},references:{}}));M.owner=L;await M.restoreTranslation('voice');
+ check('explicit restore selects original key',await T.llmKey(config)==='fixture-voice');
+ await T.saveLLM(config,'');check('blank save retains key',await T.llmKey(config)==='fixture-voice');
+ check('other endpoint isolated',await T.llmKey({...config,endpoint:origin+'/other'})==='');
+ await T.saveLLM({...config,task:'network'},'fixture-network');await T.removeLLMKey(config);
+ check('remove translation key',await T.llmKey(config)==='');
+ check('knowledge key remains',await T.llmKey({...config,task:'network'})==='fixture-network');
+ check('original predecessor keys remain',(await Services.logins.searchLoginsAsync({origin})).filter(l=>['Paper Voice API','Paper Nexus API'].includes(l.httpRealm)).length===2);
+ const V=L.voiceScope.PaperVoiceLLM;V.host=Zotero.getMainWindow();V.get=()=>0;V.set=()=>{};V.syncSettings=()=>{};V.translationCache=new Map();
+ await V.saveLLM(config,'fixture-standalone');check('standalone voice save and read',await V.llmKey(config)==='fixture-standalone');await V.removeLLMKey(config);check('standalone voice remove',await V.llmKey(config)==='');
+ return {passed:true,version:Zotero.version,checks};
+}finally{for(const login of await Services.logins.searchLoginsAsync({origin}))await remove(login);}

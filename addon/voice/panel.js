@@ -317,9 +317,12 @@ var PaperVoiceUI = {
   action('quickTranslate').ondblclick=e=>{e.preventDefault();controller.quickTranslationDoubleClick();};
   find('target').onchange=e=>controller.setTranslationTarget(e.target.value);
   find('provider').onchange=e=>{if(e.target.value==='llm'){openLLM();return;}controller.set('translationProvider',e.target.value);if(e.target.value==='tencenttransmart'&&controller.get('translationTarget','zh-Hans')==='zh-Hant')controller.set('translationTarget','zh-Hans');controller.translationTicket++;controller.hideTranslation();controller.syncSettings();if(controller.get('translation',false))controller.toggleTranslation(true);};
-  const loadLLM=id=>{
+  let llmLoad=0;
+  const loadLLM=async id=>{
+   const ticket=++llmLoad;
    const config=controller.llmConfig(id);find('llmProvider').value=config.id;find('llmEndpoint').value=config.endpoint;find('llmModel').value=config.model;find('llmKey').value='';
-   let saved=false;try{saved=!!config.endpoint&&!!controller.llmKey(config);}catch(_){}
+   let saved=false;try{saved=!!config.endpoint&&!!await controller.llmKey(config);}catch(_){}
+   if(ticket!==llmLoad)return;
    find('llmKey').placeholder=controller.t(saved?'已保存 · 留空保留':'API Key');action('llmRemoveKey').disabled=!saved;PaperVoiceUI.syncSelects(root);
   };
   const openLLM=()=>{selectSettingsTab('translation');root.querySelector('[data-settings-pane=translation]').hidden=true;find('llmPage').hidden=false;loadLLM(controller.get('llmProvider','minimax'));};
@@ -337,7 +340,7 @@ var PaperVoiceUI = {
   action('configureLLM').onclick=openLLM;action('llmBack').onclick=()=>{selectSettingsTab('translation');controller.syncSettings();};
   find('llmProvider').onchange=e=>{loadLLM(e.target.value);find('llmResult').textContent=controller.t('密钥仅存本机 · 费用由服务商收取');};
   action('llmSave').onclick=()=>saveLLM(false);action('llmTest').onclick=()=>saveLLM(true);
-  action('llmRemoveKey').onclick=()=>{try{controller.removeLLMKey(controller.validateLLM(draftLLM()));loadLLM(find('llmProvider').value);find('llmResult').textContent=controller.t('密钥已移除');}catch(error){find('llmResult').textContent=controller.t(error.message);}};
+  action('llmRemoveKey').onclick=async()=>{try{await controller.removeLLMKey(controller.validateLLM(draftLLM()));await loadLLM(find('llmProvider').value);find('llmResult').textContent=controller.t('密钥已移除');}catch(error){find('llmResult').textContent=controller.t(error.message);}};
   action('llmHelp').onclick=e=>{e.preventDefault();Zotero.launchURL('https://github.com/JunyanKang/paper-loom/blob/main/docs/'+(controller.language()==='zh'?'SETTINGS.md':'SETTINGS.en.md'));};
   find('voice').onchange=e=>{controller.set('voiceFor_'+controller.settingsVoiceLanguage(),e.target.value);if(!controller.get('readTranslation',false))controller.set('voice',e.target.value);controller.syncSettings();controller.setStatus('声音已保存，下次开始朗读生效');};
   find('rate').oninput=e=>{controller.set('rate',PaperVoiceCore.rate(e.target.value));controller.syncSettings();};
@@ -483,6 +486,6 @@ var PaperVoiceUI = {
    nextInteraction=now+controller.companionIntervalMs();playCompanion(takeBreak?'rest':undefined);
   };
   const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();win.removeEventListener('keydown',themeEscape,true);doc.removeEventListener('pointerdown',closeThemesOutside,true);doc.removeEventListener('focusin',closeThemesOutside);themePicker._pvFade?.cancel();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);win.clearTimeout(audioCloseTimer);player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
-  doc.body.append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,find,action,settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
+  doc.body.append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,find,action,finishMotion:()=>dockMotion.finish(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
  }
 };

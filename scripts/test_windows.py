@@ -23,6 +23,8 @@ with (results/'zotero.log').open('w',encoding='utf-8') as log:
    time.sleep(1)
   else:raise TimeoutError('Zotero startup')
   subprocess.run([sys.executable,str(r/'scripts/run_native.py'),'native-windows-release.js','1500'],check=True,timeout=1520)
+  for name in ['native-credentials.js','native-window-coexistence.js']:
+   subprocess.run([sys.executable,str(r/'scripts/run_native.py'),name,'180'],check=True,timeout=200)
  finally:
   # Only the isolated CI process tree.
   subprocess.run(['taskkill','/PID',str(proc.pid),'/T','/F'],check=False,stdout=subprocess.DEVNULL)

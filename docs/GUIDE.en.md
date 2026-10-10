@@ -4,7 +4,9 @@
 
 ## Open and collapse
 
-Use the book in the left library toolbar or PDF toolbar to open listening, references and the reading list, author networks, or settings. A floating book appears at the lower right when a PDF opens: hover for quick controls, click for the listening panel, and drag to reposition. Collapsing the panel keeps the book visible.
+Use the book in the left library toolbar. In a PDF, the floating book provides Read, Papers, Authors, and Settings navigation. A floating book appears at the lower right when a PDF opens: hover for quick controls, click for the listening panel, and drag to reposition. Collapsing the panel keeps the book visible.
+
+Each document shows one expanded main panel at a time: listening, references, network, or settings. Switching panels collapses the previous one without stopping speech. Reopening references or the network resumes the existing view. PDF tabs and separate reader windows keep their own panel states. Detail and editing dialogs open above their parent and return to it when closed.
 
 ![Listening panel](images/listening-en.png)
 

@@ -11,7 +11,7 @@ var PaperVoice = {
   language() { return PaperVoiceI18n.resolveLanguage(this.get('interfaceLanguage','auto'),Zotero.locale||Services.locale?.appLocaleAsBCP47||'en'); },
   t(text) { return typeof PaperVoiceI18n==='undefined'?text:PaperVoiceI18n.translate(text,this.language()); },
   localize(root) { if(typeof PaperVoiceI18n!=='undefined')PaperVoiceI18n.apply(root,this.language());if(typeof PaperVoiceUI!=='undefined')PaperVoiceUI.syncSelects(root); },
-  setLanguage(value) { this.set('interfaceLanguage',value);this.syncSettings();for(const [reader] of this.panels){for(const el of reader._iframeWindow.document.querySelectorAll('[data-paper-voice="toolbar"]')){el.removeAttribute('title');delete el.dataset.pvTooltip;el.setAttribute('aria-label',this.t('Paper Loom 论文听读'));}for(const el of reader._iframeWindow.document.querySelectorAll('[data-paper-voice="selection"]'))el.textContent=this.t(this.get('mode','selection')==='document'&&this.get('documentStart','begin')==='selection'?'▶ 从此句开始连读':'▶ 自然朗读');}for(const item of this.windows.values())item.setAttribute('label',this.t('Paper Loom · 论文听读'));this.updateSelectionAction(); },
+  setLanguage(value) { this.set('interfaceLanguage',value);this.syncSettings();for(const panel of this.livePanels()){const doc=panel.root.ownerDocument;for(const el of doc.querySelectorAll('[data-paper-voice="toolbar"]')){el.removeAttribute('title');delete el.dataset.pvTooltip;el.setAttribute('aria-label',this.t('Paper Loom 论文听读'));}for(const el of doc.querySelectorAll('[data-paper-voice="selection"]'))el.textContent=this.t(this.get('mode','selection')==='document'&&this.get('documentStart','begin')==='selection'?'▶ 从此句开始连读':'▶ 自然朗读');}for(const item of this.windows.values())item.setAttribute('label',this.t('Paper Loom · 论文听读'));this.updateSelectionAction(); },
   get host() { return Zotero.getMainWindow() || this.timerHost; },
   async start() {
     this.dead = false;this.timerHost=Zotero.getMainWindow();
@@ -24,7 +24,6 @@ var PaperVoice = {
     Zotero.Reader.registerEventListener('renderTextSelectionPopup', this.selectionHandler, this.id);
     Zotero.Reader.registerEventListener('renderToolbar', this.toolbarHandler, this.id);
     this.tabObserver = Zotero.Notifier.registerObserver({notify: (event, type) => {
-      if(type==='tab'&&event==='select'){for(const [reader] of this.panels)this.dismissPanel(reader);}
       if(type==='tab' && event==='select' && this.currentReader && !this.restoredSession && this.playbackMode!=='document')this.stop();
       // Reader disposal is handled by detachReader; unrelated tabs cannot stop a book.
     }}, ['tab'], 'paper-voice-tabs');
@@ -104,14 +103,14 @@ var PaperVoice = {
     }
     this.watchToolbar(doc,reader);this.normalizeToolbar(doc);
   },
-  dismissPanel(reader) {const ui=this.panels.get(reader);if(ui&&!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false')ui.action('close').click();},
+  dismissPanel(reader) {try{const ui=this.panels.get(reader);if(ui&&!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false')ui.action('close').click();}catch(_){this.panels.delete(reader);}},
   detachReader(reader) {
     try{const doc=reader._iframeWindow.document;this.toolbarObservers.get(doc)?.disconnect();this.toolbarObservers.delete(doc);this.toolbarNodes.delete(doc);}catch(_){}
     for (const h of this.readerHooks.get(reader) || []) {
       try { h.doc.removeEventListener('pointerdown', h.down, true);h.doc.removeEventListener('wheel',h.wheel,true); h.doc.defaultView.removeEventListener('keydown', h.key, true); } catch (_) {}
     }
     this.readerHooks.delete(reader); this.lastSelections.delete(reader);this.selectionContexts.delete(reader);
-    const panel=this.panels.get(reader);if(panel?.dispose)panel.dispose();else panel?.root.remove(); this.panels.delete(reader);
+    const panel=this.panels.get(reader);try{if(panel?.dispose)panel.dispose();else panel?.root.remove();}catch(_){}finally{this.panels.delete(reader);}
     if (this.currentReader === reader) this.stop();
   },
   toolbarButton(doc, reader) {
@@ -347,8 +346,8 @@ var PaperVoice = {
     if(name==='captionFont'){if(!this.installedCaptionFonts().some(x=>x.family===value))return;this.set(name,value);const usage=PaperVoiceFonts.history(this.get('captionFontUsage','{}'));usage[value]=(Number(usage[value])||0)+1;this.set('captionFontUsage',JSON.stringify(usage));Services.prefs.savePrefFile(null);}
     else if(name==='captionSize')this.set(name,Math.max(10,Math.min(20,Math.round(Number(value)||12))));
     this.syncSettings();
-    if(this.caption){this.applyCaptionTypography(this.caption.box);this.positionTranslation(this.caption);}
-    for(const reader of Zotero.Reader._readers)for(const box of reader._iframeWindow?.document.querySelectorAll('.pv-selection-translation')||[])this.applyCaptionTypography(box);
+    if(this.caption)try{this.applyCaptionTypography(this.caption.box);this.positionTranslation(this.caption);}catch(_){this.caption=null;}
+    for(const reader of Zotero.Reader._readers)try{for(const box of reader._iframeWindow?.document.querySelectorAll('.pv-selection-translation')||[])this.applyCaptionTypography(box);}catch(_){}
   },
   surfaceOpacity() {return 1-Math.max(0,Math.min(40,Number(this.get('surfaceTransparency',0))||0))/100;},
   async setCaptionPlacement(value) {

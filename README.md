@@ -1,5 +1,5 @@
 <p align="center"><img src="addon/assets/loom.png" width="144" alt="Paper Loom mascot: a book with headphones and a magnifying glass" /></p>
-<h1 align="center">Paper Loom · 文织</h1>
+<h1 align="center">Paper Loom</h1>
 <p align="center"><strong>听读论文，串起研究线索。</strong></p>
 <p align="center">在 Zotero 中听读、翻译、查阅引文，探索作者与论文之间的联系。</p>
 <p align="center"><a href="README.en.md">English</a> · <a href="https://github.com/JunyanKang/paper-loom/releases/latest">下载 XPI</a> · <a href="docs/GUIDE.md">使用指南</a> · <a href="https://github.com/JunyanKang/paper-loom/issues">问题反馈</a></p>
@@ -8,11 +8,10 @@ Paper Loom 把阅读中需要的下一步放在手边：听一遍难懂的段落
 
 ![Zotero 中的 Paper Loom 听读界面](docs/images/listening-zh.png)
 
-*截图均来自实际 Paper Loom 界面。听读与网络图使用示例文献库，仅演示操作，不代表真实研究结果。*
 
 ## 开始使用
 
-1. 从[最新版本](https://github.com/JunyanKang/paper-loom/releases/latest)下载 **paper-loom-1.0.0.xpi**。
+1. 从[最新版本](https://github.com/JunyanKang/paper-loom/releases/latest)下载 **paper-loom-1.0.1.xpi**。
 2. 在 Zotero 中打开 **工具 → 插件 → 齿轮 → 从文件安装插件…**，选择 XPI；如提示，请重启 Zotero。
 3. 点击**左侧工具栏的小书**，进入 **设置 → 声音与引擎 → 下载引擎与声音**。Paper Loom 会识别电脑系统和处理器，选择对应资源。
 4. 打开 PDF，右下方会自动出现悬浮小书；划选文字即可听读，也可点击小书选择阅读模式。

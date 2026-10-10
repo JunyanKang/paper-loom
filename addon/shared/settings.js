@@ -40,8 +40,8 @@ var LoomSettings = {
     const {nsLoginInfo}=ChromeUtils.importESModule('resource://gre/modules/LoginInfo.sys.mjs');
     const logins=await Services.logins.getAllLogins();
     for(const realm of ['Paper Nexus API','Paper Voice API'])for(const old of logins.filter(l=>l.httpRealm===realm)) {
-      if(Services.logins.findLogins(old.hostname,null,'Paper Loom API').some(l=>l.username===old.username))continue;
-      const login=new nsLoginInfo();login.init(old.hostname,null,'Paper Loom API',old.username,old.password,'','');await Services.logins.addLoginAsync(login);
+      if((await Services.logins.searchLoginsAsync({origin:old.origin||old.hostname,httpRealm:'Paper Loom API'})).some(l=>l.username===old.username))continue;
+      const login=new nsLoginInfo();login.init(old.origin||old.hostname,null,'Paper Loom API',old.username,old.password,'','');await Services.logins.addLoginAsync(login);
     }
     // Persist a metadata-only migration receipt, never credentials.
     await IOUtils.writeJSON(PathUtils.join(target,'migration.json'),{schema:1,date:new Date().toISOString(),sources:['Paper Voice 1.4.16','Paper Nexus 1.1.3'],originalsPreserved:true});
@@ -75,8 +75,8 @@ var LoomSettings = {
     const realm=source==='voice'?'Paper Voice API':'Paper Nexus API';
     const {nsLoginInfo}=ChromeUtils.importESModule('resource://gre/modules/LoginInfo.sys.mjs');
     for(const old of (await Services.logins.getAllLogins()).filter(l=>l.httpRealm===realm)) {
-      const existing=Services.logins.findLogins(old.hostname,null,'Paper Loom API').find(l=>l.username===old.username);
-      const login=new nsLoginInfo();login.init(old.hostname,null,'Paper Loom API',old.username,old.password,'','');if(existing)Services.logins.modifyLogin(existing,login);else await Services.logins.addLoginAsync(login);
+      const existing=(await Services.logins.searchLoginsAsync({origin:old.origin||old.hostname,httpRealm:'Paper Loom API'})).find(l=>l.username===old.username);
+      const login=new nsLoginInfo();login.init(old.origin||old.hostname,null,'Paper Loom API',old.username,old.password,'','');if(existing)await (Services.logins.modifyLoginAsync?.bind(Services.logins)||Services.logins.modifyLogin.bind(Services.logins))(existing,login);else await Services.logins.addLoginAsync(login);
     }
     T.translationCache.clear();T.syncSettings();Services.prefs.savePrefFile(null);
   }

@@ -27,16 +27,37 @@ Object.assign(PaperLoom,{
       V.addWindow=()=>{};V.removeWindow=()=>{};V.onToolbar=({reader})=>{if(reader)V.attachReader(reader);};V.watchToolbar=()=>{};
       R.libraryToolbar=()=>{};
       R.addWindow=win=>{const nodes=this.windows.get(win);if(nodes)R.windows.set(win,nodes.item);};R.removeWindow=win=>{R.windows.delete(win);RS.CiteLensThemes.release(win.document);};
-      R.toolbar=(doc,reader)=>{
-        const previous=R.toolbarNodes.get(doc);if(previous)return previous;
-        this.style(doc);const b=this.button(doc,'',()=>this.showHome(reader,doc));b.dataset.citeLens='toolbar';b.setAttribute('aria-label',this.name);b.className='pl-library-entry';b.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:34px;height:30px';b.append(this.logo(doc,26));R.toolbarNodes.set(doc,b);return b;
-      };
+      R.readerToolbarEnabled=false;R.normalizeToolbar=doc=>{for(const node of doc.querySelectorAll('[data-cite-lens=toolbar],[data-paper-voice=toolbar]'))node.remove();};
       RS.CiteLensUI.logo=(doc,size)=>this.logo(doc,size);
+      // One expanded workspace per document; each Reader keeps its own state.
+      RS.CiteLensUI.onPageActivate=doc=>{for(const [reader,ui] of V.panels)try{if(ui.root.ownerDocument===doc){V.dismissPanel(reader);ui.finishMotion();}}catch(_){V.panels.delete(reader);}};
+      const showVoice=V.showPanel.bind(V);
+      V.showPanel=(reader,toggle=false)=>{
+        const ui=V.ensurePanel(reader),doc=ui.root.ownerDocument,expanded=ui.panel.dataset.pvVisible==='true'||(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false');
+        if(!toggle||!expanded){
+          const scope=RS.CiteLensUI.pageScopes.get(doc);if(scope)scope.serial++;
+          for(const view of RS.CiteLensUI.livePages(doc)){view.finish();view.snap(false);}
+          doc._clAbstract?.close(true);
+        }
+        return showVoice(reader,toggle);
+      };
+
+      const page=RS.CiteLensUI.page.bind(RS.CiteLensUI);
+      RS.CiteLensUI.page=(frame,options={})=>{
+        const reader=options.reader,doc=frame.ownerDocument;
+        if(reader&&!frame.classList.contains('pl-home')&&!frame.querySelector(':scope>.pl-navigation')){
+          const active=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-network')?'network':'references';
+          const nav=this.navigation(doc,reader,active),head=frame.querySelector(':scope>header');if(head)head.after(nav);else frame.prepend(nav);
+        }
+        return page(frame,options);
+      };
       const create=VS.PaperVoiceUI.create.bind(VS.PaperVoiceUI);
       VS.PaperVoiceUI.create=(controller,reader)=>{
         const ui=create(controller,reader);
+        this.style(ui.root.ownerDocument);if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html'))ui.root.ownerDocument.documentElement.classList.add('pl-reader-workspace');
         ui.root.querySelector('.pv-brand-icon').src=this.assetURI+'loom.png';
         ui.root.querySelector('.pv-orb>.pv-mascot:not(.pv-mascot-reading)').src=this.assetURI+'loom.png';
+        if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){ui.panel.querySelector('.pv-header').after(this.navigation(ui.root.ownerDocument,reader,'listening'));RS.CiteLensI18n.install(ui.root.ownerDocument);}
         ui.action('settings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument);
         ui.action('voiceSettings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument,'voice');
         for(const [action,key] of [['help','guide'],['feedback','feedback'],['privacy','privacy']])ui.action(action).onclick=()=>this.showInfo(key,ui.root.ownerDocument);

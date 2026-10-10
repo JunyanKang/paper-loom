@@ -26,21 +26,21 @@ var PaperVoiceLLM = {
   if(!config.model?.trim())throw new Error('请输入服务商提供的模型名称');
   return {...config,endpoint:url.href.replace(/\/$/,''),model:config.model.trim()};
  },
- llmLogins(config) {
+ async llmLogins(config) {
   const origin=new this.host.URL(config.endpoint).origin;
-  return Services.logins.findLogins(origin,null,'Paper Loom API').filter(login=>login.username===config.id+' '+config.endpoint);
+  return (await Services.logins.searchLoginsAsync({origin,httpRealm:'Paper Loom API'})).filter(login=>login.username===config.id+' '+config.endpoint);
  },
- llmKey(config) {return this.llmLogins(config)[0]?.password||'';},
+ async llmKey(config) {return (await this.llmLogins(config))[0]?.password||'';},
  async saveLLM(config,key) {
   config=this.validateLLM(config);key=key.trim();
   if(key&&/[\s\r\n]/.test(key))throw new Error('API Key 格式无效');
   if(key){
    const {nsLoginInfo}=ChromeUtils.importESModule('resource://gre/modules/LoginInfo.sys.mjs'),login=new nsLoginInfo();
    login.init(new this.host.URL(config.endpoint).origin,null,'Paper Loom API',config.id+' '+config.endpoint,key,'','');
-   const existing=this.llmLogins(config)[0];
-   if(existing)Services.logins.modifyLogin(existing,login);else await Services.logins.addLoginAsync(login);
+   const existing=(await this.llmLogins(config))[0];
+   if(existing)await (Services.logins.modifyLoginAsync?.bind(Services.logins)||Services.logins.modifyLogin.bind(Services.logins))(existing,login);else await Services.logins.addLoginAsync(login);
   }
-  if(!this.llmKey(config))throw new Error('请先填写 API Key');
+  if(!await this.llmKey(config))throw new Error('请先填写 API Key');
   let configs={};try{configs=JSON.parse(this.get('llmConfigs','{}'));}catch(_){}
   configs[config.id]={endpoint:config.endpoint,model:config.model};
   this.set('llmConfigs',JSON.stringify(configs));this.set('llmProvider',config.id);
@@ -49,8 +49,8 @@ var PaperVoiceLLM = {
   this.set('translationProvider','llm');this.syncSettings();
   return config;
  },
- removeLLMKey(config) {
-  for(const login of this.llmLogins(config))Services.logins.removeLogin(login);
+ async removeLLMKey(config) {
+  for(const login of await this.llmLogins(config))await (Services.logins.removeLoginAsync?.bind(Services.logins)||Services.logins.removeLogin.bind(Services.logins))(login);
   this.set('llmRevision',Number(this.get('llmRevision',0))+1);this.translationCache.clear();
  },
  llmError(status=0) {
@@ -103,7 +103,7 @@ var PaperVoiceLLM = {
   });
  },
  async translateLLM(text,source,options={}) {
-  const config=this.validateLLM(this.llmConfig()),secret=this.llmKey(config);
+  const config=this.validateLLM(this.llmConfig()),secret=await this.llmKey(config);
   if(!secret)throw new Error('请在译文设置中配置大模型 API');
   const target=options.target||this.get('translationTarget','zh-Hans');
   const key=['llm',config.id,config.endpoint,config.model,this.get('llmRevision',0),source,target,text].join('\0');

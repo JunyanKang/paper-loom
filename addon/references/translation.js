@@ -200,7 +200,7 @@ var CiteLensTranslationLLM = {
   return base+'/models'+(config.protocol==='anthropic'?'?limit=100':'');
  },
  async discoverModels(config){
-  const base=this.modelListURL(config),key=this.llmKey(config);if(!base||!key)return null;
+  const base=this.modelListURL(config),key=await this.llmKey(config);if(!base||!key)return null;
   const models=new Set();let url=base;
   for(let page=0;page<10;page++){
    if(this.dead)throw Error('模型更新已取消');
@@ -227,7 +227,7 @@ var CiteLensTranslationLLM = {
   const job=(async()=>{let catalog,catalogError='';try{catalog=await this.updateModelCatalog();}catch(e){catalogError=e.message;}
    if(this.dead)throw Error('模型更新已取消');const results=[];
    const configs=this.llmPresets.filter(p=>p.id!=='custom').map(p=>this.llmConfig(p.id,task));let cursor=0;
-   const run=async()=>{while(cursor<configs.length&&!this.dead){const config=configs[cursor++];if(!this.modelListURL(config)||!this.llmKey(config))continue;try{const result=await this.discoverModels(config);results.push({id:config.id,name:config.name,ok:true,count:result.count});}catch(e){results.push({id:config.id,name:config.name,ok:false,message:e.message});}}};await Promise.all([run(),run()]);
+   const run=async()=>{while(cursor<configs.length&&!this.dead){const config=configs[cursor++];if(!this.modelListURL(config)||!await this.llmKey(config))continue;try{const result=await this.discoverModels(config);results.push({id:config.id,name:config.name,ok:true,count:result.count});}catch(e){results.push({id:config.id,name:config.name,ok:false,message:e.message});}}};await Promise.all([run(),run()]);
    if(this.dead)throw Error('模型更新已取消');return{...catalog,catalogError,results};
   })();this.modelRefreshFlights.set(task,job);try{return await job;}finally{this.modelRefreshFlights.delete(task);}
  },
@@ -274,11 +274,11 @@ var CiteLensTranslationLLM = {
   this.llmStorage(config.task);
   return {...config,endpoint:url.href.replace(/\/$/,''),model:config.model.trim()};
  },
- llmLogins(config) {
+ async llmLogins(config) {
   if(!config.endpoint)return [];const origin=new this.host.URL(config.endpoint).origin;
-  return Services.logins.findLogins(origin,null,this.llmStorage(config.task).realm).filter(login=>login.username===config.id+' '+config.endpoint);
+  return (await Services.logins.searchLoginsAsync({origin,httpRealm:this.llmStorage(config.task).realm})).filter(login=>login.username===config.id+' '+config.endpoint);
  },
- llmKey(config) {return this.llmLogins(config)[0]?.password||'';},
+ async llmKey(config) {return (await this.llmLogins(config))[0]?.password||'';},
  async saveLLM(config,key,{activateTranslation=true}={}) {
   config=this.validateLLM(config);
   const storage=this.llmStorage(config.task);config.task=storage.task;
@@ -287,10 +287,10 @@ var CiteLensTranslationLLM = {
   if(key){
    const {nsLoginInfo}=ChromeUtils.importESModule('resource://gre/modules/LoginInfo.sys.mjs'),login=new nsLoginInfo();
    login.init(new this.host.URL(config.endpoint).origin,null,storage.realm,config.id+' '+config.endpoint,key,'','');
-   const existing=this.llmLogins(config)[0];
-   if(existing)Services.logins.modifyLogin(existing,login);else await Services.logins.addLoginAsync(login);
+   const existing=(await this.llmLogins(config))[0];
+   if(existing)await (Services.logins.modifyLoginAsync?.bind(Services.logins)||Services.logins.modifyLogin.bind(Services.logins))(existing,login);else await Services.logins.addLoginAsync(login);
   }
-  if(!this.llmKey(config))throw new Error('请先填写 API Key');
+  if(!await this.llmKey(config))throw new Error('请先填写 API Key');
   let configs={};try{configs=JSON.parse(this.get(storage.configs,'{}'));}catch(_){}
   const preset=this.llmPreset(config.id);
   // Pin the credential endpoint. Never relocate an existing key when a provider migrates.
@@ -301,8 +301,8 @@ var CiteLensTranslationLLM = {
   if(activateTranslation&&storage.task==='translation')this.set('translationProvider','llm');this.syncSettings();
   return config;
  },
- removeLLMKey(config) {
-  for(const login of this.llmLogins(config))Services.logins.removeLogin(login);
+ async removeLLMKey(config) {
+  for(const login of await this.llmLogins(config))await (Services.logins.removeLoginAsync?.bind(Services.logins)||Services.logins.removeLogin.bind(Services.logins))(login);
   this.invalidateLLM(config.task);
  },
  llmError(status=0) {
@@ -390,16 +390,16 @@ var CiteLensTranslationLLM = {
   });
  },
  async testLLM(config,{onProgress=()=>{}}={}) {
-  onProgress('translation');try{const scoped=this.validateLLM(config);await this.llmRequest(scoped,this.llmKey(scoped),'Gene expression regulates retinal development.','zh-Hans');return{translation:{ok:true}};}catch(e){return{translation:{ok:false,message:e.message}};}
+  onProgress('translation');try{const scoped=this.validateLLM(config);await this.llmRequest(scoped,await this.llmKey(scoped),'Gene expression regulates retinal development.','zh-Hans');return{translation:{ok:true}};}catch(e){return{translation:{ok:false,message:e.message}};}
  },
  async removeLegacyNetwork(){
   // Remove only this plugin's retired network settings and dedicated credential realm.
   for(const key of ['networkEngine','networkLLMProvider','networkLLMConfigs','networkLLMRevision','networkLLMDiscoveredModels'])Zotero.Prefs.clear('paperLoom.shared.'+key);
   try{const configs=JSON.parse(this.get('llmConfigs','{}'));let changed=false;for(const row of Object.values(configs))if(row&&typeof row==='object'&&'clusterModel' in row){delete row.clusterModel;changed=true;}if(changed)this.set('llmConfigs',JSON.stringify(configs));}catch(_){}
-  const logins=await Services.logins.getAllLogins();for(const login of logins)if(login.httpRealm==='Paper Loom Network API')Services.logins.removeLogin(login);
+  const logins=await Services.logins.getAllLogins();for(const login of logins)if(login.httpRealm==='Paper Loom Network API')await (Services.logins.removeLoginAsync?.bind(Services.logins)||Services.logins.removeLogin.bind(Services.logins))(login);
  },
  async translateLLM(text,source,options={}) {
-  const config=this.validateLLM(this.llmTaskConfig('translation')),secret=this.llmKey(config);
+  const config=this.validateLLM(this.llmTaskConfig('translation')),secret=await this.llmKey(config);
   if(!secret)throw new Error('请在翻译设置中配置大模型 API');
   const target=options.target||this.get('translationTarget','zh-Hans');
   const key=['llm',config.id,config.endpoint,config.model,this.get('llmRevision',0),source,target,text].join('\0');

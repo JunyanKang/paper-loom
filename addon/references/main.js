@@ -3,7 +3,7 @@ var CiteLens = {
   async start() {
     this.dead=false;this.stopTask=null;this.assetResource='paper-nexus-'+this.version.replace(/\./g,'-')+'-'+Services.uuid.generateUUID().toString().replace(/[{}]/g,'');this.ensureAssets();
     await Zotero.uiReadyPromise;await CiteLensServices.init();CiteLensTranslation.init();await CiteLensThemes.initialize();this.dead=false;CiteLensUpdater.start(this).catch(e=>Zotero.logError(e));this.setNetworkEnabled(CiteLensServices.state.settings.networkEnabled===true,{persist:false}).catch(e=>Zotero.logError(e));
-    this.toolbarHandler=e=>{if(this.dead)return;const button=this.toolbar(e.doc,e.reader);if(!button.isConnected)e.append(button);this.normalizeToolbar(e.doc);e.doc.defaultView.setTimeout(()=>{if(!this.dead)this.normalizeToolbar(e.doc);this.scheduleScan();},0);};
+    this.toolbarHandler=e=>{if(this.dead)return;if(this.readerToolbarEnabled===false){this.scheduleScan();return;}const button=this.toolbar(e.doc,e.reader);if(!button.isConnected)e.append(button);this.normalizeToolbar(e.doc);e.doc.defaultView.setTimeout(()=>{if(!this.dead)this.normalizeToolbar(e.doc);this.scheduleScan();},0);};
     Zotero.Reader.registerEventListener('renderToolbar',this.toolbarHandler,this.id);
     for(const win of Zotero.getMainWindows())this.addWindow(win);
     this.readerObserver=Zotero.Notifier.registerObserver({notify:()=>this.scheduleScan()},['tab','file'],'paper-nexus-readers');
@@ -75,7 +75,7 @@ var CiteLens = {
   },
   attach(reader) {
     const doc=reader._iframeWindow?.document;if(!doc?.body)return;CiteLensUI.style(doc);
-    if(!doc.querySelector('[data-cite-lens="toolbar"]'))(doc.querySelector('.toolbar .end')||doc.querySelector('.toolbar'))?.append(this.toolbar(doc,reader));this.normalizeToolbar(doc);
+    if(this.readerToolbarEnabled!==false&&!doc.querySelector('[data-cite-lens="toolbar"]'))(doc.querySelector('.toolbar .end')||doc.querySelector('.toolbar'))?.append(this.toolbar(doc,reader));this.normalizeToolbar(doc);
     let state=this.readers.get(reader);
     if(!state){state={doc,hooks:[],refPromise:null};this.readers.set(reader,state);
       state.observer=new doc.defaultView.MutationObserver(records=>{
@@ -236,9 +236,9 @@ var CiteLens = {
     for(const old of pdfwin.document.querySelectorAll('.cl-citation-flash'))old.remove();
     for(const r of location.position.rects){const rect=page.viewport.convertToViewportRectangle(Components.utils.cloneInto(Array.from(r),pdfwin)),flash=pdfwin.document.createElement('div');flash.className='cl-citation-flash';flash.style.cssText='position:absolute;pointer-events:none;border-radius:3px;z-index:3;left:'+Math.min(rect[0],rect[2])+'px;top:'+Math.min(rect[1],rect[3])+'px;width:'+Math.abs(rect[2]-rect[0])+'px;height:'+Math.abs(rect[3]-rect[1])+'px;background:'+CiteLensThemes.resolve(CiteLensServices.state.settings.theme).highlight;page.div.append(flash);pdfwin.setTimeout(()=>flash.remove(),2400);}
   },
-  showNetwork(reader=null,{doc=Zotero.getMainWindow().document}={}){if(CiteLensServices.state.settings.networkEnabled!==true){CiteLensUI.settingsDialog(reader?._iframeWindow?.document||Zotero.getMainWindow().document);return;}return CiteLensNetworkUI.open(reader,{doc});},
+  showNetwork(reader=null,{doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document}={}){if(CiteLensServices.state.settings.networkEnabled!==true){CiteLensUI.settingsDialog(reader?._iframeWindow?.document||Zotero.getMainWindow().document);return;}return CiteLensNetworkUI.open(reader,{doc});},
   togglePanel(reader){const current=[...CiteLensUI.pageViews].find(v=>v.reader===reader&&!v.container.hidden);if(current){current.dismiss();return;}const panel=this.panels.get(reader);if(panel?.isConnected){panel._clSetOpen?.(!panel._clOpen);return panel;}return this.showPanel(reader);},
-  showPanel(reader,options={}) {this.panels.get(reader)?.remove();const doc=reader._iframeWindow.document,panel=CiteLensUI.panel(doc,reader,options);this.panels.set(reader,panel);return panel;},
+  showPanel(reader,options={}) {const existing=this.panels.get(reader);if(existing?.isConnected&&!Object.keys(options).length){existing._clSetOpen?.(true);return existing;}existing?._clPage?.destroy();const doc=reader._iframeWindow.document,panel=CiteLensUI.panel(doc,reader,options);this.panels.set(reader,panel);return panel;},
   refreshMetrics() {for(const reader of this.readers.keys()){const doc=reader._iframeWindow.document;for(const card of doc.querySelectorAll('[data-cite-lens=card]'))card.dispatchEvent(new doc.defaultView.Event('cl-metrics-changed'));this.enhance(reader);doc.querySelector('.cl-root')?.dispatchEvent(new doc.defaultView.Event('cl-metrics-changed'));}},
   refreshAuthors() {for(const {doc} of this.readers.values())for(const card of doc.querySelectorAll('[data-cite-lens=card]'))card.dispatchEvent(new doc.defaultView.Event('cl-authors-changed'));},
   async picker(mode,title,filters,defaultName='Paper-Nexus-references.ris') {

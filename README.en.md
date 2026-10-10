@@ -1,5 +1,5 @@
 <p align="center"><img src="addon/assets/loom.png" width="144" alt="Paper Loom mascot: a book with headphones and a magnifying glass" /></p>
-<h1 align="center">Paper Loom · 文织</h1>
+<h1 align="center">Paper Loom</h1>
 <p align="center"><strong>Read. Listen. Follow the connections.</strong></p>
 <p align="center">A reading companion for Zotero: offline speech, translation, references, and author discovery.</p>
 <p align="center"><a href="README.md">简体中文</a> · <a href="https://github.com/JunyanKang/paper-loom/releases/latest">Download XPI</a> · <a href="docs/GUIDE.en.md">User guide</a> · <a href="https://github.com/JunyanKang/paper-loom/issues">Feedback</a></p>
@@ -8,11 +8,10 @@ Paper Loom keeps the next step close to the paper you are reading. Listen to a d
 
 ![Paper Loom listening controls in Zotero](docs/images/listening-en.png)
 
-*Actual Paper Loom interface in Zotero. Reading and network screenshots use an illustrative demo library; they do not present research results.*
 
 ## Get started
 
-1. Download **paper-loom-1.0.0.xpi** from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest).
+1. Download **paper-loom-1.0.1.xpi** from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest).
 2. In Zotero, choose **Tools → Plugins → gear → Install Plugin From File…** and select the XPI. Restart if Zotero asks.
 3. Click the **small book in the left toolbar**, then **Settings → Voices & engine → Download engine & voices**. Paper Loom detects your operating system and processor.
 4. Open a PDF. The floating book appears automatically; select text to listen or open it to choose a reading mode.

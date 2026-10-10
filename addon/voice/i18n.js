@@ -1056,7 +1056,7 @@ var PaperVoiceI18n = (() => {
   };
   function visit(node){
    if(node.nodeType===3){update(node,'text',node.nodeValue,v=>node.nodeValue=v);return;}
-   if(node.nodeType!==1||['STYLE','SCRIPT'].includes(node.tagName)||node.classList?.contains('pl-engine'))return;
+   if(node.nodeType!==1||['STYLE','SCRIPT'].includes(node.tagName)||node.classList?.contains('pl-engine')||node.classList?.contains('pl-navigation'))return;
    if(node.getAttribute('data-field')==='selectPopover')return;
    if(node.getAttribute('data-field')==='language'){const auto=node.querySelector('option[value=auto]');if(auto)visit(auto);return;}
    if(node.getAttribute('data-field')==='preview'&&!placeholders.has(node.textContent))return;
