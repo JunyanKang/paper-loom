@@ -23,5 +23,9 @@ try{
  f._plSelect('appearance');await wait(200);check('switching settings category hides model editor',f.querySelector('.cl-llm-settings').hidden&&!f.querySelector('.cl-settings-tabs').hidden);await inspect(f.querySelector('[data-select-id=cl-setting-interfaceLanguage]'),'.cl-select-popover','interface flags');
  f._plSelect('voice');await wait(250);const inside=f.querySelector('iframe').contentDocument;
  await inspect(inside.querySelector('[data-select-field=speechLanguage] button'),'.pv-select-popover','speech flags');
+ const speech=inside.querySelector('[data-field=speechLanguage]');check('speech language always shows a concrete supported choice',speech.value!=='auto'&&[...speech.options].map(o=>o.value).join(',')==='en,zh,ja,fr');
+ const oldLanguage=V.get('speechLanguage','en'),oldVoice=V.get('voice','af_heart');
+ try{for(const code of ['en','zh','ja','fr']){speech.value=code;speech.dispatchEvent(new inside.defaultView.Event('change',{bubbles:true}));await wait(80);const voices=inside.querySelector('[data-field=voice]');check(code+' selection changes speech and retains numbered voices',V.get('speechLanguage','en')===code&&V.speechLanguage()===code&&voices.options.length>0&&[...voices.options].every(o=>/[12]$/.test(o.textContent)),[...voices.options].map(o=>o.textContent));}}finally{V.set('speechLanguage',oldLanguage);V.set('voice',oldVoice);V.syncSettings();}
+
  return {passed:true,checks};
 }catch(e){return {passed:false,error:String(e),stack:e.stack,checks};}finally{V.set('llmConfigs',savedConfigs);V.set('llmProvider',savedProvider);T.set('translationProvider',saved);V.syncSettings();}

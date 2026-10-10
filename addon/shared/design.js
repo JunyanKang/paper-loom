@@ -155,9 +155,9 @@ var LoomDesignStyle = `
 .pl-workspace-page{--pl-art-size:auto max(480px,calc(100vh - 112px))}
 .pv-shell[data-theme] .pv-panel.pl-workspace-page::before{background-position:left bottom;background-size:100% 100%,var(--pl-art-size);background-repeat:no-repeat}
 :is(.cl-root,.cl-settings).pl-workspace-page::before{background-position:left bottom;background-size:100% 100%,100% 100%,var(--pl-art-size);background-repeat:no-repeat}
-.pl-workspace-page>.pl-main-actions{justify-content:flex-end;height:38px;padding:0 58px 2px 0;gap:12px}
+.pl-workspace-page>.pl-main-actions{justify-content:flex-end;height:38px;padding:0 var(--pl-nav-right,58px) 2px 0;gap:12px}
 .pl-workspace-page>.pl-main-actions>button{height:36px!important;min-height:36px!important;padding:7px 10px!important}
-@media(max-width:350px){.pl-workspace-page>.pl-main-actions{padding-right:12px}}
+@media(max-width:350px){.pl-workspace-page>.pl-main-actions{--pl-nav-right:12px}}
 :is(.cl-select-popover,.pv-select-popover) [role=option]:not(.pl-language-option){justify-content:flex-end;text-align:right;white-space:normal}
 :is(.cl-select-popover,.pv-select-popover) [role=option]:not(.pl-language-option)>span:first-child{flex:1;min-width:0;text-align:right;overflow-wrap:break-word}
 /* Settings categories retain one outer height and a common row rhythm. */
@@ -186,4 +186,13 @@ var LoomDesignStyle = `
 /* Embedded settings inherit the parent surface without glass tint or saturation. */
 html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.pl-embedded.pv-shell .pv-panel,.pl-embedded .pv-settings-content,.pl-embedded [data-settings-pane]{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}
 .pl-embedded .pv-panel::before,.pl-embedded .pv-panel::after{display:none!important}
+/* Open content surface; only the lower edge flows into the active tab. */
+.pl-workspace-content{background:transparent;box-shadow:none;border-radius:0}
+.cl-settings.pl-settings .cl-dialog-body{background:transparent;box-shadow:none}
+.cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button[aria-selected=true]::after{display:none}
+.pl-workspace-page>.pl-main-actions{position:relative;--pl-selected-right:calc(var(--pl-nav-right,58px) + (3 - var(--pl-active-index,0))*60px)}
+.pl-workspace-page>.pl-main-actions::before,.pl-workspace-page>.pl-main-actions::after{content:'';position:absolute;top:0;height:1px;background:var(--pl-tab-line);pointer-events:none}
+.pl-workspace-page>.pl-main-actions::before{left:12px;right:calc(var(--pl-selected-right) + 48px)}
+.pl-workspace-page>.pl-main-actions::after{left:calc(100% - var(--pl-selected-right));right:12px}
+.pl-workspace-page>.pl-main-actions>button[aria-current=page]::before{display:none}
 `;

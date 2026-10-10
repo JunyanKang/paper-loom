@@ -7,7 +7,7 @@ try{
  for(const id of ['references','network','settings']){
   main.querySelector('[data-loom-page='+id+']').click();await settle();const view=doc.querySelector(id==='references'?'.cl-root':id==='network'?'.pn-map-window':'.cl-settings');
   check(id+' available without PDF',!!view&&!view.hidden&&view.getBoundingClientRect().width>200);
-  check(id+' has four header destinations',view.querySelectorAll('.pl-main-actions button').length===4);
+  check(id+' has four footer destinations',view.querySelectorAll('.pl-main-actions button').length===4);
   view.querySelector('[data-loom-page=listening]').click();await settle();check(id+' returns to listening',!main.hidden&&view.hidden);
  }
  ui.action('orb').click();await settle();check('library mascot collapses workspace',main.hidden);

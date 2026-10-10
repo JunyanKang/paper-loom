@@ -15,6 +15,8 @@ var PaperVoice = {
   get host() { return Zotero.getMainWindow() || this.timerHost; },
   async start() {
     this.dead = false;this.timerHost=Zotero.getMainWindow();
+    // Replace the retired automatic choice with a concrete default language.
+    if(!PaperVoiceCore.speechLanguages.some(x=>x.id===this.get('speechLanguage',''))){this.set('speechLanguage','en');this.selectVoiceLanguage('en');}
     await this.loadThemeImage?.();
     this.loadReadingSession();
     this.quitObserver=()=>{this.quitting=true;this.saveReadingSession();Services.prefs.savePrefFile(null);};
@@ -381,7 +383,7 @@ var PaperVoice = {
       if(find('transparency')){find('transparency').value=this.get('surfaceTransparency',0);find('transparencyLabel').textContent=this.get('surfaceTransparency',0)+'%';}
       if(find('language')){find('language').value=this.get('interfaceLanguage','auto');find('language').querySelector('[value=auto]').textContent=this.t('跟随系统');}
       if(find('speechLanguage')) {
-        find('speechLanguage').value=this.get('speechLanguage','auto');
+        find('speechLanguage').value=this.get('speechLanguage','en');
         const select=find('voice');select.replaceChildren();
         for(const v of PaperVoiceCore.voices.filter(v=>v.language===this.settingsVoiceLanguage())){const option=root.ownerDocument.createElement('option');option.value=v.id;option.textContent=v.label;select.append(option);}
       }
@@ -836,7 +838,7 @@ var PaperVoice = {
     units=PaperVoiceCore.spokenUnits(units);
     if(!units.length||startIndex>=units.length){this.setStatus('选区仅包含引文标记，无需朗读','idle');return;}
     if(this.state!=='paused')this.setStatus('正在准备自然语音…','loading');
-    const languageMode=sample?this.settingsVoiceLanguage():this.get('speechLanguage','auto');
+    const languageMode=sample?this.settingsVoiceLanguage():this.get('speechLanguage','en');
     const selectedVoice=this.get('voice','af_heart'),voiceChoices=Object.fromEntries(PaperVoiceCore.speechLanguages.map(x=>[x.id,this.get('voiceFor_'+x.id,PaperVoiceCore.voices.find(v=>v.language===x.id).id)]));
     voiceChoices[this.speechLanguage()]=selectedVoice;
     let contextText='',documentLanguage=languageMode;
@@ -934,7 +936,7 @@ var PaperVoice = {
           if(generation!==this.generation || this.dead)return;
           activeConfig=prepared.config;activeSentence=prepared.unit;
           this.activeSpeechLanguage=prepared.language;
-          if(!prepared.readTranslation&&languageMode==='auto'&&this.get('speechLanguage','auto')==='auto'){this.set('voice',prepared.voice);this.syncSettings();}
+          if(!prepared.readTranslation&&languageMode==='auto'&&this.get('speechLanguage','en')==='auto'){this.set('voice',prepared.voice);this.syncSettings();}
           const hasNext=prepared.endIndex+1<units.length || loops===0 || cycle+1<loops;
           next=hasNext?takePrepared((prepared.endIndex+1)%units.length,1):null;
           fillAhead(next,++bufferTicket);

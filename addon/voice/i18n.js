@@ -1023,6 +1023,18 @@ var PaperVoiceI18n = (() => {
  Object.assign(catalogs.ja,{'点击取消':'クリックでキャンセル','已取消准备':'準備をキャンセルしました'});
  Object.assign(catalogs.fr,{'点击取消':'Annuler','已取消准备':'Préparation annulée'});
  Object.assign(catalogs.de,{'点击取消':'Abbrechen','已取消准备':'Vorbereitung abgebrochen'});
+ const voiceLabels={
+  '美音 · 女':['US · Female ','米語 · 女性','US · Femme ','US · Weiblich '],
+  '美音 · 男':['US · Male ','米語 · 男性','US · Homme ','US · Männlich '],
+  '英音 · 女':['UK · Female ','英語 · 女性','UK · Femme ','UK · Weiblich '],
+  '英音 · 男':['UK · Male ','英語 · 男性','UK · Homme ','UK · Männlich '],
+  '普通话 · 女':['Mandarin · Female ','中国語 · 女性','Mandarin · Femme ','Mandarin · Weiblich '],
+  '普通话 · 男':['Mandarin · Male ','中国語 · 男性','Mandarin · Homme ','Mandarin · Männlich '],
+  '日语 · 女':['Japanese · Female ','日本語 · 女性','Japonais · Femme ','Japanisch · Weiblich '],
+  '日语 · 男':['Japanese · Male ','日本語 · 男性','Japonais · Homme ','Japanisch · Männlich '],
+  '法语 · 女':['French · Female ','仏語 · 女性','Français · Femme ','Französisch · Weiblich ']
+ };
+ for(const [prefix,values] of Object.entries(voiceLabels))for(let number=1;number<=2;number++)for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][prefix+number]=values[i]+number;
  const keys=Object.keys(catalogs.en).sort((a,b)=>b.length-a.length);
  const pattern=new RegExp(keys.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
  const sources=new WeakMap();

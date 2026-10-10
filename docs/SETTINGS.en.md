@@ -16,7 +16,7 @@ Do not include keys in feedback screenshots. Keys are stored locally using Zoter
 
 ![Voices & engine](images/voices-en.png)
 
-Select a text language and its voice, adjust speed, and preview it. English includes US and UK voices; Mandarin and Japanese include male and female voices; French includes Siwis. Automatic language detection may be uncertain for very short or mixed-language text; select the language manually when needed.
+Reading defaults to English; Mandarin, Japanese, and French are also available. Voices use a language, gender, and number, such as “US · Female 1” or “UK · Male 1”. Choose a voice, preview it, and adjust its speed.
 
 Below the voice controls, download the matching engine, cancel/resume, check voices, or view the installation location. Import an existing engine with the folder button. Unchanged voice packages need not be downloaded for every plugin update.
 

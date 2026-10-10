@@ -16,7 +16,7 @@ Run **Check installed voices**, then preview a voice. Check the system output de
 
 ## A language or pronunciation is wrong
 
-Short or mixed-language passages can confuse detection. Choose the language and voice manually. Technical abbreviations and equations may not be pronounced as a human reader would. All 14 voices use local speech synthesis; they are not human recordings.
+Check that the reading language matches the passage, then choose and preview a voice. Technical abbreviations and equations may not be pronounced as a human reader would. All 14 voices use local speech synthesis; they are not human recordings.
 
 ## Scanned pages, tables, or columns read incorrectly
 

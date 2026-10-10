@@ -11,7 +11,7 @@ var PaperLoom = {
     if(code==='llm'){try{const selected=this.voice.get('llmProvider','');const saved=JSON.parse(this.voice.get('llmConfigs','{}'));id=selected&&saved[selected]?selected:'llm';}catch(_){id='llm';}}
     const known=['tencenttransmart','bing','google','llm',...presets.map(p=>p.id)];if(!known.includes(id))id='custom';
     const label=({tencenttransmart:'Tencent',bing:'Microsoft',google:'Google',llm:'LLM',custom:'Custom API',qwen:'Qwen',doubao:'Doubao',glm:'GLM',hunyuan:'Hunyuan',qianfan:'Qianfan',anthropic:'Claude'})[id]||presets.find(p=>p.id===id)?.name||'LLM';
-    return {id,label:code==='llm'&&id!=='llm'?'LLM · '+label:label,uri:this.assetURI+'providers/'+id+'.svg'};
+    return {id,label:code==='llm'&&id!=='llm'?'LLM · '+label:label,uri:this.assetURI+'providers/'+id+(id==='tencenttransmart'?'.png':'.svg')};
   },
   style(doc) {
     if(doc.getElementById('paper-loom-style'))return;
@@ -47,6 +47,7 @@ var PaperLoom = {
   mainNavigation(doc,reader,active='listening'){
     const nav=this.el(doc,'nav',null,'pl-main-actions');nav.setAttribute('aria-label','Paper Loom');
     const entries=[['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['listening','headphones','听读',()=>this.voice.showPanel(reader)],['references','references','引文与稍后读',()=>this.references.showPanel(reader,this.references.panels.get(reader)?.isConnected?{}:{view:reader.itemID?'references':'queue'})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];
+    nav.style.setProperty('--pl-active-index',String(entries.findIndex(entry=>entry[0]===active)));
     for(const [id,icon,label,run] of entries){const button=this.referencesScope.CiteLensUI.iconButton(doc,label,icon,()=>{if(id!==active)return run();});button.dataset.loomPage=id;button.setAttribute('aria-current',id===active?'page':'false');nav.append(button);}return nav;
   },
   mountWorkspace(frame,reader,active){

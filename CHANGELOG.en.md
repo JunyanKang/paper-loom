@@ -4,6 +4,9 @@
 
 ## 1.0.2 · 2026-10-10
 
+- Reading defaults to English; voice names use language, gender, and number. Tencent translation uses the full-color QQ penguin.
+- Remove extra content outlines and fills, keeping a lower edge connected to the selected navigation tab.
+
 - Settings categories share a fixed height and consistent row spacing. Appearance moves to the last tab and includes update options. Model configuration opens below its gear without replacing the current page.
 - Bottom navigation stays in place with the active tab connected to its page. Artwork in listening, references, and settings stays anchored at the bottom left. Citation styles use a compact right-aligned menu with Cell, Nature, and Science first, followed by alphabetical entries.
 - Listening, references, and settings now share a width and type scale; flags and provider logos use aligned compact menus, and workspace switching no longer fades through transparency.
