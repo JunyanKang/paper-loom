@@ -21,10 +21,10 @@ var PaperLoom = {
     if(this.dead||this.windows.has(win))return;
     this.style(win.document);const item=win.document.createXULElement('menuitem');item.id='paper-loom-tools';item.setAttribute('label',this.name);item.setAttribute('class','menuitem-iconic');item.setAttribute('image',this.assetURI+'loom.png');item.addEventListener('command',()=>this.showHome(this.currentReader(win.document),win.document));
     win.document.getElementById('menu_ToolsPopup')?.append(item);
-    const host=win.document.getElementById('zotero-items-toolbar'),entry=this.button(win.document,'',()=>this.showHome(null,win.document));entry.className='cl-library-entry pl-library-entry';entry.setAttribute('aria-label',this.name);entry.append(this.logo(win.document,24));const spacer=host&&[...host.children].find(node=>node.localName==='spacer'||node.id==='zotero-tb-search-spinner'||node.id==='zotero-tb-search');host?.insertBefore(entry,spacer||null); this.windows.set(win,{item,entry});
+    const host=win.document.getElementById('zotero-items-toolbar'),entry=this.button(win.document,'',()=>this.showHome(null,win.document));entry.className='cl-library-entry pl-library-entry';entry.setAttribute('aria-label',this.name);entry.append(this.logo(win.document,24));const spacer=host&&[...host.children].find(node=>node.localName==='spacer'||node.id==='zotero-tb-search-spinner'||node.id==='zotero-tb-search');host?.insertBefore(entry,spacer||null); const key=e=>this.voice?.handlePlaybackShortcut(e);win.addEventListener('keydown',key,true);this.windows.set(win,{item,entry,key});
     this.references?.windows.set(win,item);
   },
-  removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
+  removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();if(nodes?.key)win.removeEventListener('keydown',nodes.key,true);this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
   installOutsideCollapse(ui,reader){
     const doc=ui.root.ownerDocument,U=this.referencesScope.CiteLensUI,surfaces=new Set();let disposed=false;
     const inside=node=>{
