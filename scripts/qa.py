@@ -33,17 +33,17 @@ if os.environ.get('PAPER_LOOM_QA_ENGINE'):prefs['extensions.paperLoom.voice.engi
 subprocess.run([sys.executable,str(root/'scripts/build.py')],check=True)
 harness=r"""
 (async()=>{
- const base=__ROOT__,L=PaperLoom;
- await IOUtils.writeUTF8(base+'/test-results/ready.json',JSON.stringify({version:Zotero.version,profile:Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path,started:L.started,platform:LoomRuntime.platform}));
+ const base=__ROOT__,resultsPath=__RESULTS__,L=PaperLoom;
+ await IOUtils.writeUTF8(PathUtils.join(resultsPath,'ready.json'),JSON.stringify({version:Zotero.version,profile:Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path,started:L.started,platform:LoomRuntime.platform}));
  let busy=false,last='';
  L.qaTimer=Zotero.getMainWindow().setInterval(async()=>{
-  if(busy)return;const path=base+'/test-results/command.js';if(!await IOUtils.exists(path))return;
+  if(busy)return;const path=PathUtils.join(resultsPath,'command.js');if(!await IOUtils.exists(path))return;
   const code=await IOUtils.readUTF8(path);if(code===last)return;last=code;busy=true;
-  try{const value=await new Function('L','Zotero','IOUtils','PathUtils','Services','ChromeUtils','Components','Runtime','return (async()=>{'+code+'})()')(L,Zotero,IOUtils,PathUtils,Services,ChromeUtils,Components,LoomRuntime);await IOUtils.writeUTF8(base+'/test-results/result.json',JSON.stringify({ok:true,value},null,2));}
-  catch(e){await IOUtils.writeUTF8(base+'/test-results/result.json',JSON.stringify({ok:false,error:String(e),stack:e.stack},null,2));}
+  try{const value=await new Function('L','Zotero','IOUtils','PathUtils','Services','ChromeUtils','Components','Runtime','return (async()=>{'+code+'})()')(L,Zotero,IOUtils,PathUtils,Services,ChromeUtils,Components,LoomRuntime);await IOUtils.writeUTF8(PathUtils.join(resultsPath,'result.json'),JSON.stringify({ok:true,value},null,2));}
+  catch(e){await IOUtils.writeUTF8(PathUtils.join(resultsPath,'result.json'),JSON.stringify({ok:false,error:String(e),stack:e.stack},null,2));}
   finally{busy=false;}
  },300);
-})();""".replace('__ROOT__',json.dumps(str(root))).replace('/test-results/', '/test-results'+suffix+'/')
+})();""".replace('__ROOT__',json.dumps(str(root))).replace('__RESULTS__',json.dumps(str(results)))
 with zipfile.ZipFile(profile/'extensions/paper-loom@local.research.xpi','w',zipfile.ZIP_DEFLATED) as z:
  for p in (root/'addon').rglob('*'):
   if not p.is_file() or p.name=='.DS_Store':continue

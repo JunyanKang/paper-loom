@@ -32,7 +32,7 @@ if(!attachment){
  attachment=await Zotero.Attachments.importFromFile({file:PathUtils.join(base,'tests','two-column.pdf'),parentItemID:parent.id});Zotero.Prefs.set('paperLoom.qaAttachment',attachment.id);
  const related=new Zotero.Item('journalArticle');related.setField('title','Paper Loom linked paper fixture');related.setField('date','2025');related.setCreators([{creatorType:'author',firstName:'Ada',lastName:'Example'},{creatorType:'author',firstName:'Kai',lastName:'Fixture'}]);await related.saveTx();
 }
-const reader=await Zotero.Reader.open(attachment.id);await reader._initPromise;
+const opened=await Zotero.Reader.open(attachment.id);const reader=opened||Zotero.Reader._readers.find(r=>r.itemID===attachment.id);if(!reader)throw Error('Reader did not open');await reader._initPromise;
 for(let n=0;n<100&&!L.references.readerReady(reader);n++)await Zotero.Promise.delay(150);
 L.voice.attachReader(reader);L.references.attach(reader);await Zotero.Promise.delay(800);
 const doc=reader._iframeWindow.document;
@@ -117,4 +117,4 @@ try{
 }catch(e){return {passed:false,checks,error:String(e),stack:e.stack};}finally{L.voice.setCaptionStyle('captionSize',size);T.set('translationProvider',provider);T.set('translationTarget',target);}
 
 })();
-return {passed:Object.values(results).every(r=>r.passed),version:Zotero.version,results};
+return {passed:Object.values(results).every(r=>r.passed),results};
