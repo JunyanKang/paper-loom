@@ -73,6 +73,30 @@ var PaperVoiceUI = {
   doc.addEventListener('pointerover',enter);doc.addEventListener('pointerout',leave);doc.addEventListener('focusin',enter);doc.addEventListener('focusout',leave);doc.addEventListener('pointerdown',hide,true);doc.addEventListener('keydown',hide,true);doc.addEventListener('scroll',hide,true);win.addEventListener('resize',hide);
   return {hide,dispose(){hide();observer.disconnect();for(const [name,fn,capture] of [['pointerover',enter],['pointerout',leave],['focusin',enter],['focusout',leave],['pointerdown',hide,true],['keydown',hide,true],['scroll',hide,true]])doc.removeEventListener(name,fn,capture);win.removeEventListener('resize',hide);tip._pvFade?.cancel();tip.remove();}};
  },
+ voiceSymbol(label,controller,code) {
+  const voice=PaperVoiceCore.voices.find(v=>v.id===code);if(!voice||label.dataset.voice===code)return;
+  label.dataset.voice=code;label.classList.add('pl-voice-symbol');
+  const doc=label.ownerDocument,make=tag=>doc.createElementNS('http://www.w3.org/1999/xhtml',tag),flag=make('img'),avatar=make('span');
+  flag.className='pl-flag';flag.alt='';flag.src=controller.flagURI(voice.accent==='US'?'en-US':voice.accent==='GB'?'en':voice.language);
+  avatar.className='pl-voice-avatar';avatar.setAttribute('aria-hidden','true');avatar.dataset.voice=code;
+  const portrait={af_heart:0,af_bella:1,bf_emma:2,zf_xiaobei:3,zf_xiaoxiao:4,jf_tebukuro:5,jf_alpha:6,ff_siwis:7,am_michael:8,am_fenrir:9,bm_george:10,zm_yunxi:11,zm_yunjian:12,jm_kumo:13}[code],col=portrait%4,row=Math.floor(portrait/4),xs=[0,314,627,940,1254],ys=[0,314,622,930,1254],x=xs[col],y=ys[row],width=xs[col+1]-x,height=ys[row+1]-y;
+  avatar.style.backgroundImage='url("'+controller.assetURI+'voices/portraits.png")';avatar.style.backgroundSize=(1254/width*100)+'% '+(1254/height*100)+'%';avatar.style.backgroundPosition=(x/(1254-width)*100)+'% '+(y/(1254-height)*100)+'%';label.replaceChildren(flag,avatar);
+ },
+ // Trace the union once: translucent popup surfaces must never overlap their fills.
+ connectedSurfacePath(rects,radius=10) {
+  rects=rects.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,Math.round(v*4)/4])));
+  const xs=[...new Set(rects.flatMap(r=>[r.left,r.right]))].sort((a,b)=>a-b),ys=[...new Set(rects.flatMap(r=>[r.top,r.bottom]))].sort((a,b)=>a-b),edges=new Map(),key=p=>p.join(',');
+  const edge=(a,b)=>{const reverse=key(b)+'>'+key(a);if(edges.has(reverse))edges.delete(reverse);else edges.set(key(a)+'>'+key(b),[a,b]);};
+  for(let x=0;x<xs.length-1;x++)for(let y=0;y<ys.length-1;y++){
+   const cx=(xs[x]+xs[x+1])/2,cy=(ys[y]+ys[y+1])/2;if(!rects.some(r=>cx>r.left&&cx<r.right&&cy>r.top&&cy<r.bottom))continue;
+   const a=[xs[x],ys[y]],b=[xs[x+1],ys[y]],c=[xs[x+1],ys[y+1]],d=[xs[x],ys[y+1]];edge(a,b);edge(b,c);edge(c,d);edge(d,a);
+  }
+  let path='';while(edges.size){const first=edges.values().next().value,points=[first[0]];let current=first;
+   do{edges.delete(key(current[0])+'>'+key(current[1]));points.push(current[1]);current=[...edges.values()].find(e=>key(e[0])===key(points.at(-1)));}while(current&&key(points.at(-1))!==key(points[0]));points.pop();
+   const clean=points.filter((p,i,a)=>{const prev=a[(i+a.length-1)%a.length],next=a[(i+1)%a.length];return Math.abs((p[0]-prev[0])*(next[1]-p[1])-(p[1]-prev[1])*(next[0]-p[0]))>.01;});
+   path+=clean.map((p,i,a)=>{const prev=a[(i+a.length-1)%a.length],next=a[(i+1)%a.length],before=Math.hypot(p[0]-prev[0],p[1]-prev[1]),after=Math.hypot(next[0]-p[0],next[1]-p[1]),r=Math.min(radius,before/2,after/2),start=p.map((v,j)=>v+(prev[j]-v)*r/before),end=p.map((v,j)=>v+(next[j]-v)*r/after);return (i?' L':' M')+start.join(' ')+' Q'+p.join(' ')+' '+end.join(' ');}).join('')+' Z';
+  }return path;
+ },
  installSelects(root,controller) {
   const doc=root.ownerDocument,win=doc.defaultView,entries=[],portal=doc._pvSelectHost,menuDoc=portal?.ownerDocument||doc,menuWin=menuDoc.defaultView;
   let host=root;if(portal){host=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','div');host.className='pv-shell pl-select-portal';host.style.cssText='position:fixed;width:0;height:0;right:0;bottom:0';const style=menuDoc.createElementNS('http://www.w3.org/1999/xhtml','style');style.textContent=controller.cssText;host.append(style);portal.append(host);}
@@ -84,11 +108,7 @@ var PaperVoiceUI = {
   const isIcon=select=>isLanguage(select)||isProvider(select)||isVoice(select);
   const flag=(label,code)=>{const src=controller.flagURI(code);let img=label.querySelector('img');if(!img){img=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','img');img.className='pl-flag';img.alt='';label.replaceChildren(img);}if(img.getAttribute('src')!==src)img.src=src;};
   const symbol=(select,label,code)=>{if(isVoice(select)){
-   const voice=PaperVoiceCore.voices.find(v=>v.id===code);if(!voice)return;
-   if(label.dataset.voice===code)return;label.dataset.voice=code;label.classList.add('pl-voice-symbol');
-   const flagImage=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','img'),avatar=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','span');flagImage.className='pl-flag';flagImage.alt='';flagImage.src=controller.flagURI(voice.accent==='US'?'en-US':voice.accent==='GB'?'en':voice.language);avatar.className='pl-voice-avatar';avatar.setAttribute('aria-hidden','true');avatar.dataset.voice=code;
-   const portrait={af_heart:0,af_bella:1,bf_emma:2,zf_xiaobei:3,zf_xiaoxiao:4,jf_tebukuro:5,jf_alpha:6,ff_siwis:7,am_michael:8,am_fenrir:9,bm_george:10,zm_yunxi:11,zm_yunjian:12,jm_kumo:13}[code],col=portrait%4,row=Math.floor(portrait/4),xs=[0,314,627,940,1254],ys=[0,314,622,930,1254],x=xs[col],y=ys[row],width=xs[col+1]-x,height=ys[row+1]-y;
-   avatar.style.backgroundImage='url("'+controller.assetURI+'voices/portraits.png")';avatar.style.backgroundSize=(1254/width*100)+'% '+(1254/height*100)+'%';avatar.style.backgroundPosition=(x/(1254-width)*100)+'% '+(y/(1254-height)*100)+'%';label.replaceChildren(avatar,flagImage);return;
+   PaperVoiceUI.voiceSymbol(label,controller,code);return;
   }if(isLanguage(select)){flag(label,code);return;}const meta=controller.providerMeta(code);let img=label.querySelector('img');if(!img){img=label.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml','img');img.alt='';label.replaceChildren(img);}img.className='pl-provider-icon';if(img.getAttribute('src')!==meta.uri)img.src=meta.uri;img.dataset.provider=meta.id;};
   let active=null,index=-1,typeAhead='',typeTimer=null;
   const close=()=>{if(active){active.button.setAttribute('aria-expanded','false');active.button.removeAttribute('aria-activedescendant');}active=null;PaperVoiceUI.visibility(menu,false);if(portal&&menu.matches(':popover-open'))menu.hidePopover();};

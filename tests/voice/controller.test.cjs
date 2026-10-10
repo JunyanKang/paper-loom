@@ -488,3 +488,34 @@ test('one-shot selection launch overrides looping without changing saved prefere
 test('one-shot sentence and paragraph launches override loops after resolving PDF selection',async()=>{
  for(const mode of ['sentence','paragraph']){const {p}=setup(),r=progressReader();p.set('mode',mode);p.set('repeat',0);const unit={text:'A single reading.',pageIndex:0,sentenceIndex:0,paragraphIndex:0};p.resolveSelection=async()=>unit;p.localUnits=async()=>[unit];let playback;p.runUnits=async(units,reader,generation,options)=>{playback=options;};await p.beginSelectionReading(r,{text:unit.text,pageIndex:0},null,null,{loops:1});assert.equal(playback.loops,1);assert.equal(p.get('repeat'),0);}
 });
+
+test('caption hover waits for every cross-page fragment before pausing and resumes at next sentence',async()=>{
+ const {p,played}=setup(),reader={navigate:async()=>{}};p.currentReader=reader;p.requestSpeech=async text=>({audio:text});
+ const units=[{text:'First fragment',sentenceId:1,pageIndex:0},{text:'finishes here.',sentenceId:1,pageIndex:1},{text:'Next sentence.',sentenceId:2,pageIndex:1}];
+ p.playAudio=async text=>{played.push(text);p.state='playing';if(played.length===1)p.requestCaptionPause(reader);};
+ const task=p.runUnits(units,reader,p.generation,{mode:'document',loops:1});await tick();await tick();
+ assert.deepEqual(played,['First fragment','finishes here.']);assert.equal(p.state,'paused');assert.equal(p.currentUnit.text,units[1].text);assert.equal(typeof p.captionBoundaryResume,'function');
+ p.releaseCaptionPause(reader);await task;assert.deepEqual(played,units.map(u=>u.text));assert.equal(p.state,'idle');
+});
+test('stop cancels a pending caption boundary pause and cannot resume obsolete audio',async()=>{
+ const {p,played}=setup(),r={};p.currentReader=r;p.requestSpeech=async text=>({audio:text});p.playAudio=async text=>{played.push(text);p.state='playing';p.requestCaptionPause(r);};
+ const task=p.runUnits([{text:'First.'},{text:'Next.'}],r,p.generation,{mode:'selection',loops:1});await tick();await tick();assert.equal(p.state,'paused');p.stop();await task;assert.deepEqual(played,['First.']);assert.equal(p.captionBoundaryResume,null);assert.equal(p.state,'idle');
+});
+test('caption hover ignores other readers, preview audio and paused sessions',()=>{
+ const {p}=setup(),r={};p.currentReader=r;p.state='playing';p.requestCaptionPause({});assert.equal(p.captionPauseGeneration,undefined);p.session={sample:true};p.requestCaptionPause(r);assert.equal(p.captionPauseGeneration,undefined);p.session=null;p.state='paused';p.requestCaptionPause(r);assert.equal(p.captionPauseGeneration,undefined);
+});
+for(const scope of ['sentence','paragraph'])for(const count of [1,3,5])test(`caption ${scope} replay scopes exactly and repeats ${count} times in document mode`,async()=>{
+ const {p,played}=setup();p.set('mode','document');p.set('repeat',10);p.currentUnit=navigationUnits[0];p.documentUnits=async()=>navigationUnits;p.requestSpeech=async text=>({audio:text});
+ const expected=core.scopeUnits(navigationUnits,navigationUnits[0],scope).map(u=>u.text);await p.replayScope(scope,count,{});assert.deepEqual(played,Array.from({length:count},()=>expected).flat());assert.equal(p.get('mode'),'document');
+});
+test('caption infinite replay remains stoppable',async()=>{
+ const {p,played}=setup();p.currentUnit=navigationUnits[0];p.documentUnits=async()=>navigationUnits;p.requestSpeech=async text=>({audio:text});p.playAudio=async text=>{played.push(text);if(played.length===6)p.stop();};await p.replayScope('sentence',0,{});assert.equal(played.length,6);assert.equal(p.state,'idle');
+});
+test('changing translation voice discards prefetched voice at next sentence',async()=>{
+ const {p,voices}=translatedSetup(),played=[];p.playSpeechStream=async result=>{played.push(result);if(played.length===1)p.set('voiceFor_zh','zf_xiaobei');};
+ await p.speak('First sentence. Second sentence.',{});assert.equal(played.length,2);assert.ok(voices.includes('zf_xiaobei'));assert.equal(p.get('voiceFor_zh'),'zf_xiaobei');
+});
+
+test('leaving caption before sentence end cancels automatic pause; manual pause stays paused',()=>{
+ const {p}=setup(),r={};p.currentReader=r;p.state='playing';p.requestCaptionPause(r);assert.equal(p.captionPauseGeneration,p.generation);p.releaseCaptionPause(r);assert.equal(p.captionPauseGeneration,null);p.togglePause();assert.equal(p.state,'paused');p.releaseCaptionPause(r);assert.equal(p.state,'paused');
+});

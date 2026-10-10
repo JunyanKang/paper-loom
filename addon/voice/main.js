@@ -591,8 +591,8 @@ var PaperVoice = {
     const anchorOffset=PaperVoiceCore.selectionOffset(items,selection,view._pdfPages?.[selection.pageIndex]?.chars||[]);
     return anchorOffset>=0?{...selection,anchorOffset}:null;
   },
-  async navigateScope(delta,reader,scope=null) {
-    const current=this.currentUnit,mode=this.get('mode','selection'),generation=this.generation;
+  async navigateScope(delta,reader,scope=null,options={}) {
+    const current=this.currentUnit,mode=options.exactScope?scope:this.get('mode','selection'),generation=this.generation;
     if(!current||(mode==='selection'&&!scope))return;
     try{
       const all=await this.documentUnits(reader);
@@ -605,8 +605,31 @@ var PaperVoice = {
       if(!units.length)return;
       const startIndex=scope==='sentence'&&mode==='paragraph'?Math.max(0,PaperVoiceCore.unitIndex(units,target)):0;
       this.stop(false);this.currentReader=reader;this.playbackMode=mode;
-      return this.runUnits(units,reader,this.generation,{mode,startIndex,loops:mode==='document'?1:Number(this.get(mode==='selection'?'selectionRepeat':'repeat',mode==='selection'?1:0))});
+      return this.runUnits(units,reader,this.generation,{mode,startIndex,loops:options.loops??(mode==='document'?1:Number(this.get(mode==='selection'?'selectionRepeat':'repeat',mode==='selection'?1:0)))});
     }catch(error){if(generation===this.generation)this.setStatus(error.message);}
+  },
+  replayScope(scope,count=1,reader=this.currentReader) {
+    if(!['sentence','paragraph'].includes(scope)||![0,1,3,5].includes(count))return;
+    return this.navigateScope(0,reader,scope,{exactScope:true,loops:count});
+  },
+  requestCaptionPause(reader) {
+    if(reader!==this.currentReader||this.session?.sample||!['playing','loading'].includes(this.state))return;
+    this.captionPauseGeneration=this.generation;
+  },
+  releaseCaptionPause(reader) {
+    if(reader!==this.currentReader)return;
+    this.captionPauseGeneration=null;
+    if(this.captionAutoPaused&&this.captionBoundaryResume)this.togglePause();
+  },
+  async pauseAtCaptionBoundary(generation) {
+    if(this.captionPauseGeneration!==generation||generation!==this.generation)return;
+    this.captionPauseGeneration=null;
+    this.releaseAudio();
+    // Resume on pointer exit only when this pause belongs to caption hover.
+    this.captionAutoPaused=true;
+    const wait=new Promise(resolve=>{this.captionBoundaryResume=resolve;});
+    this.setStatus('已暂停，点击继续','paused');this.saveReadingSession();
+    await wait;
   },
   async startDocument(reader, origin='begin') {
     this.stop(false);const generation=this.generation;this.currentReader=reader;this.ensurePanel(reader);
@@ -867,8 +890,12 @@ var PaperVoice = {
     };
     let activeConfig=null,activeSentence=null;
     const sameSentence=(a,b)=>a&&b&&(a.sentenceId!==undefined?b.sentenceId===a.sentenceId:a.sentenceText&&a.text!==a.sentenceText&&b.sentenceText===a.sentenceText);
-    const configFor=index=>activeConfig&&sameSentence(activeSentence,units[index])?activeConfig:{readTranslation:!sample&&this.get('readTranslation',false),provider:this.get('translationProvider','tencenttransmart'),target:this.get('translationTarget','zh-Hans')};
-    const audioKey=config=>[config.readTranslation,config.provider,config.target].join('|');
+    const configFor=index=>{
+      if(activeConfig&&sameSentence(activeSentence,units[index]))return activeConfig;
+      const readTranslation=!sample&&this.get('readTranslation',false),target=this.get('translationTarget','zh-Hans'),language=this.translationVoiceLanguage(target);
+      return {readTranslation,provider:this.get('translationProvider','tencenttransmart'),target,voice:readTranslation?this.get('voiceFor_'+language,PaperVoiceCore.voices.find(v=>v.language===language)?.id):null};
+    };
+    const audioKey=config=>[config.readTranslation,config.provider,config.target,config.voice].join('|');
     const buffered=new Map();let bufferTicket=0;
     const prepare=(index,priority=0)=>{
       const unit=units[index],config=configFor(index),{readTranslation,target,provider}=config,key=audioKey(config);
@@ -887,7 +914,7 @@ var PaperVoice = {
       if(!PaperVoiceCore.speechLanguages.some(x=>x.id===language))throw new Error('无法确定受支持的朗读语言，请在设置中手动选择英语、中文、日语或法语。');
       const outputLanguage=readTranslation?this.translationVoiceLanguage(target):language;
       if(!outputLanguage)throw new Error('译文朗读暂不可用，请更换译文语种');
-      const voice=(readTranslation||(sample&&this.get('readTranslation',false)))?this.get('voiceFor_'+outputLanguage,PaperVoiceCore.voices.find(v=>v.language===outputLanguage).id):voiceChoices[outputLanguage];
+      const voice=readTranslation?config.voice:(sample&&this.get('readTranslation',false))?this.get('voiceFor_'+outputLanguage,PaperVoiceCore.voices.find(v=>v.language===outputLanguage).id):voiceChoices[outputLanguage];
       const reportStage=message=>{if(index===startIndex&&generation===this.generation&&this.state==='loading')this.setStatus(message,'loading');};
       if(readTranslation)reportStage('正在准备译文…');
       const translation=(readTranslation||this.get('translation',false))&&!sample?this.translate(readTranslation?sourceSpeech:(unit.translationText||unit.text),language,{target,provider}):Promise.resolve(null);
@@ -1004,6 +1031,10 @@ var PaperVoice = {
           if(source&&units.length-i<8)extend();
           if(i+1>=units.length&&(source||extension)){await extend();if(generation!==this.generation)return;if(i+1<units.length)next=takePrepared(i+1);}
           if(!next&&i+1<units.length)next=takePrepared(i+1);
+          if(!sameSentence(unit,units[i+1])){
+            await this.pauseAtCaptionBoundary(generation);
+            if(generation!==this.generation||this.dead)return;
+          }
           if(session.pendingMode){
             const all=await session.context;
             if(generation!==this.generation||this.dead)return;
@@ -1187,6 +1218,8 @@ var PaperVoice = {
     });
   },
   togglePause() {
+    this.captionAutoPaused=false;this.captionPauseGeneration=null;
+    if(this.captionBoundaryResume){const resume=this.captionBoundaryResume;this.captionBoundaryResume=null;this.setStatus('正在准备自然语音…','loading');resume();return;}
     if (this.state === 'paused') {
       if(this.restoredSession)return this.resumeReadingSession();
       if (this.audio) { const audio=this.audio,generation=this.generation;audio.play().catch(e => {if(this.audio===audio&&this.generation===generation&&this.state!=='paused')this.setStatus(e.message,'error');}); this.setStatus(this.resumeStatus || '正在朗读','playing'); }
@@ -1204,7 +1237,8 @@ var PaperVoice = {
   stop(show = true, preserveSession = false) {
     if(!preserveSession&&!this.quitting)this.clearReadingSession();
     this.cancelTranslationClick();
-    this.session=null;this.generation++; this.translationTicket++; this.currentUnit=null;this.pendingProgress=null;this.playbackMode=null; this.clearSelectionTimers(); this.releaseAudio();
+    this.captionAutoPaused=false;this.captionPauseGeneration=null;const boundaryResume=this.captionBoundaryResume;this.captionBoundaryResume=null;
+    this.session=null;this.generation++;boundaryResume?.(); this.translationTicket++; this.currentUnit=null;this.pendingProgress=null;this.playbackMode=null; this.clearSelectionTimers(); this.releaseAudio();
     this._speechQueue?.cancel();this.host.clearTimeout(this.warmupTimer);this.warmupTimer=null;this.scheduleWorkerIdle();
     this.hideTranslation?.();this.clearSentenceHighlight?.();
     this.state = 'idle';

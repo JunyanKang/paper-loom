@@ -222,11 +222,11 @@ html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-pag
 .pl-engine-actions{justify-content:center;gap:12px}
 .pl-engine .pl-engine-actions>button{flex:0 0 48px;height:32px;min-height:32px;display:flex;align-items:center;justify-content:center;padding:6px;border:1px solid var(--pv-glass-line)!important;border-radius:8px;background:var(--pv-soft)!important;color:var(--pv-accent)!important}
 .pl-engine-actions .pv-icon{width:19px;height:19px}
-.pl-voice-symbol{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;flex:none}
-.pl-voice-avatar{display:block!important;width:26px;height:26px;background-repeat:no-repeat;filter:none!important;flex:none}
-:is(.cl-select-popover,.pv-select-popover).pl-language-menu.pl-voice-menu{width:75px!important;min-width:75px!important}
+.pl-voice-symbol{position:relative;display:inline-block!important;width:26px;height:26px;flex:none}
+.pl-voice-symbol>.pl-flag{position:absolute;left:0;top:2px;width:24px!important;height:16px!important;object-fit:cover;border-radius:2px}.pl-voice-avatar{position:absolute;z-index:1;right:0;bottom:0;display:block!important;width:17px;height:17px;background-repeat:no-repeat;filter:none!important;border-radius:50%;flex:none}
+:is(.cl-select-popover,.pv-select-popover).pl-language-menu.pl-voice-menu{width:40px!important;min-width:40px!important}
 .pl-voice-menu .pl-language-option{height:36px;min-height:36px;padding:5px!important}
-.pl-voice-select .pv-select-value{overflow:visible;flex:none}
+.pl-voice-select .pv-select-value{overflow:visible;flex:none;transform:translateX(2px)}
 /* Move only the tint. Text keeps the same right edge as menu option text. */
 :is(.pl-settings .cl-select-trigger,.pv-shell .pv-select-trigger):not(.pl-language-select):not(.cl-model-toggle){position:relative;isolation:isolate;overflow:visible;background:transparent!important}
 :is(.pl-settings .cl-select-trigger,.pv-shell .pv-select-trigger):not(.pl-language-select):not(.cl-model-toggle)::before{content:'';position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;transform:translateX(var(--pl-select-fill-shift,9px));background:transparent;transition:background .18s ease}
