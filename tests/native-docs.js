@@ -32,6 +32,6 @@ for(const lang of ['zh','en']){
  const network=L.references.showNetwork(null,{doc:d});await U.pageQueue;await until(()=>network._pnModel&&network.querySelector('.pn-map-stage')?.getAttribute('aria-busy')==='false','network');
  const select=network.querySelector('.pn-map-controls').querySelectorAll('select')[1];select.value=String(collection.id);select.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(1500);await until(()=>network._pnModel?.nodes.some(n=>n.title==='Maya Chen'),'demo network');
  const node=network._pnModel.nodes.find(n=>n.title==='Maya Chen');await network._pnSelect(node.id);await wait(700);images.push(await capture(network,'network-'+lang));
- const career=Q.CiteLensCareerUI.open(d,{orcid:'0000-0002-9053-5249',name:'Dawang Zhou',host:network});await until(()=>career.querySelector('.pn-career-event'),'career');images.push(await capture(network,'career-'+lang));career._clClose();network._pnClose();await wait(350);
+ const career=Q.CiteLensCareerUI.open(d,{orcid:'0000-0002-9053-5249',name:'Dawang Zhou',host:network});await until(()=>career.querySelector('.pn-career-event'),'career');images.push(await capture(career,'career-'+lang));career._clClose();network._pnClose();await wait(350);
 }
 return {passed:checks.every(c=>c.ok),checks,images};

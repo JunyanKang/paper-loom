@@ -727,7 +727,7 @@ var PaperVoice = {
     this.processStart = (async () => {
       const root = this.engineRoot(),started=Date.now(),generation=this.generation;
       const command = Zotero.isWin ? PathUtils.join(root,'python','python.exe') : PathUtils.join(root,'python','bin','python3');
-      if (!(await IOUtils.exists(command))) throw new Error('尚未安装离线声音。请打开 Paper Loom 安装助手，完成声音安装后重试。');
+      if (!(await IOUtils.exists(command))) throw new Error('尚未安装离线声音。请在「设置 → 声音与引擎」中下载后重试。');
       const { Subprocess } = ChromeUtils.importESModule('resource://gre/modules/Subprocess.sys.mjs');
       const proc = await Subprocess.call({ command, arguments: ['-E','-s','-B','-X','utf8',PathUtils.join(root, 'worker.py')],
         environment: this.workerEnvironment(), stderr: 'pipe' });
@@ -773,7 +773,7 @@ var PaperVoice = {
     if(!this.process||this.processStart)onStage?.('正在启动声音…');
     await this.ensureWorker();onStage?.('正在生成语音…');
     if(generation!==this.generation||this.dead)throw PaperVoicePipeline.cancelled();
-    if(this.workerVoices&&!this.workerVoices.includes(voice))throw new Error('请运行最新版安装助手，更新离线声音以启用多语言朗读。');
+    if(this.workerVoices&&!this.workerVoices.includes(voice))throw new Error('请在「声音与引擎」中重新下载声音，以启用多语言朗读。');
     const id = ++this.sequence;
     return new Promise((resolve,reject) => {
       const timer = this.host.setTimeout(() => {

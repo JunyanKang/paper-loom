@@ -14,7 +14,7 @@ Paper Loom requires no account and adds no telemetry or usage analytics. Some fe
 | Journal metrics | Read compatible local data or download a public metrics package; displayed source and year govern interpretation |
 | Plugin, voices, and model-catalog updates | Download from GitHub / GitHub Pages; servers can receive normal request information such as your IP address |
 
-Translation services include Tencent, Microsoft, Google, or your chosen model provider. Public lookups use relevant sources such as Crossref, OpenAlex, Semantic Scholar, and ORCID. Each provider’s own privacy policy applies. Paper Loom does not automatically upload an entire PDF to these services. Before translating sensitive text, choose an appropriate provider.
+Translation services include Tencent, Microsoft, Google, or your chosen model provider. Public lookups use relevant sources such as Crossref, PubMed/PMC, Europe PMC, Semantic Scholar, and ORCID. Each provider’s own privacy policy applies. Paper Loom does not automatically upload an entire PDF to these services. Before translating sensitive text, choose an appropriate provider.
 
 ## Local storage
 

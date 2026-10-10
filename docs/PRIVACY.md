@@ -14,7 +14,7 @@ Paper Loom 无需账号，不添加遥测或使用统计。部分功能使用外
 | 期刊指标 | 可读取本地兼容指标数据，或下载公开指标包；显示来源与年份，以来源为准 |
 | 插件、声音、模型清单更新 | 从 GitHub / GitHub Pages 下载资源；服务器可看到常规请求信息，如 IP 地址 |
 
-翻译服务包括腾讯、微软、Google 或你选择的模型服务商。公开资料查询使用 Crossref、OpenAlex、Semantic Scholar、ORCID 等相应来源；第三方处理方式受其自身隐私政策约束。Paper Loom 不自动向这些服务上传整篇 PDF。使用译文功能时，请确认所选服务适合处理当前文本。
+翻译服务包括腾讯、微软、Google 或你选择的模型服务商。公开资料查询使用 Crossref、PubMed/PMC、Europe PMC、Semantic Scholar、ORCID 等相应来源；第三方处理方式受其自身隐私政策约束。Paper Loom 不自动向这些服务上传整篇 PDF。使用译文功能时，请确认所选服务适合处理当前文本。
 
 ## 本地保存什么
 
