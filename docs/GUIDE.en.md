@@ -31,6 +31,8 @@ Translation display is enabled by default. Hover over the language icon to choos
 
 The selection translation card has a flag synchronized with the quick bar. Changing it refreshes the translation. Three scope icons select sentence, selection, or paragraph; hovering over the headphones button reveals four equal mode areas. Click Sentence, Selection, Paragraph, or Document to start one reading; Document starts at the selected passage.
 
+![Translation caption controls](images/caption-controls-en.png)
+
 ## Inspect in-text citations
 
 Hover over supported numeric or author–year citations to inspect the referenced paper. Locate occurrences, open a local paper or DOI, or copy a formatted citation. Recognition depends on the PDF’s text structure. If it fails, open the reference panel or search by DOI/title.

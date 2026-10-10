@@ -2,7 +2,7 @@
 
 [Home](README.en.md) · [简体中文](CHANGELOG.md)
 
-## 1.0.4 · 2026-10-10
+## 1.0.4 · 2026-10-11
 
 - Hover over a translation caption for an attached control row with sentence/paragraph navigation, pause/stop, all four modes, and the current flag. Other languages expand upward on hover.
 - Hover over the selection card’s headphones button to choose one of four reading modes and start once. Dropdown edges remain intact, and expanded triggers stay transparent.
