@@ -19,7 +19,7 @@ var PaperLoom = {
   removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
   mainNavigation(doc,reader,active='listening'){
     const nav=this.el(doc,'nav',null,'pl-main-actions');nav.setAttribute('aria-label','Paper Loom');
-    const entries=[['listening','headphones','听读',()=>this.voice.showPanel(reader)],['references','references','引文与稍后读',()=>this.references.showPanel(reader,{view:reader.itemID?'references':'queue'})],['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];
+    const entries=[['listening','headphones','听读',()=>this.voice.showPanel(reader)],['references','references','引文与稍后读',()=>this.references.showPanel(reader,this.references.panels.get(reader)?.isConnected?{}:{view:reader.itemID?'references':'queue'})],['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];
     for(const [id,icon,label,run] of entries){const button=this.referencesScope.CiteLensUI.iconButton(doc,label,icon,()=>{if(id!==active)return run();});button.dataset.loomPage=id;button.setAttribute('aria-current',id===active?'page':'false');nav.append(button);}return nav;
   },
   showHome(reader=this.currentReader(),doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document) {

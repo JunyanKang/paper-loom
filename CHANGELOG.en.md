@@ -11,6 +11,9 @@
 - Newly illustrated feature gestures, distinct forward/backward page turns, and window gestures with a steady mascot centre and shared bottom-right panel alignment.
 - Abstract listening uses the shared headphones icon with bilingual labels and keyboard access.
 
+- Distinct selected-tab backgrounds across all themes; remove the full-height seam from the linen artwork.
+- Fix the library workspace and feature switching when no PDF is open.
+
 ## 1.0.0 · 2026-10-10
 
 First public release of Paper Loom.

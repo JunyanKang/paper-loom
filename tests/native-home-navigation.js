@@ -14,6 +14,11 @@ try{
   const globals=[...view.querySelectorAll(':scope>header .cl-header-tools>[data-icon=settings],:scope>header [data-network-entry],:scope>header [data-list-entry]')];check(id+' has no duplicate global header shortcuts',globals.every(e=>!e.getClientRects().length));
   back.click();await settle();check(id+' returns listening',!main.hidden);check(id+' collapses after listening opens',view.hidden);
  }
+ main.querySelector('[data-loom-page=references]').click();await settle();
+ const retained=doc.querySelector('.cl-root'),search=retained.querySelector('.cl-search'),prior=search.value;search.value='retained search';search.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));
+ retained.querySelector('[data-loom-page=network]').click();await settle();doc.querySelector('.pn-map-window [data-loom-page=settings]').click();await settle();
+ const settings=doc.querySelector('.cl-settings');await settings._plReady;check('settings controls finish loading',!!settings._plSelect);settings.querySelector('[data-loom-page=references]').click();await settle();check('direct page switching retains the reference view and search',doc.querySelector('.cl-root')===retained&&search.value==='retained search');search.value=prior;search.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));
+ retained.querySelector('[data-loom-page=listening]').click();await settle();
  ui.action('orb').click();await settle();check('mascot collapses main panel',main.hidden);ui.action('orb').click();await settle();check('next click opens listening again',!main.hidden);
  main.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await settle();check('Escape collapses main panel',main.hidden);ui.action('orb').click();await settle();
  const out=PathUtils.join(PathUtils.parent(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path),PathUtils.filename(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path).replace('qa-profile','test-results'));

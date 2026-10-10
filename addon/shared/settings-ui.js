@@ -2,9 +2,14 @@ PaperLoom.extendSettings=async function(ctx) {
   const {doc,reader,root,frame,tabs,panes,activate,cleanups,translation}=ctx;
   frame.classList.add('pl-settings');this.style(doc);
   const embedded=this.el(doc,'iframe');embedded.className='pl-settings-frame';embedded.setAttribute('title','听读设置');embedded.style.cssText='width:100%;border:0;display:block;height:320px;background:transparent';
-  const loaded=new Promise(resolve=>embedded.addEventListener('load',resolve,{once:true}));
-  embedded.src='resource://'+this.resource+'/shared/settings-frame.html';root.append(embedded);
-  await Promise.race([loaded,Zotero.Promise.delay(8000).then(()=>{if(!embedded.contentDocument?.body)throw Error('听读设置页面未能加载');})]);
+  await new Promise((resolve,reject)=>{
+    const win=doc.defaultView;let finished=false,timer;
+    const finish=error=>{if(finished)return;finished=true;win.clearTimeout(timer);embedded.removeEventListener('load',loaded);error?reject(error):resolve();};
+    const loaded=()=>{if(embedded.contentDocument?.body)finish();};
+    cleanups.push(()=>finish());embedded.addEventListener('load',loaded);
+    embedded.src='resource://'+this.resource+'/shared/settings-frame.html';root.append(embedded);
+    timer=win.setTimeout(()=>finish(!root.isConnected||embedded.contentDocument?.body?null:Error('听读设置页面未能加载')),8000);
+  });
   if(!root.isConnected)return;
   const inside=embedded.contentDocument;inside.body.style.cssText='margin:0;background:transparent;overflow:hidden';this.style(inside);this.referencesScope.CiteLensUI.appearance(inside);this.referencesScope.CiteLensI18n.install(inside);
   const fake={_iframeWindow:embedded.contentWindow,_window:embedded.contentWindow,itemID:reader?.itemID},V=this.voice;

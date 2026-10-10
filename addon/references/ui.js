@@ -755,7 +755,7 @@ var CiteLensUI = {
     const summary=dialog.root.querySelector('.cl-save-summary .cl-muted');if(ready.length!==rows.length&&summary)summary.textContent=`${rows.length-ready.length} 篇尚未确认，仍保留在阅读清单。`;
   },
   settingsDialog(doc,{reader=CiteLens.readerForDocument(doc)}={}) {
-    const S=CiteLensServices,existing=doc.querySelector('.cl-settings');if(existing){if(existing._clReader===reader){existing._clPage?.activate();return;}existing._clClose?.();}
+    const S=CiteLensServices,existing=doc.querySelector('.cl-settings');if(existing){if(existing._clReader===reader){existing._clPage?.activate();return existing._plReady;}existing._clClose?.();}
     const panel=CiteLens.panels.get(reader);
     const cleanups=[];let unsubscribe=()=>{},unsubscribeModels=()=>{},testTicket=0;
     const {root,footer,close}=this.dialog(doc,'Paper Loom',{className:'cl-settings',reader,onClose:()=>{testTicket++;unsubscribe();unsubscribeModels();for(const cleanup of cleanups.splice(0))cleanup();}}),status=this.el(doc,'div','','cl-status');
@@ -849,6 +849,6 @@ var CiteLensUI = {
     unsubscribe=CiteLensUpdater.subscribe(state=>{try{if(!root.isConnected){unsubscribe();return;}}catch(_){unsubscribe();return;}automatic.checked=state.automatic;version.textContent='v'+state.version;update.textContent=state.phase==='available'?'安装 v'+state.availableVersion:state.phase==='checking'?'检查中…':state.phase==='installing'?'更新中…':state.phase==='error'?'重试检查':'检查更新';update.disabled=['checking','installing'].includes(state.phase);const message=state.phase==='error'?({timeout:'检查超时',network:'连接失败',manifest:'更新信息异常',security:'安全校验失败',cancelled:'检查已取消',install:'更新失败'}[state.errorKind]||'更新暂不可用'):['current','available'].includes(state.phase)?state.message:'';this.status(updateStatus,message,state.phase==='error');updateStatus.hidden=!message;updateStatus.setAttribute('aria-label',message);release.hidden=state.phase!=='error';});
     root.append(status);activate(active);
     if(S.metricWarning||S.loadWarning)this.status(status,S.metricWarning||S.loadWarning,true);
-    return Zotero.PaperLoom?.extendSettings({doc,reader,root,footer,frame,tabs,panes,activate,close,cleanups,translation,data,modelPages});
+    return frame._plReady=Zotero.PaperLoom?.extendSettings({doc,reader,root,footer,frame,tabs,panes,activate,close,cleanups,translation,data,modelPages});
   }
 };

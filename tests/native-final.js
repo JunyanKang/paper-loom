@@ -50,7 +50,7 @@ check('Reader uses same settings center',typeof settings?._plSelect==='function'
 settings?._clClose?.();await Zotero.Promise.delay(400);
 const record={title:'Paper Loom reading and collaboration fixture',year:'2026',author:'Example',abstract:'This is a synthetic integration fixture for the Paper Loom reading application. It verifies that citation discovery and audio playback share the same reading environment. The fixture contains no experimental findings or scientific conclusions.',verified:true};
 const U=L.referencesScope.CiteLensUI,dialog=U.dialog(doc,'Integration fixture'),card=U.card(doc,record,reader,{context:{parentID:attachment.parentItemID},detailed:true});dialog.root.append(card);
-const title=card.querySelector('.cl-title');if(title){U.abstractPopover(doc,card,title,()=>record);await Zotero.Promise.delay(500);}
+const title=card.querySelector('.cl-title');if(title){title.focus();U.abstractPopover(doc,card,title,()=>record);doc.querySelector('.cl-summary')?.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown',{key:'Tab',bubbles:true}));await Zotero.Promise.delay(500);}
 check('abstract has listening action',!!doc.querySelector('[data-loom-action=listen-abstract]'));
 L.qaReader=reader;L.qaAttachment=attachment;L.qaFixtureDialog=dialog;
 return {passed:checks.every(c=>c.ok),checks,readerID:reader.itemID,runtime:Runtime.state};
