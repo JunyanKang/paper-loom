@@ -491,8 +491,8 @@ var PaperVoiceUI = {
   action('orb').addEventListener('pointerdown',finishInteraction);
   let previewIndex=0;const previewCompanion=()=>{resetCompanionSchedule();const gestures=['greeting','listening','references','network','settings','page-forward','page-backward','dock-present'];playCompanion(gestures[previewIndex++%gestures.length]);};
   action('previewCompanion').onclick=previewCompanion;
-  action('previewCompanion').disabled=win.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(action('previewCompanion').disabled)action('previewCompanion').title=controller.t('系统已开启减少动态效果');
+  const motionPreference=win.matchMedia('(prefers-reduced-motion: reduce)'),syncPreviewAvailability=()=>{const disabled=motionPreference.matches;action('previewCompanion').disabled=disabled;action('previewCompanion').title=controller.t(disabled?'系统已开启减少动态效果':'预览动作');if(disabled)finishInteraction();};
+  motionPreference.addEventListener('change',syncPreviewAvailability);syncPreviewAvailability();
   const tickCompanion=(now=Date.now())=>{
    bindPageEvents();
    if(!controller.get('companionInteractions',true)){nextInteraction=now+controller.companionIntervalMs();return;}
@@ -504,7 +504,7 @@ var PaperVoiceUI = {
    if(takeBreak)lastBreakAt=elapsed;
    nextInteraction=now+controller.companionIntervalMs();playCompanion(takeBreak?'rest':undefined);
   };
-  const dispose=()=>{if(disposed)return;disposed=true;quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);for(const menu of choiceMenus)menu.dispose();player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
+  const dispose=()=>{if(disposed)return;disposed=true;motionPreference.removeEventListener('change',syncPreviewAvailability);quickReveal.dispose();disposeTransparency();doc.removeEventListener('pointerdown',outsideUpdateNotice,true);find('updateNotice')._pvFade?.cancel();dockMotion.dispose();pageEvents?.off('pagechanging',onPageChanged);if(pageAnimationTimer!==null)win.clearTimeout(pageAnimationTimer);win.removeEventListener('keydown',recordShortcut,true);doc.removeEventListener('pointerdown',cancelOutside,true);recordingShortcut=null;root._pvSelects?.dispose();root._pvTooltips?.dispose();win.clearTimeout(closeTimer);for(const menu of choiceMenus)menu.dispose();player.dispose();for(const el of [panel,navigation,audioPopover])el._pvFade?.cancel();root.remove();};
   (doc.body||doc.documentElement).append(root);this.installSelects(root,controller);root._pvTooltips=this.installTooltips(root,controller);return {root,panel,dockMotion,find,action,previewCompanion,setContext,performContext,dockCompanion,finishMotion:()=>dockMotion.finish(),waitMotion:()=>dockMotion.whenSettled(),settings,selectSettingsTab,syncShortcutBindings,cancelShortcutRecording,closeNavigation,closeAudioPopover,tickCompanion,finishInteraction,syncCompanionPose,resetCompanionSchedule,dispose};
  }
 };
