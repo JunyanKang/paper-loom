@@ -1,0 +1,3 @@
+const base=PathUtils.parent(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path);
+Runtime.root=PathUtils.join(base,'runtime-qa','public-release');Runtime.cache=PathUtils.join(Runtime.root,'downloads');await IOUtils.makeDirectory(Runtime.cache,{ignoreExisting:true});
+const path=PathUtils.join(base,'test-results','public-runtime.json');Runtime.subscribe(state=>IOUtils.writeJSON(path,state).catch(()=>{}));L.publicRuntimeTask=Runtime.install().then(destination=>({passed:Runtime.state.phase==='ready',destination})).catch(e=>({passed:false,error:String(e)}));return {started:true,platform:Runtime.platform};

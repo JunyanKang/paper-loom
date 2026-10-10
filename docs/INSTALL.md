@@ -8,6 +8,8 @@
 
 需要 Zotero 10.0.5-beta.1 或更新的 10.x，或 11.x。更旧的 Zotero 版本需要先升级。安装不会修改原有文献、附件或其他无关插件。
 
+![左侧工具栏的小书入口](images/library-toolbar.png)
+
 ## 下载离线声音
 
 打开「设置 → 声音与引擎」，点击「下载引擎与声音」。系统与架构由插件识别：Apple Silicon Mac（macOS 14+）使用 Mac 引擎，Intel/AMD x64 Windows 使用 Windows 引擎。下载包含英语、普通话、日语和法语的全部音色。

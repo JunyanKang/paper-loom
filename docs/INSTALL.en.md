@@ -8,6 +8,8 @@ Download the `.xpi` from [the latest release](https://github.com/JunyanKang/pape
 
 Requires Zotero 10.0.5-beta.1 or newer 10.x, or 11.x. Upgrade older Zotero installations first. Your existing papers, attachments, and unrelated plugins remain in place.
 
+![The book in the left toolbar](images/library-toolbar.png)
+
 ## Download offline voices
 
 Open **Settings → Voices & engine** and select **Download engine & voices**. Paper Loom detects the system and processor: Apple Silicon Mac with macOS 14+ uses the Mac engine; Intel/AMD x64 Windows uses the Windows engine. The download includes all English, Mandarin Chinese, Japanese, and French voices.
