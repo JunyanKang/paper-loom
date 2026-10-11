@@ -41,7 +41,7 @@ The selection translation card has a flag synchronized with the caption controls
 
 Hover over supported numeric or author–year citations to inspect the referenced paper. Locate occurrences, open a local paper or DOI, or copy a formatted citation. Recognition depends on the PDF’s text structure. If it fails, open the reference panel or search by DOI/title.
 
-Click or hover a paper title to expand its abstract. Abstracts support translation, source comparison, and listening. If an abstract is missing locally, query online metadata where offered. Paper Loom does not invent an abstract when a source has none.
+Click or hover a paper title to expand its abstract. Abstracts support original, translated, and bilingual views. If an abstract is missing locally, query online metadata where offered. Paper Loom does not invent an abstract when a source has none.
 
 ![Reference abstract](images/references-en.png)
 
@@ -53,6 +53,6 @@ Removing an entry from Read later does not delete the corresponding Zotero paper
 
 Continue with [Settings](SETTINGS.en.md), [Authors & careers](NETWORK.en.md), or the [FAQ](FAQ.en.md).
 
-Abstracts, selection translations, and reading captions share the target language. A single headphones button follows the display mode: original text, translated text, or alternating original and translated sentences. If the target has no supported voice, translated mode disables listening; bilingual mode skips translations and reads only the original. Switching original, translated, or bilingual display keeps the abstract open.
+Abstracts, selection translations, and reading captions share the target language. The floating abstract window offers original, translated, and bilingual views without a listening action. Switching display modes keeps the abstract open.
 
 Once selection-started audio begins playing, its launch popup and original selection clear. A different selection made during preparation remains intact.

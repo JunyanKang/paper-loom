@@ -1903,7 +1903,7 @@ Object.assign(CiteLensI18n.catalogs.en,{
   "打开网页": "Open webpage"
 });
 
-Object.assign(CiteLensI18n.catalogs.en,{'合作作者':'Collaborators','共著论文':'Shared papers','听读摘要':'Listen to abstract','macOS 版本过低':'macOS version too old','离线声音需要 macOS 14 或更新版本。':'Offline voices require macOS 14 or later.','暂未提供 Intel Mac 声音包；可导入经过验证的兼容声音文件夹。':'No Intel Mac voice download is available. Import a verified compatible engine folder.','暂未提供此架构的声音包；不会自动下载不匹配的版本。':'No voice download is available for this architecture. An incompatible package will not be downloaded.','暂未提供此系统的声音包。文献、翻译和研究网络仍可使用。':'No voice download is available for this system. References, translation, and author networks remain available.'});
+Object.assign(CiteLensI18n.catalogs.en,{'合作作者':'Collaborators','共著论文':'Shared papers','macOS 版本过低':'macOS version too old','离线声音需要 macOS 14 或更新版本。':'Offline voices require macOS 14 or later.','暂未提供 Intel Mac 声音包；可导入经过验证的兼容声音文件夹。':'No Intel Mac voice download is available. Import a verified compatible engine folder.','暂未提供此架构的声音包；不会自动下载不匹配的版本。':'No voice download is available for this architecture. An incompatible package will not be downloaded.','暂未提供此系统的声音包。文献、翻译和研究网络仍可使用。':'No voice download is available for this system. References, translation, and author networks remain available.'});
 
 Object.assign(CiteLensI18n.catalogs.en,{'听摘要':'Listen','文献记录':'Paper record'});
 

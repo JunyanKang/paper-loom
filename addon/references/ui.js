@@ -172,33 +172,7 @@ var CiteLensUI = {
     const tools=this.el(doc,'div',null,'cl-summary-tools'),modes=this.el(doc,'div',null,'cl-summary-modes'),translationStatus=this.el(doc,'span','','cl-mode-status');modes.setAttribute('role','group');modes.setAttribute('aria-label','摘要显示方式');
     for(const [mode,label] of [['original','原文'],['translation','译文'],['bilingual','双语']]){const button=this.iconButton(doc,label,mode==='translation'?'translate':mode==='bilingual'?'bilingual':'original',()=>setDisplay(mode));button.dataset.mode=mode;button.setAttribute('aria-pressed',String(mode==='original'));modes.append(button);}
     modes.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const buttons=[...modes.children],i=buttons.indexOf(doc.activeElement),n=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowLeft'?-1:1)+3)%3;buttons[n].focus();buttons[n].click();});
-    let audioTicket=0,audioBusy=false;
-    const listenGroup=this.el(doc,'div',null,'cl-summary-listen');
-    const syncListen=()=>{const supported=Zotero.PaperLoom?.voice?.translationVoiceLanguage(CiteLensTranslation.get('translationTarget','zh-Hans'));listen.disabled=audioBusy||!abstractResult?.text||displayMode==='translation'&&!supported;};
-    const playAbstract=async()=>{
-      if(listen.disabled||!abstractResult?.text)return;keep();const ticket=++audioTicket,V=Zotero.PaperLoom?.voice,C=Zotero.PaperLoom?.voiceScope?.PaperVoiceCore;
-      if(!V||!C)return;const target=CiteLensTranslation.get('translationTarget','zh-Hans'),mode=displayMode,original=abstractResult.text;
-      const sourceLanguage=C.detectSpeechLanguage(original)||V.speechLanguage(),translatedLanguage=V.translationVoiceLanguage(target);
-      if(mode==='translation'&&!translatedLanguage)return;
-      const voice=language=>V.get('voiceFor_'+language,C.voices.find(v=>v.language===language)?.id);
-      const cancelled=()=>closed||ticket!==audioTicket||mode!==displayMode||target!==CiteLensTranslation.get('translationTarget','zh-Hans');
-      audioBusy=true;syncListen();
-      try{
-        let text=original,options={language:sourceLanguage,voice:voice(sourceLanguage)};
-        if(mode!=='original'&&translatedLanguage){
-          const result=await CiteLensTranslation.abstract(original,{paired:mode==='bilingual',cancelled});
-          if(cancelled())return;
-          if(mode==='bilingual'){
-            const units=result.pairs.flatMap(pair=>[{text:pair.original,language:sourceLanguage,voice:voice(sourceLanguage)},{text:pair.translated,language:translatedLanguage,voice:voice(translatedLanguage)}]);
-            text=units.map(unit=>unit.text).join('\n');options={units};
-          }else{text=result.text;options={language:translatedLanguage,voice:voice(translatedLanguage)};}
-        }
-        if(cancelled())return;
-        await Zotero.PaperLoom.listen(text,CiteLens.readerForDocument(doc),options);
-      }catch(error){if(!cancelled())translationStatus.textContent=error.message;}finally{if(ticket===audioTicket){audioBusy=false;syncListen();}}
-    };
-    const listen=this.iconButton(doc,'听读摘要','headphones',playAbstract);listen.dataset.loomAction='listen-abstract';syncListen();listenGroup.append(listen);
-    translationStatus.setAttribute('role','status');tools.append(source,translationStatus,modes,listenGroup);facts.setAttribute('aria-label','关键词');body.append(content,facts,retry);panel.append(tools,body);card.append(panel);doc._clAbstract={title,close,position,get placement(){return manual?{...manual}:null;}};title.setAttribute('aria-expanded','true');title.setAttribute('aria-controls',panel.id);position();animation=animate(true);
+    translationStatus.setAttribute('role','status');tools.append(source,translationStatus,modes);facts.setAttribute('aria-label','关键词');body.append(content,facts,retry);panel.append(tools,body);card.append(panel);doc._clAbstract={title,close,position,get placement(){return manual?{...manual}:null;}};title.setAttribute('aria-expanded','true');title.setAttribute('aria-controls',panel.id);position();animation=animate(true);
     const grip=tools;grip.tabIndex=0;grip.setAttribute('role','toolbar');grip.setAttribute('aria-label','摘要工具栏');
     const geometry=(point,snap=true)=>CiteLensAbstracts.dragPlacement(host.getBoundingClientRect(),{width:win.innerWidth,height:win.innerHeight},{width:userSize?.width||manual?.width||panel.offsetWidth,height:userSize?.height||panel.offsetHeight,userSized:!!userSize},point,snap,dockOptions());
     const remember=p=>{const a=host.getBoundingClientRect();manual={...p,offset:['top','bottom'].includes(p.side)?p.left-a.left:p.top-a.top};};
@@ -242,7 +216,7 @@ var CiteLensUI = {
       let result;try{result=await CiteLensAbstracts.lookup(CiteLensServices,record,{force});}catch(_){result={status:'offline'};}
       if(ticket!==requestTicket||!title.isConnected||CiteLensCore.identity(getRecord())!==key)return;
       title.dataset.abstractState=result.status;if(closed)return;
-      if(result.status==='available')result={...result,text:CiteLensCore.abstractBody(result.text,result.record||record)};loading=false;title.dataset.abstractState=result.status;abstractResult=result;listen.disabled=result.status!=='available';syncListen();modes.hidden=result.status!=='available';body.setAttribute('aria-busy','false');body.style.minHeight='';retry.disabled=false;retry.hidden=result.status==='available';
+      if(result.status==='available')result={...result,text:CiteLensCore.abstractBody(result.text,result.record||record)};loading=false;title.dataset.abstractState=result.status;abstractResult=result;modes.hidden=result.status!=='available';body.setAttribute('aria-busy','false');body.style.minHeight='';retry.disabled=false;retry.hidden=result.status==='available';
       if(retry.hidden&&doc.activeElement===retry){panel.tabIndex=-1;panel.focus({preventScroll:true});}
       content.dataset.uiStatus=String(result.status!=='available');content.textContent=result.status==='available'?result.text:result.status==='offline'?'暂时无法连接摘要服务，请重试。':'公开来源暂未返回可匹配的摘要。';
       if(result.status==='available'){
@@ -258,7 +232,7 @@ var CiteLensUI = {
     const showText=text=>{content.replaceChildren();for(const part of text.split(/\n\s*\n/).filter(Boolean))content.append(this.el(doc,'p',part));position();};
     const showPairs=pairs=>{content.replaceChildren();for(const pair of pairs){const row=this.el(doc,'div',null,'cl-bilingual-pair'),original=this.el(doc,'p',pair.original,'cl-original-line'),translated=this.el(doc,'p',pair.translated,'cl-translated-line');original.lang='en';translated.lang=CiteLensTranslation.get('translationTarget','zh-Hans');row.append(original,translated);content.append(row);}position();};
     let originalNodes=[];
-    const selectMode=mode=>{audioTicket++;audioBusy=false;displayMode=mode;syncListen();for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
+    const selectMode=mode=>{displayMode=mode;for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
     const restoreOriginal=()=>{content.replaceChildren(...originalNodes.map(n=>n.cloneNode(true)));content.classList.remove('cl-translated','cl-bilingual');content.lang='en';content.removeAttribute('aria-label');position();};
     const setDisplay=async(mode)=>{
       if(!abstractResult?.text)return;mode=['original','translation','bilingual'].includes(mode)?mode:'original';
@@ -269,7 +243,7 @@ var CiteLensUI = {
       try{const result=await T.abstract(abstractResult.text,{paired,cancelled:()=>!current(),onPartial:(text,pairs)=>{if(current()){if(paired&&pairs)showPairs(pairs);else showText(text);}}});if(!current())return;if(paired&&result.pairs)showPairs(result.pairs);else showText(result.text);delete modes.dataset.loading;translationStatus.textContent='';content.setAttribute('aria-label','机器翻译');}
       catch(error){if(!current())return;selectMode('original');restoreOriginal();delete modes.dataset.loading;modes.dataset.error='true';translationStatus.textContent=error.message;}
       finally{if(current()){body.style.minHeight='';position();}}
-    };cleanups.push(CiteLensTranslation.subscribe(keys=>{if(closed)return;if(keys.has('translationTarget')||keys.has('translationProvider')){audioTicket++;audioBusy=false;syncListen();if(displayMode!=='original')setDisplay(displayMode);}}));load();
+    };cleanups.push(CiteLensTranslation.subscribe(keys=>{if(closed)return;if(keys.has('translationTarget')||keys.has('translationProvider')){if(displayMode!=='original')setDisplay(displayMode);}}));load();
   },
   scrollEdges(doc){
     if(doc._clScrollEdges)return;const win=doc.defaultView,selector='.cl-body,.cl-dialog-body,.pn-list,.pn-detail,.cl-summary-body,.pn-map-inspector,.pn-inspector-content,.pn-node-abstract,.pn-search-results,.pn-career-bio-content,.pn-career-timeline',tracked=new Set(),pending=new Set();let raf=0,disposed=false;
