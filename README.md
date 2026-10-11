@@ -11,7 +11,7 @@ Paper Loom 把阅读中需要的下一步放在手边：听一遍难懂的段落
 
 ## 开始使用
 
-1. 从[最新版本](https://github.com/JunyanKang/paper-loom/releases/latest)下载 **paper-loom-1.0.1.xpi**。
+1. 从[最新版本](https://github.com/JunyanKang/paper-loom/releases/latest)下载 **paper-loom-1.0.6.xpi**。
 2. 在 Zotero 中打开 **工具 → 插件 → 齿轮 → 从文件安装插件…**，选择 XPI；如提示，请重启 Zotero。
 3. 点击**左侧工具栏的小书**，进入 **设置 → 声音与引擎 → 下载引擎与声音**。Paper Loom 会识别电脑系统和处理器，选择对应资源。
 4. 打开 PDF，划选文字即可听读；点击悬浮小书打开设置，通过底部图标切换文献列表与作者网络。

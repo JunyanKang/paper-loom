@@ -11,7 +11,7 @@ Paper Loom keeps the next step close to the paper you are reading. Listen to a d
 
 ## Get started
 
-1. Download **paper-loom-1.0.1.xpi** from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest).
+1. Download **paper-loom-1.0.6.xpi** from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest).
 2. In Zotero, choose **Tools → Plugins → gear → Install Plugin From File…** and select the XPI. Restart if Zotero asks.
 3. Click the **small book in the left toolbar**, then **Settings → Voices & engine → Download engine & voices**. Paper Loom detects your operating system and processor.
 4. Open a PDF. Select text to listen, or click the floating book to open Settings. Bottom icons switch to papers and author networks.

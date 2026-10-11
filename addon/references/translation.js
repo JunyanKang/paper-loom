@@ -422,10 +422,15 @@ var CiteLensTranslation = Object.assign({
  id:'paper-loom@local.research',
  get host(){return Zotero.getMainWindow();},
  get(key,fallback){return Zotero.Prefs.get('paperLoom.shared.'+key)??fallback;},
- set(key,value){Zotero.Prefs.set('paperLoom.shared.'+key,value);},
+ set(key,value){
+  if(this.get(key)===value)return;Zotero.Prefs.set('paperLoom.shared.'+key,value);
+  this.changedKeys||=new Set();this.changedKeys.add(key);if(this.notificationPending)return;this.notificationPending=true;
+  Promise.resolve().then(()=>{this.notificationPending=false;const keys=this.changedKeys;this.changedKeys=new Set();if(!this.dead)for(const fn of this.listeners||[])try{fn(keys);}catch(error){Zotero.logError(error);}});
+ },
+ subscribe(fn){this.listeners||=new Set();this.listeners.add(fn);return ()=>this.listeners.delete(fn);},
  syncSettings(){},
  init(){this.dead=false;this.translationCache=new Map();this.translationJobs=new Map();this.translationTicket=0;this.requests=new Set();this.legacyNetworkCleanup=this.removeLegacyNetwork().catch(e=>Zotero.logError(e));},
- stop(){this.dead=true;for(const xhr of this.requests||[])xhr.abort();for(const xhr of this.llmRequests||[])xhr.abort();this.translationCache?.clear();},
+ stop(){this.dead=true;this.listeners?.clear();for(const xhr of this.requests||[])xhr.abort();for(const xhr of this.llmRequests||[])xhr.abort();this.translationCache?.clear();},
  languages:[['zh-Hans','简体中文'],['zh-Hant','繁體中文'],['en','English'],['ja','日本語'],['ko','한국어'],['fr','Français'],['de','Deutsch'],['es','Español'],['ru','Русский']],
  chunks(text,limit=1600){const output=[];for(let paragraph of text.split(/\n\s*\n/).filter(Boolean)){while(paragraph.length>limit){const cut=Math.max(paragraph.lastIndexOf('. ',limit)+1,paragraph.lastIndexOf('。',limit)+1,paragraph.lastIndexOf(' ',limit));const end=cut>limit/2?cut:limit;output.push(paragraph.slice(0,end));paragraph=paragraph.slice(end).trim();}if(paragraph)output.push(paragraph);}return output;},
  units(text){const paragraphs=String(text).split(/\n\s*\n/).filter(Boolean);try{const segmenter=new Intl.Segmenter('en',{granularity:'sentence'});return paragraphs.flatMap(p=>Array.from(segmenter.segment(p),s=>s.segment.trim()).filter(Boolean));}catch(_){return paragraphs;}},

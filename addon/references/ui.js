@@ -172,8 +172,33 @@ var CiteLensUI = {
     const tools=this.el(doc,'div',null,'cl-summary-tools'),modes=this.el(doc,'div',null,'cl-summary-modes'),translationStatus=this.el(doc,'span','','cl-mode-status');modes.setAttribute('role','group');modes.setAttribute('aria-label','摘要显示方式');
     for(const [mode,label] of [['original','原文'],['translation','译文'],['bilingual','双语']]){const button=this.iconButton(doc,label,mode==='translation'?'translate':mode==='bilingual'?'bilingual':'original',()=>setDisplay(mode));button.dataset.mode=mode;button.setAttribute('aria-pressed',String(mode==='original'));modes.append(button);}
     modes.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const buttons=[...modes.children],i=buttons.indexOf(doc.activeElement),n=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowLeft'?-1:1)+3)%3;buttons[n].focus();buttons[n].click();});
-    const listen=this.iconButton(doc,'听读摘要','headphones',()=>{const text=displayMode==='translation'?content.textContent:abstractResult?.text;if(text)Zotero.PaperLoom.listen(text,CiteLens.readerForDocument(doc));});listen.disabled=true;listen.dataset.loomAction='listen-abstract';
-    translationStatus.setAttribute('role','status');tools.append(source,translationStatus,modes,listen);facts.setAttribute('aria-label','关键词');body.append(content,facts,retry);panel.append(tools,body);card.append(panel);doc._clAbstract={title,close,position,get placement(){return manual?{...manual}:null;}};title.setAttribute('aria-expanded','true');title.setAttribute('aria-controls',panel.id);position();animation=animate(true);
+    let audioTicket=0,audioBusy=false;
+    const listenGroup=this.el(doc,'div',null,'cl-summary-listen');
+    const syncListen=()=>{const supported=Zotero.PaperLoom?.voice?.translationVoiceLanguage(CiteLensTranslation.get('translationTarget','zh-Hans'));listen.disabled=audioBusy||!abstractResult?.text||displayMode==='translation'&&!supported;};
+    const playAbstract=async()=>{
+      if(listen.disabled||!abstractResult?.text)return;keep();const ticket=++audioTicket,V=Zotero.PaperLoom?.voice,C=Zotero.PaperLoom?.voiceScope?.PaperVoiceCore;
+      if(!V||!C)return;const target=CiteLensTranslation.get('translationTarget','zh-Hans'),mode=displayMode,original=abstractResult.text;
+      const sourceLanguage=C.detectSpeechLanguage(original)||V.speechLanguage(),translatedLanguage=V.translationVoiceLanguage(target);
+      if(mode==='translation'&&!translatedLanguage)return;
+      const voice=language=>V.get('voiceFor_'+language,C.voices.find(v=>v.language===language)?.id);
+      const cancelled=()=>closed||ticket!==audioTicket||mode!==displayMode||target!==CiteLensTranslation.get('translationTarget','zh-Hans');
+      audioBusy=true;syncListen();
+      try{
+        let text=original,options={language:sourceLanguage,voice:voice(sourceLanguage)};
+        if(mode!=='original'&&translatedLanguage){
+          const result=await CiteLensTranslation.abstract(original,{paired:mode==='bilingual',cancelled});
+          if(cancelled())return;
+          if(mode==='bilingual'){
+            const units=result.pairs.flatMap(pair=>[{text:pair.original,language:sourceLanguage,voice:voice(sourceLanguage)},{text:pair.translated,language:translatedLanguage,voice:voice(translatedLanguage)}]);
+            text=units.map(unit=>unit.text).join('\n');options={units};
+          }else{text=result.text;options={language:translatedLanguage,voice:voice(translatedLanguage)};}
+        }
+        if(cancelled())return;
+        await Zotero.PaperLoom.listen(text,CiteLens.readerForDocument(doc),options);
+      }catch(error){if(!cancelled())translationStatus.textContent=error.message;}finally{if(ticket===audioTicket){audioBusy=false;syncListen();}}
+    };
+    const listen=this.iconButton(doc,'听读摘要','headphones',playAbstract);listen.dataset.loomAction='listen-abstract';syncListen();listenGroup.append(listen);
+    translationStatus.setAttribute('role','status');tools.append(source,translationStatus,modes,listenGroup);facts.setAttribute('aria-label','关键词');body.append(content,facts,retry);panel.append(tools,body);card.append(panel);doc._clAbstract={title,close,position,get placement(){return manual?{...manual}:null;}};title.setAttribute('aria-expanded','true');title.setAttribute('aria-controls',panel.id);position();animation=animate(true);
     const grip=tools;grip.tabIndex=0;grip.setAttribute('role','toolbar');grip.setAttribute('aria-label','摘要工具栏');
     const geometry=(point,snap=true)=>CiteLensAbstracts.dragPlacement(host.getBoundingClientRect(),{width:win.innerWidth,height:win.innerHeight},{width:userSize?.width||manual?.width||panel.offsetWidth,height:userSize?.height||panel.offsetHeight,userSized:!!userSize},point,snap,dockOptions());
     const remember=p=>{const a=host.getBoundingClientRect();manual={...p,offset:['top','bottom'].includes(p.side)?p.left-a.left:p.top-a.top};};
@@ -197,8 +222,8 @@ var CiteLensUI = {
     for(const [type,fn] of [['pointermove',resizeMove],['pointerup',resizeStop],['pointercancel',resizeStop],['keydown',resizeEscape]]){doc.addEventListener(type,fn,true);cleanups.push(()=>doc.removeEventListener(type,fn,true));}win.addEventListener('blur',resizeBlur);cleanups.push(()=>win.removeEventListener('blur',resizeBlur));
     cleanups.push(()=>{drag=null;resizing=null;hideDock();});
     // Delay dismissal so the pointer can cross from the title into the docked panel.
-    let leaveTimer,keyboardInside=false;const keep=()=>{win.clearTimeout(leaveTimer);leaveTimer=0;},defer=()=>{keep();leaveTimer=win.setTimeout(()=>{leaveTimer=0;if(drag||resizing)return;if(keyboardInside&&panel.contains(doc.activeElement))return;close();},280);};
-    panel.addEventListener('keydown',()=>{keyboardInside=true;});panel.addEventListener('pointerdown',()=>{keyboardInside=false;});
+    let leaveTimer,keyboardInside=false;const keep=()=>{win.clearTimeout(leaveTimer);leaveTimer=0;},defer=()=>{keep();leaveTimer=win.setTimeout(()=>{leaveTimer=0;if(drag||resizing||panel.matches(':hover')||title.matches(':hover'))return;if(keyboardInside&&panel.contains(doc.activeElement))return;close();},700);};
+    panel.addEventListener('keydown',()=>{keyboardInside=true;});panel.addEventListener('pointerdown',()=>{keyboardInside=false;keep();});
     for(const target of [title,panel]){target.addEventListener('pointerenter',keep);target.addEventListener('pointerleave',defer);target.addEventListener('focusin',keep);target.addEventListener('focusout',defer);cleanups.push(()=>{target.removeEventListener('pointerenter',keep);target.removeEventListener('pointerleave',defer);target.removeEventListener('focusin',keep);target.removeEventListener('focusout',defer);});}cleanups.push(keep);
     for(const type of ['pointerdown','mousedown'])panel.addEventListener(type,e=>e.stopPropagation());
     const ownerRow=card.closest('.cl-list-row')||card;
@@ -207,7 +232,7 @@ var CiteLensUI = {
     const surfaces=new Set([doc,Zotero.getMainWindow()?.document]);for(const frame of doc.querySelectorAll('iframe'))try{if(frame.contentDocument)surfaces.add(frame.contentDocument);}catch(_){}
     try{if(doc.defaultView.frameElement?.ownerDocument)surfaces.add(doc.defaultView.frameElement.ownerDocument);}catch(_){}
     for(const surface of surfaces)if(surface){for(const type of ['pointerdown','mousedown']){surface.addEventListener(type,outside,true);cleanups.push(()=>surface.removeEventListener(type,outside,true));}}
-    doc.addEventListener('pointerover',another,true);doc.addEventListener('pointermove',another,true);cleanups.push(()=>{doc.removeEventListener('pointerover',another,true);doc.removeEventListener('pointermove',another,true);});
+    doc.addEventListener('pointerover',another,true);cleanups.push(()=>doc.removeEventListener('pointerover',another,true));
     doc.addEventListener('keydown',escape,true);doc.addEventListener('scroll',scroll,true);win.addEventListener('resize',position);
     cleanups.push(()=>{doc.removeEventListener('keydown',escape,true);doc.removeEventListener('scroll',scroll,true);win.removeEventListener('resize',position);});
     const resize=new win.ResizeObserver(()=>{if(!drag&&!resizing)position();});resize.observe(panel);cleanups.push(()=>resize.disconnect());
@@ -217,7 +242,7 @@ var CiteLensUI = {
       let result;try{result=await CiteLensAbstracts.lookup(CiteLensServices,record,{force});}catch(_){result={status:'offline'};}
       if(ticket!==requestTicket||!title.isConnected||CiteLensCore.identity(getRecord())!==key)return;
       title.dataset.abstractState=result.status;if(closed)return;
-      if(result.status==='available')result={...result,text:CiteLensCore.abstractBody(result.text,result.record||record)};loading=false;title.dataset.abstractState=result.status;abstractResult=result;listen.disabled=result.status!=='available';modes.hidden=result.status!=='available';body.setAttribute('aria-busy','false');body.style.minHeight='';retry.disabled=false;retry.hidden=result.status==='available';
+      if(result.status==='available')result={...result,text:CiteLensCore.abstractBody(result.text,result.record||record)};loading=false;title.dataset.abstractState=result.status;abstractResult=result;listen.disabled=result.status!=='available';syncListen();modes.hidden=result.status!=='available';body.setAttribute('aria-busy','false');body.style.minHeight='';retry.disabled=false;retry.hidden=result.status==='available';
       if(retry.hidden&&doc.activeElement===retry){panel.tabIndex=-1;panel.focus({preventScroll:true});}
       content.dataset.uiStatus=String(result.status!=='available');content.textContent=result.status==='available'?result.text:result.status==='offline'?'暂时无法连接摘要服务，请重试。':'公开来源暂未返回可匹配的摘要。';
       if(result.status==='available'){
@@ -233,7 +258,7 @@ var CiteLensUI = {
     const showText=text=>{content.replaceChildren();for(const part of text.split(/\n\s*\n/).filter(Boolean))content.append(this.el(doc,'p',part));position();};
     const showPairs=pairs=>{content.replaceChildren();for(const pair of pairs){const row=this.el(doc,'div',null,'cl-bilingual-pair'),original=this.el(doc,'p',pair.original,'cl-original-line'),translated=this.el(doc,'p',pair.translated,'cl-translated-line');original.lang='en';translated.lang=CiteLensTranslation.get('translationTarget','zh-Hans');row.append(original,translated);content.append(row);}position();};
     let originalNodes=[];
-    const selectMode=mode=>{displayMode=mode;for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
+    const selectMode=mode=>{audioTicket++;audioBusy=false;displayMode=mode;syncListen();for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
     const restoreOriginal=()=>{content.replaceChildren(...originalNodes.map(n=>n.cloneNode(true)));content.classList.remove('cl-translated','cl-bilingual');content.lang='en';content.removeAttribute('aria-label');position();};
     const setDisplay=async(mode)=>{
       if(!abstractResult?.text)return;mode=['original','translation','bilingual'].includes(mode)?mode:'original';
@@ -244,7 +269,7 @@ var CiteLensUI = {
       try{const result=await T.abstract(abstractResult.text,{paired,cancelled:()=>!current(),onPartial:(text,pairs)=>{if(current()){if(paired&&pairs)showPairs(pairs);else showText(text);}}});if(!current())return;if(paired&&result.pairs)showPairs(result.pairs);else showText(result.text);delete modes.dataset.loading;translationStatus.textContent='';content.setAttribute('aria-label','机器翻译');}
       catch(error){if(!current())return;selectMode('original');restoreOriginal();delete modes.dataset.loading;modes.dataset.error='true';translationStatus.textContent=error.message;}
       finally{if(current()){body.style.minHeight='';position();}}
-    };load();
+    };cleanups.push(CiteLensTranslation.subscribe(keys=>{if(closed)return;if(keys.has('translationTarget')||keys.has('translationProvider')){audioTicket++;audioBusy=false;syncListen();if(displayMode!=='original')setDisplay(displayMode);}}));load();
   },
   scrollEdges(doc){
     if(doc._clScrollEdges)return;const win=doc.defaultView,selector='.cl-body,.cl-dialog-body,.pn-list,.pn-detail,.cl-summary-body,.pn-map-inspector,.pn-inspector-content,.pn-node-abstract,.pn-search-results,.pn-career-bio-content,.pn-career-timeline',tracked=new Set(),pending=new Set();let raf=0,disposed=false;
@@ -510,7 +535,7 @@ var CiteLensUI = {
     if(!wrap&&(next<0||next>=focus.length))return;
     e.preventDefault();e.stopPropagation();focus[(next+focus.length)%focus.length]?.focus();
   },
-  dialog(doc,title,{onClose=null,className='',header=true,keepParentVisible=false,reader=null}={}) {
+  dialog(doc,title,{onClose=null,className='',header=true,keepParentVisible=false,reader=null,autoOpen=true}={}) {
     this.style(doc);
     const workspace=['cl-settings','pn-network pn-map-window','pl-home'].includes(className),previous=doc.activeElement,parent=workspace?null:[...doc.querySelectorAll('.cl-overlay,.cl-root')].reverse().find(x=>!x.hidden),overlay=this.el(doc,'div',null,'cl-overlay'),frame=this.el(doc,'section',null,'cl-dialog '+className),head=this.el(doc,'header',null,'cl-dialog-header'),root=this.el(doc,'div',null,'cl-dialog-body'),footer=this.el(doc,'footer',null,'cl-dialog-footer');
     const heading=this.el(doc,'h2',title);heading.id='cl-dialog-title-'+(++this.sequence);
@@ -529,7 +554,7 @@ var CiteLensUI = {
     overlay.addEventListener('keydown',e=>{
       if(e.key==='Escape'){e.stopPropagation();e.preventDefault();close();return;}
       if(className!=='cl-settings')this.tab(frame,e);
-    });if(workspace)page=this.page(frame,{container:overlay,reader,dispose:finish,retain:className==='pn-network pn-map-window'});else frame.focus();
+    });if(workspace)page=this.page(frame,{container:overlay,reader,dispose:finish,retain:className==='pn-network pn-map-window'||className==='cl-settings',autoOpen});else frame.focus();
     return {root,frame,footer,overlay,close,setBusy(value){busy=value;dismiss.disabled=value;const back=head.querySelector('.cl-back');if(back)back.disabled=value;frame.setAttribute('aria-busy',String(value));}};
   },
   field(doc,parent,label,value='',tag='input') {
@@ -758,7 +783,7 @@ var CiteLensUI = {
     const S=CiteLensServices,existing=doc.querySelector('.cl-settings');if(existing){if(existing._clReader===reader){existing._clPage?.activate();return existing._plReady;}if(existing._clPage)existing._clPage.destroy();else existing._clClose?.();}
     const panel=CiteLens.panels.get(reader);
     const cleanups=[];let unsubscribe=()=>{},unsubscribeModels=()=>{},testTicket=0;
-    const {root,footer,close}=this.dialog(doc,'Paper Loom',{className:'cl-settings',reader,onClose:()=>{testTicket++;unsubscribe();unsubscribeModels();for(const cleanup of cleanups.splice(0))cleanup();}}),status=this.el(doc,'div','','cl-status');
+    const {root,footer,close}=this.dialog(doc,'Paper Loom',{className:'cl-settings',reader,autoOpen:false,onClose:()=>{testTicket++;unsubscribe();unsubscribeModels();for(const cleanup of cleanups.splice(0))cleanup();}}),status=this.el(doc,'div','','cl-status');
     const frame=root.closest('.cl-dialog'),head=frame.querySelector('.cl-dialog-header'),tools=this.el(doc,'div',null,'cl-header-tools'),network=this.iconButton(doc,'文献网络','network',()=>{CiteLens.showNetwork(reader||null,{doc});});
     const outside=e=>{if(Zotero.PaperLoom?.managedWorkspaces)return;if(!frame.isConnected||frame.hidden||frame.inert||frame.contains(e.target)||e.target.closest?.('.cl-select-popover,.cl-tooltip,.cl-overlay,[data-cite-lens=toolbar]')||[...doc.querySelectorAll('.cl-overlay')].some(x=>x!==frame.parentElement&&!x.hidden&&(frame.parentElement.compareDocumentPosition(x)&4)))return;frame._clPage?.hide(true);};
     const surfaces=new Set([doc,reader?._iframeWindow?.document,reader?._internalReader?._primaryView?._iframeWindow?.document,reader?._internalReader?._secondaryView?._iframeWindow?.document]);
@@ -788,7 +813,7 @@ var CiteLensUI = {
     // Appearance is supplied by the shared embedded settings controls.
     const T=CiteLensTranslation;
     const main=this.el(doc,'div'),modelPages={};translation.append(main);
-    const translationSelect=(parent,label,key,choices,fallback)=>{const input=this.el(doc,'select');input.dataset.translationSetting=key;for(const [value,name] of choices){const option=this.el(doc,'option',name);option.value=value;input.append(option);}input.value=T.get(key,fallback);input.addEventListener('change',()=>{T.set(key,input.value);syncTranslation();CiteLensThemes.refresh();});return row(parent,label,key,input);};
+    const translationSelect=(parent,label,key,choices,fallback)=>{const input=this.el(doc,'select');input.dataset.translationSetting=key;for(const [value,name] of choices){const option=this.el(doc,'option',name);option.value=value;input.append(option);}input.value=T.get(key,fallback);input.addEventListener('change',()=>{T.set(key,input.value);syncTranslation();});return row(parent,label,key,input);};
     const provider=translationSelect(main,'翻译服务','translationProvider',[['tencenttransmart','腾讯'],['bing','微软'],['google','Google'],['llm','大模型 · API']],'tencenttransmart');
     const configure=this.iconButton(doc,'配置大模型','settings',()=>modelPages.translation.open());configure.classList.add('pl-provider-settings');
     provider.before(configure);
@@ -845,6 +870,6 @@ var CiteLensUI = {
     unsubscribe=CiteLensUpdater.subscribe(state=>{try{if(!root.isConnected){unsubscribe();return;}}catch(_){unsubscribe();return;}automatic.checked=state.automatic;version.textContent='v'+state.version;update.textContent=state.phase==='available'?'安装 v'+state.availableVersion:state.phase==='checking'?'检查中…':state.phase==='installing'?'更新中…':state.phase==='error'?'重试检查':'检查更新';update.disabled=['checking','installing'].includes(state.phase);const message=state.phase==='error'?({timeout:'检查超时',network:'连接失败',manifest:'更新信息异常',security:'安全校验失败',cancelled:'检查已取消',install:'更新失败'}[state.errorKind]||'更新暂不可用'):['current','available'].includes(state.phase)?state.message:'';this.status(updateStatus,message,state.phase==='error');updateStatus.hidden=!message;updateStatus.setAttribute('aria-label',message);release.hidden=state.phase!=='error';});
     root.append(status);activate(active);
     if(S.metricWarning||S.loadWarning)this.status(status,S.metricWarning||S.loadWarning,true);
-    return frame._plReady=Zotero.PaperLoom?.extendSettings({doc,reader,root,footer,frame,tabs,panes,activate,close,cleanups,translation,data,modelPages});
+    frame._plReady=Zotero.PaperLoom?.extendSettings({doc,reader,root,footer,frame,tabs,panes,activate,close,cleanups,translation,data,modelPages});frame._clPage?.activate();return frame._plReady;
   }
 };

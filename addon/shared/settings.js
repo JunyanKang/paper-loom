@@ -74,10 +74,16 @@ var LoomSettings = {
       for(const doc of docs)for(const select of doc.querySelectorAll('.cl-settings select[data-translation-setting]')){
         const key=select.dataset.translationSetting;if(!['translationTarget','translationProvider'].includes(key))continue;
         select.value=T.get(key,key==='translationTarget'?'zh-Hans':'tencenttransmart');
-        if(key==='translationTarget')for(const option of select.options)option.hidden=option.disabled=!V.translationLanguages().some(x=>x.code===option.value);
+        if(key==='translationTarget')for(const option of select.options)option.hidden=option.disabled=!V.translationLanguages(false).some(x=>x.code===option.value);
       }
     };
     T.syncSettings=()=>{V.syncSettings();};
+    owner.translationUnsubscribe?.();owner.translationUnsubscribe=T.subscribe(keys=>{
+      if(![...keys].some(k=>['translationTarget','translationProvider','translationSize','translationFont'].includes(k)))return;
+      if(T.get('translationProvider','tencenttransmart')==='tencenttransmart'&&T.get('translationTarget')==='zh-Hant'){T.set('translationTarget','zh-Hans');return;}
+      V.syncTranslationVoice();
+      V.syncSettings();if(keys.has('translationSize')||keys.has('translationFont')){if(V.caption)V.applyCaptionTypography(V.caption.box);R.CiteLensThemes.refresh();}if(keys.has('translationTarget')||keys.has('translationProvider'))V.refreshTranslation?.();
+    });
   },
   async restoreTranslation(source) {
     const T=this.owner.referencesScope.CiteLensTranslation,profiles=JSON.parse(T.get('previousTranslationProfiles','{}')),profile=profiles[source];

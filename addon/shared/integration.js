@@ -46,7 +46,7 @@ Object.assign(PaperLoom,{
       U.onPageActivate=doc=>doc._clAbstract?.close(true);
       RS.CiteLensDockMotion.create=(panel,orb,fit,settled,progress)=>{const motion=VS.PaperVoiceDockMotion.create(panel,orb,fit);motion.setSettled(settled);motion.setCompanion(progress);return motion;};
       V.showPanel=(reader,toggle=false)=>{
-        V.scheduleWarmup();V.ensurePanel(reader);const doc=reader._iframeWindow.document;
+        V.ensurePanel(reader);const doc=reader._iframeWindow.document;
         const active=[...U.livePages(doc)].find(v=>!v.container.hidden);
         if(toggle&&active)return active.dismiss();
         return this.showSettings(reader,doc);
@@ -77,7 +77,7 @@ Object.assign(PaperLoom,{
         if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html')){
           const doc=ui.root.ownerDocument;
           // The companion owns no listening page. Settings owns all preferences.
-          ui.panel.hidden=true;ui.panel.inert=true;ui.panel.style.display='none';
+          ui.root.dataset.companionOnly='true';ui.panel.hidden=true;ui.panel.inert=true;ui.panel.style.display='none';
           ui.panel._pvDockVisibility=()=>{};
           this.installOutsideCollapse(ui,reader);
           ui.action('orb').setAttribute('aria-label','打开或收起 Paper Loom');ui.action('orb').title='Paper Loom';
@@ -118,7 +118,7 @@ Object.assign(PaperLoom,{
     U.set('idle','');
   },
   async stopModules() {
-    this.updateUnsubscribe?.();this.updateUnsubscribe=null;
+    this.updateUnsubscribe?.();this.updateUnsubscribe=null;this.translationUnsubscribe?.();this.translationUnsubscribe=null;
     await LoomRuntime.stop();
     if(this.voice)await this.voice.shutdown();
     if(this.references)await this.references.stop();

@@ -70,15 +70,24 @@ var PaperLoom = {
     this.queueReaders||=new WeakMap();let reader=this.queueReaders.get(doc);if(!reader){reader={_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};this.queueReaders.set(doc,reader);}
     return this.references.showPanel(reader,{view:'queue'});
   },
-  showInfo(key,doc=Zotero.getMainWindow().document) {
-    const english=this.referencesScope.CiteLensI18n.language()==='en',repo='https://github.com/JunyanKang/paper-loom';
-    const info={
-      about:['Paper Loom',english?'Version '+this.version+'. Read, listen, and follow research connections in Zotero. Created by Junyan Kang.':'版本 '+this.version+'。在 Zotero 中听读论文、理解引文、收藏线索、探索作者。作者：Junyan Kang。',repo],
-      guide:[english?'User guide':'使用指南',english?'Start from the left library toolbar or floating book in a PDF. Install offline voices in Settings → Voices & engine. Read selected text, a sentence, a paragraph, or the whole paper; explore references, save papers for later, and open author networks.':'从文献库左侧入口或 PDF 内的悬浮小书打开 Paper Loom。在「设置 → 声音与引擎」中下载离线声音，即可听读划选、单句、段落或全文；阅读时还可查阅引文摘要、收藏稍后读，或探索作者合作关系。',repo+'/blob/main/docs/'+(english?'GUIDE.en.md':'GUIDE.md')],
-      privacy:[english?'Privacy & data':'隐私与数据',english?'Speech runs on your computer after the voice download. Translation sends text to your chosen provider. Online reference and career lookups contact public data services. API keys are stored in Zotero’s login manager. No telemetry or analytics are added.':'声音下载后在本机合成。翻译会将文本发送给所选服务商；在线文献和履历查询会访问相应公开数据源。API 密钥存入 Zotero 登录管理器。无新增遥测或使用统计。',repo+'/blob/main/docs/'+(english?'PRIVACY.en.md':'PRIVACY.md')],
-      feedback:[english?'Feedback':'反馈',english?'Include your Paper Loom version, Zotero version, operating system and steps to reproduce. Remove API keys and private library information before sharing screenshots or logs.':'请附上 Paper Loom 版本、Zotero 版本、操作系统和复现步骤。分享截图和日志前请移除 API 密钥与私人文献内容。',repo+'/issues']
-    }[key]||['Paper Loom','',repo];
-    const dialog=this.referencesScope.CiteLensUI.dialog(doc,info[0]);dialog.root.append(this.el(doc,'p',info[1]),this.button(doc,english?'Open webpage':'打开网页',()=>Zotero.launchURL(info[2])));return dialog;
+  showInfo(key='about',doc=Zotero.getMainWindow().document) {
+    const existing=doc.querySelector('.pl-about');if(existing){existing._plSection?.(key);existing.focus();return existing._plDialog;}
+    this.style(doc);const U=this.referencesScope.CiteLensUI,lang=this.referencesScope.CiteLensI18n.language(),repo='https://github.com/JunyanKang/paper-loom',index=['zh','en','ja','fr','de'].indexOf(lang),word=values=>values[index<0?1:index];
+    const labels={guide:word(['指南','Guide','ガイド','Guide','Anleitung']),privacy:word(['隐私','Privacy','プライバシー','Confidentialité','Datenschutz']),feedback:word(['反馈','Feedback','フィードバック','Commentaires','Feedback'])};
+    const dialog=U.dialog(doc,'Paper Loom',{className:'pl-about',keepParentVisible:true});dialog.frame._plDialog=dialog;
+    const head=dialog.frame.querySelector('.cl-dialog-header');head.querySelector('h2').remove();head.classList.add('pl-about-close');dialog.frame.removeAttribute('aria-labelledby');dialog.frame.setAttribute('aria-label','Paper Loom');
+    const hero=this.el(doc,'div',null,'pl-about-hero'),identity=this.el(doc,'div',null,'pl-about-identity'),name=this.el(doc,'h2','Paper Loom'),version=this.el(doc,'span','v'+this.version,'pl-about-version');name.append(version);identity.append(name,this.el(doc,'p',word(['读论文，听论文，发现研究之间的联系。','Read, listen, and connect research.','読み、聴き、研究のつながりを探す。','Lire, écouter et relier les recherches.','Forschung lesen, hören und verknüpfen.'])));hero.append(this.logo(doc,64),identity);
+    const meta=this.el(doc,'div',null,'pl-about-meta');meta.append(this.el(doc,'span','Junyan Kang'),this.el(doc,'span','Zotero 10 / 11'));
+    const tabs=this.el(doc,'div',null,'pl-about-tabs'),content=this.el(doc,'section',null,'pl-about-content'),title=this.el(doc,'h3'),copy=this.el(doc,'p'),link=this.button(doc,'',()=>Zotero.launchURL(link.dataset.url));content.append(title,copy,link);tabs.setAttribute('role','tablist');content.id='pl-about-content';content.setAttribute('role','tabpanel');
+    const sections={
+      guide:[word(['使用指南','User guide','使い方','Guide d’utilisation','Benutzerhandbuch']),word(['选择文字后点击耳麦开始朗读。悬停正在朗读的原文或译文，使用句子、段落和语音控制；文献与朋友圈入口位于窗口底部。','Select text and click the headphones. Hover over the spoken source or caption for sentence, paragraph, and voice controls. Papers and author networks are in the bottom navigation.','文字を選び、ヘッドホンを押して再生します。原文や訳文にカーソルを置くと操作ボタンが表示されます。文献と研究者ネットワークは下部から開けます。','Sélectionnez du texte et cliquez sur le casque. Survolez le passage lu ou sa traduction pour afficher les commandes. Les articles et réseaux d’auteurs sont accessibles en bas.','Text auswählen und auf den Kopfhörer klicken. Über dem gelesenen Text oder der Übersetzung erscheinen die Steuerelemente. Publikationen und Autorennetzwerke finden Sie unten.']),word(['阅读完整指南 ↗','Read the guide ↗','ガイドを開く ↗','Ouvrir le guide ↗','Anleitung öffnen ↗']),repo+'/blob/main/docs/'+(lang==='zh'?'GUIDE.md':'GUIDE.en.md')],
+      privacy:[word(['隐私与数据','Privacy & data','プライバシーとデータ','Confidentialité et données','Datenschutz und Daten']),word(['语音在本机合成。翻译文本发送给你选择的服务商；在线文献查询访问对应数据源。密钥保存在 Zotero 登录管理器中，无使用遥测。','Speech runs locally. Translation text goes to your chosen provider; online lookups contact their data sources. Keys stay in Zotero’s login manager. No usage telemetry.','音声は端末で生成します。翻訳文は選択したサービスへ送信し、文献検索は各データ源に接続します。キーは Zotero に保存され、利用状況は収集しません。','La voix est générée localement. Les textes sont envoyés au traducteur choisi et les recherches aux sources concernées. Les clés restent dans Zotero. Aucune télémétrie d’usage.','Sprache wird lokal erzeugt. Übersetzungstexte gehen an den gewählten Anbieter, Abfragen an die jeweiligen Datenquellen. Schlüssel bleiben in Zotero. Keine Nutzungstelemetrie.']),word(['查看隐私说明 ↗','Read privacy details ↗','詳細を開く ↗','Voir les détails ↗','Datenschutzhinweise ↗']),repo+'/blob/main/docs/'+(lang==='zh'?'PRIVACY.md':'PRIVACY.en.md')],
+      feedback:[word(['问题与建议','Issues & suggestions','問題とご提案','Questions et suggestions','Probleme und Vorschläge']),word(['请附上插件与 Zotero 版本、系统信息和复现步骤。分享截图或日志前，移除密钥和私人文献内容。','Include the plugin and Zotero versions, operating system, and steps to reproduce. Remove keys and private library content from screenshots or logs.','プラグインと Zotero のバージョン、OS、再現手順を記載してください。キーや非公開情報は削除してください。','Indiquez les versions, le système et les étapes de reproduction. Retirez les clés et les données privées des captures et journaux.','Versionen, Betriebssystem und Schritte zur Reproduktion angeben. Schlüssel und private Inhalte aus Screenshots und Protokollen entfernen.']),word(['提交反馈 ↗','Submit feedback ↗','フィードバックを送る ↗','Envoyer un commentaire ↗','Feedback senden ↗']),repo+'/issues']
+    };
+    const select=key=>{key=sections[key]?key:'guide';for(const b of tabs.children){const active=b.dataset.section===key;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;}const item=sections[key];title.textContent=item[0];copy.textContent=item[1];link.textContent=item[2];link.dataset.url=item[3];content.setAttribute('aria-labelledby','pl-about-tab-'+key);};
+    for(const [key,icon] of [['guide','file-text'],['privacy','shield-check'],['feedback','message-circle']]){const b=this.button(doc,'',()=>select(key)),img=this.el(doc,'span',null,'pl-about-tab-icon');img.style.setProperty('--pl-info-icon','url("'+this.voice.assetURI+'icons/'+icon+'.svg")');img.setAttribute('aria-hidden','true');b.append(img,this.el(doc,'span',labels[key]));b.dataset.section=key;b.id='pl-about-tab-'+key;b.setAttribute('aria-controls',content.id);b.setAttribute('role','tab');tabs.append(b);}
+    tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const all=[...tabs.children],i=all.indexOf(doc.activeElement),next=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowLeft'?-1:1)+3)%3;select(all[next].dataset.section);all[next].focus();});
+    content.setAttribute('role','tabpanel');const repoLink=this.button(doc,'GitHub ↗',()=>Zotero.launchURL(repo));dialog.footer.append(repoLink);dialog.root.append(hero,meta,tabs,content);dialog.frame._plSection=select;select(key);return dialog;
   },
   async showSettings(reader=this.currentReader(),doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document,tab='general') {
     this.style(doc);const result=await this.referencesScope.CiteLensUI.settingsDialog(doc,{reader});
@@ -94,11 +103,11 @@ var PaperLoom = {
     actions.append(enable,this.button(doc,'稍后',()=>box.remove()));box.append(actions,status);
     (doc.body||doc.documentElement).append(box);
   },
-  async listen(text,reader=this.currentReader()) {
+  async listen(text,reader=this.currentReader(),options={}) {
     if(!text?.trim())return;
     if(!reader){this.libraryReader||={_iframeWindow:Zotero.getMainWindow(),_window:Zotero.getMainWindow(),itemID:null};reader=this.libraryReader;}
     this.voice.ensurePanel(reader);
-    return this.voice.speak(text,reader,true);
+    return this.voice.speak(text,reader,true,false,options);
   }
 };
 var LoomShellStyle = [

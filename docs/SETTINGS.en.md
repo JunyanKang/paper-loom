@@ -16,7 +16,7 @@ Do not include keys in feedback screenshots. Keys are stored locally using Zoter
 
 ![Voices & engine](images/voices-en.png)
 
-Reading defaults to English; Mandarin, Japanese, and French are also available. Each voice has a flag and a distinct portrait: the flag identifies its region or accent, and the portrait distinguishes the speaker. Choose a voice, preview it with the headphones button, and adjust its speed.
+Language and voice share one selector, with English as the default. Its menu has five right-aligned rows: US English, UK English, Chinese, Japanese, and French. A small portrait overlays each flag. Choosing one sets both language and voice; the headphones preview it. Reading mode and loop controls are now only in the caption toolbar.
 
 Installation status appears beside “Speech environment”, with action icons immediately below: a down arrow to download, a wrench to repair, and a checked shield to test voices. Progress, an icon-only cancel button, and status text expand underneath without moving the action buttons. Interrupted downloads can resume. Voice checks can also be cancelled. A success message clears after five seconds; a failed check keeps a repair prompt visible. Import an existing engine using the Voice folder button above. Unchanged voice packages need not be downloaded for every plugin update.
 
@@ -32,4 +32,6 @@ All 10 theme cards stay visible, ordered from light to dark. Click a preview to 
 
 Transparency, interface language, and companion interactions sit below the cards. The motion icon cycles through eight performances. Automatic interactions can be disabled or timed, and reduced-motion preferences are respected. Shared caption and abstract font settings are on **Reading & translation**.
 
-Update settings, help, privacy, and feedback are at the bottom of this page. Choose a check interval, enable automatic updates, or check for a new version manually.
+Update settings and About are at the bottom of this page. Guide, Privacy, and Feedback are inside About. Choose a check interval, enable automatic updates, or check for a new version manually.
+
+While translated reading is enabled, the shared translation language determines the reading voice. Unsupported languages disable the voice picker and sample button until a supported language is selected. Original-text voice preferences remain separate.

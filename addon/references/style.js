@@ -501,4 +501,10 @@ button[data-cite-lens]:is(:hover,:focus-visible){background:var(--cl-soft);color
 .cl-save-dialog .cl-reference-preview{display:block;margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--cl-soft);font-size:var(--cl-ui-size);line-height:1.55;overflow-wrap:anywhere;user-select:text;min-height:3.1em}
 .cl-save-dialog .cl-reference-preview[aria-busy=true]{opacity:.6}
 .cl-list-publication>.cl-journal-text{display:block}
+
+/* Preserve paragraph rhythm when switching abstract display modes. */
+.cl-summary .cl-summary-content,.cl-summary .cl-summary-content.cl-translated{font:var(--cl-size)/1.55 var(--cl-reading-font)}
+.cl-summary .cl-summary-content p,.cl-summary .cl-bilingual-pair p{font:inherit;line-height:inherit;padding:0;margin:0 0 7px;background:transparent;border-radius:0;text-align:start;white-space:pre-wrap;overflow-wrap:break-word}
+.cl-summary .cl-bilingual-pair{margin:0 0 14px}.cl-summary .cl-translated-line{color:var(--cl-muted)}
+.cl-summary-listen{display:flex;align-items:center;gap:2px;position:relative;flex:none}
 `;

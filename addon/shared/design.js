@@ -224,13 +224,13 @@ html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-pag
 .pl-engine-actions .pv-icon{width:19px;height:19px}
 .pl-voice-symbol{position:relative;display:inline-block!important;width:26px;height:26px;flex:none}
 .pl-voice-symbol>.pl-flag{position:absolute;left:0;top:2px;width:24px!important;height:16px!important;object-fit:cover;border-radius:2px}.pl-voice-avatar{position:absolute;z-index:1;right:0;bottom:0;display:block!important;width:17px;height:17px;background-repeat:no-repeat;filter:none!important;border-radius:50%;flex:none}
-:is(.cl-select-popover,.pv-select-popover).pl-language-menu.pl-voice-menu{width:40px!important;min-width:40px!important}
+:is(.cl-select-popover,.pv-select-popover).pl-language-menu.pl-voice-menu{width:max-content!important;min-width:0!important}
 .pl-voice-menu .pl-language-option{height:36px;min-height:36px;padding:5px!important}
 .pl-voice-select .pv-select-value{overflow:visible;flex:none;transform:translateX(2px)}
 /* Move only the tint. Text keeps the same right edge as menu option text. */
 :is(.pl-settings .cl-select-trigger,.pv-shell .pv-select-trigger):not(.pl-language-select):not(.cl-model-toggle){position:relative;isolation:isolate;overflow:visible;background:transparent!important}
 :is(.pl-settings .cl-select-trigger,.pv-shell .pv-select-trigger):not(.pl-language-select):not(.cl-model-toggle)::before{content:'';position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;transform:translateX(var(--pl-select-fill-shift,9px));background:transparent;transition:background .18s ease}
-:is(.pl-settings .cl-select-trigger,.pv-shell .pv-select-trigger):not(.pl-language-select):not(.cl-model-toggle):is(:hover,:focus-visible):not([aria-expanded=true])::before{background:var(--pv-soft,var(--cl-soft))}
+:is(.pl-settings .cl-select-trigger,.pv-shell .pv-select-trigger):not(.pl-language-select):not(.cl-model-toggle):focus-visible:not([aria-expanded=true])::before{background:transparent}
 /* Menus retain their complete surface while their content scrolls. */
 :is(.cl-select-popover,.pv-select-popover,.cl-menu,.cl-citation-locations){mask-image:none!important;scroll-padding-block:5px}
 :is(.cl-select-trigger,.pv-select-trigger,.pl-settings [role=combobox])[aria-expanded=true],
@@ -244,4 +244,27 @@ html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-pag
 .pl-embedded .pv-reading-modes>span{margin-right:auto}
 .pl-embedded .pv-reading-modes>[data-action=primary]{flex:none!important;width:28px!important;height:28px!important;min-width:28px!important;padding:5px!important}
 .pl-embedded .pv-reading-modes [data-field=primaryLabel]{display:none!important}
+
+/* Main workspaces keep stable surfaces; hover changes ink, never the fill. */
+.pl-workspace-page.pl-workspace-page>.pl-main-actions>button.cl-icon-button:hover{background:transparent!important}
+.pl-embedded .pv-shortcut-key{background:transparent!important}
+.pl-embedded .pv-shortcut-row[data-recording=true] .pv-shortcut-key{background:var(--pv-soft)!important}
+.cl-root .cl-group-stack>.cl-card:hover{--cl-card-hover:transparent!important}
+
+:is(.cl-settings,.cl-root,.pn-network,.pl-embedded) button:hover:not([aria-pressed=true]):not([aria-selected=true]):not([aria-current=page]):not(.cl-primary):not(.pv-primary):not(.pv-theme-choice):not(.cl-theme-choice):not(.pl-engine-actions>button){background-color:transparent!important}
+:is(.cl-settings,.pl-embedded) :is(.cl-select-trigger,.pv-select-trigger):hover::before{background:transparent!important}
+:is(.cl-root,.pn-network) :is(.cl-list-row,.pn-member-paper,.cl-card):hover{background-color:transparent!important}
+:is(.cl-settings,.cl-root,.pn-network,.pl-embedded) button:hover{color:var(--cl-accent,var(--pv-accent))}
+
+.cl-dialog.pl-about{position:relative;width:min(460px,calc(100vw - 40px));padding:26px;border-radius:20px;font:13px/1.6 var(--pl-font)}
+.cl-dialog.pl-about>.cl-dialog-body{padding:0}.cl-dialog.pl-about>.pl-about-close{position:absolute;right:12px;top:12px;padding:0;min-height:0;border:0;background:transparent}
+.pl-about-hero{display:flex;align-items:center;gap:18px;padding-right:18px}.pl-about-hero>img{flex:none}
+.pl-about-identity{min-width:0}.pl-about-identity h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font:600 18px/1.3 var(--pl-font);margin:0 0 7px;letter-spacing:-.3px}.pl-about-version{font:400 12px/1.4 var(--pl-font);color:var(--cl-muted);letter-spacing:0}
+.pl-about-identity p{font:400 13px/1.6 var(--pl-font);margin:0;color:var(--cl-muted)}
+.pl-about-meta{display:flex;justify-content:space-between;gap:16px;margin:20px 0 24px;color:var(--cl-muted);font-size:12px}
+.pl-about-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}.cl-dialog.pl-about .pl-about-tabs button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;border-radius:9px;background:transparent;font:400 13px/1.4 var(--pl-font)}
+.pl-about-tab-icon{width:17px;height:17px;flex:none;background:currentColor;mask:var(--pl-info-icon) center/contain no-repeat}.cl-dialog.pl-about .pl-about-tabs button[aria-selected=true]{background:var(--cl-soft);color:var(--cl-accent)}
+.pl-about-content{min-height:132px}.pl-about-content h3{font:600 14px/1.5 var(--pl-font);margin:0 0 8px}.pl-about-content p{font:400 13px/1.65 var(--pl-font);margin:0 0 14px;color:var(--cl-muted);overflow-wrap:anywhere}.cl-dialog.pl-about .pl-about-content button{background:transparent;padding:0;color:var(--cl-accent);font-size:13px;min-height:28px}
+.pl-about .cl-dialog-footer{display:flex;justify-content:flex-end;margin:16px 0 0;padding:0;border:0}.pl-about .cl-dialog-footer button{background:transparent;padding:0;color:var(--cl-muted);font-size:12px}
+.cl-dialog.pl-about button:not([aria-selected=true]){background:transparent!important}.cl-dialog.pl-about button:hover:not([aria-selected=true]){color:var(--cl-accent)}.pl-settings .cl-update-links{justify-content:center!important}
 `;

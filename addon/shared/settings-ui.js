@@ -15,6 +15,8 @@ PaperLoom.extendSettings=async function(ctx) {
   const fake={_iframeWindow:embedded.contentWindow,_window:embedded.contentWindow,itemID:reader?.itemID},V=this.voice;
   const ui=this.voiceScope.PaperVoiceUI.create(V,fake);ui.root.classList.add('pl-embedded');ui.root.dataset.loomSettings='true';ui.panel.hidden=false;ui.panel.dataset.pvVisible='true';
   V.panels.set(fake,ui);ui.settings(true);V.syncSettings();
+  ui.find('speechLanguage').closest('.pv-setting-row').hidden=true;
+  ui.find('voice').closest('.pv-setting-row').querySelector('label').textContent='朗读声音';
   const shortcut=e=>V.handlePlaybackShortcut(e,reader||V.currentReader);
   embedded.contentWindow.addEventListener('keydown',shortcut,true);
   cleanups.push(()=>{try{embedded.contentWindow.removeEventListener('keydown',shortcut,true);}catch(_){}});
@@ -31,11 +33,11 @@ PaperLoom.extendSettings=async function(ctx) {
   // Keep the complete original event wiring; display each control only once.
   for(const field of ['provider','target'])ui.find(field)?.closest('.pv-setting-row')?.setAttribute('hidden','');
   ui.action('primary').onclick=()=>{const active=reader?.itemID?reader:this.currentReader();if(active?.itemID)V.primary(active);};ui.action('primary').disabled=!reader?.itemID;
-  ui.action('sample').onclick=()=>this.listen(this.voiceScope.PaperVoiceCore.speechLanguages.find(l=>l.id===V.settingsVoiceLanguage()).sample,reader);
+  ui.action('sample').onclick=()=>{const language=this.voiceScope.PaperVoiceCore.speechLanguages.find(l=>l.id===V.settingsVoiceLanguage());if(language)this.listen(language.sample,reader);};
   ui.action('previewCompanion').onclick=()=>{const live=[...V.livePanels()].find(p=>p.root.ownerDocument===doc&&!p.root.classList.contains('pl-embedded'));live?.previewCompanion();};
   ui.action('settings').onclick=()=>{};
   const engine=this.enginePanel(inside);ui.root.querySelector('[data-settings-pane=voice]').append(engine.node);cleanups.push(engine.dispose);
-  const resize=()=>{if(embedded.isConnected&&!embedded.hidden)embedded.style.height=Math.ceil(ui.panel.getBoundingClientRect().height+12)+'px';};
+  const resize=()=>{if(embedded.isConnected&&!embedded.hidden){const h=ui.panel.getBoundingClientRect().height;if(h>0&&embedded.style.height!==Math.ceil(h+12)+'px')embedded.style.height=Math.ceil(h+12)+'px';}};
   const observer=new embedded.contentWindow.ResizeObserver(resize);observer.observe(ui.panel);
   cleanups.push(()=>{observer.disconnect();this.referencesScope.CiteLensThemes.release(inside);V.panels.delete(fake);ui.dispose();embedded.remove();});
   const labels={general:'阅读与翻译',appearance:'外观',voice:'声音与引擎',shortcuts:'快捷键'};
@@ -58,8 +60,12 @@ PaperLoom.extendSettings=async function(ctx) {
   automatic.onchange=async()=>{await V.setAutoUpdate(automatic.checked);interval.disabled=!automatic.checked;};interval.onchange=()=>V.setUpdateInterval(interval.value);
   const label=this.el(doc,'label');label.append(automatic,this.el(doc,'span','定期检查更新'));schedule.append(label,interval);ctx.footer.prepend(schedule);
   const links=ctx.footer.querySelector('.cl-update-links');links.replaceChildren();
-  for(const [key,label] of [['about','v'+this.version],['guide','指南'],['feedback','反馈'],['privacy','隐私']])links.append(this.button(doc,label,()=>this.showInfo(key,doc)));
-  root.append(ctx.footer);select('general');return ctx;
+  const about=this.button(doc,'Paper Loom · v'+this.version,()=>this.showInfo('about',doc));about.className='pl-about-entry';links.append(about);
+  root.append(ctx.footer);select('general');
+  const container=frame._clPage?.container||frame,hidden=container.hidden,frameHidden=frame.hidden;
+  frame.style.visibility='hidden';container.hidden=false;frame.hidden=false;resize();
+  await new Promise(resolve=>doc.defaultView.requestAnimationFrame(()=>{resize();resolve();}));
+  container.hidden=hidden;frame.hidden=frameHidden;frame.style.removeProperty('visibility');return ctx;
 };
 PaperLoom.enginePanel=function(doc) {
   const node=this.el(doc,'section',null,'pl-engine'),runtime=LoomRuntime;

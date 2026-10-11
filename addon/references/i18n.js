@@ -1586,7 +1586,16 @@ var CiteLensI18n = {
      if(['INPUT','TEXTAREA'].includes(n.tagName))return;for(const c of n.childNodes)visit(c);
    };visit(root);
  },
- install(doc){if(this.documents.has(doc))return;let running=false,scheduled=0,previous='zh';const win=doc.defaultView,apply=()=>{if(running)return;const language=this.language();if(language==='zh'&&previous==='zh')return;previous=language;running=true;try{for(const root of doc.querySelectorAll('.cl-root,.cl-dialog,.cl-floating,.cl-summary,.cl-select-popover,.cl-tooltip,.pl-engine,.pl-navigation,.pl-main-actions,.pl-conflicts,[data-cite-lens="toolbar"]'))this.apply(root);}finally{running=false;}};const observer=new win.MutationObserver(()=>{if(scheduled)return;scheduled=win.requestAnimationFrame(()=>{scheduled=0;apply();});});observer.observe(doc.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','data-cl-tooltip','data-pv-tooltip','aria-label','placeholder']});this.documents.set(doc,{apply,observer,cancel:()=>win.cancelAnimationFrame(scheduled)});apply();},
+ install(doc){
+   if(this.documents.has(doc))return;
+   const win=doc.defaultView,selector='.cl-root,.cl-dialog,.cl-floating,.cl-summary,.cl-select-popover,.cl-tooltip,.pl-engine,.pl-navigation,.pl-main-actions,.pl-conflicts,[data-cite-lens="toolbar"]',dirty=new Set();let scheduled=0;
+   const options={subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','data-cl-tooltip','data-pv-tooltip','aria-label','placeholder']};
+   const flush=()=>{scheduled=0;observer.disconnect();try{const roots=[...dirty].filter(n=>n.isConnected);dirty.clear();for(const root of roots)if(!roots.some(other=>other!==root&&other.contains(root)))this.apply(root);}finally{observer.observe(doc.documentElement,options);}};
+   const mark=node=>{const el=node?.nodeType===1?node:node?.parentElement;if(!el)return;const root=el.closest(selector);if(root){dirty.add(root);return;}for(const child of el.querySelectorAll(selector))dirty.add(child);};
+   const observer=new win.MutationObserver(records=>{for(const record of records){const el=record.target.nodeType===1?record.target:record.target.parentElement,root=el?.closest(selector);if(root)dirty.add(root);for(const node of record.addedNodes||[])if(node.nodeType===1)mark(node);}if(dirty.size&&!scheduled)scheduled=win.requestAnimationFrame(flush);});
+   const apply=()=>{for(const root of doc.querySelectorAll(selector))dirty.add(root);win.cancelAnimationFrame(scheduled);flush();};
+   this.documents.set(doc,{apply,observer,cancel:()=>{win.cancelAnimationFrame(scheduled);dirty.clear();}});apply();
+ },
  refresh(){for(const entry of this.documents.values())entry.apply();},
  release(doc){this.documents.get(doc)?.cancel?.();this.documents.get(doc)?.observer.disconnect();this.documents.delete(doc);}
 };

@@ -17,17 +17,40 @@ var PaperVoiceDockMotion = {
   const neck=Math.min(5/width,.025),scale=neck+(1-neck)*spread;
   return {center:anchor.x+(width/2-anchor.x)*spread,y:anchor.y+(v*height-anchor.y)*rise,scale};
  },
+ outerShadows(value) {
+  const layers=[];let depth=0,start=0;
+  for(let i=0;i<=value.length;i++){const c=value[i];if(c==='(')depth++;else if(c===')')depth--;if(i===value.length||c===','&&!depth){layers.push(value.slice(start,i).trim());start=i+1;}}
+  return layers.filter(x=>x&&x!=='none'&&!/\binset\b/.test(x)).map(layer=>{
+   const tokens=layer.match(/[a-z-]+\([^)]*\)|[^\s]+/gi)||[],lengths=tokens.filter(x=>/^-?[\d.]+(?:px)?$/.test(x)).map(parseFloat),color=tokens.find(x=>!/^[-\d.]+(?:px)?$/.test(x));
+   return {x:lengths[0]||0,y:lengths[1]||0,blur:Math.max(0,lengths[2]||0),spread:lengths[3]||0,color:color||'transparent'};
+  });
+ },
+ shadowPadding(shadows) {return Math.ceil(Math.max(32,...shadows.map(s=>Math.max(Math.abs(s.x),Math.abs(s.y))+Math.max(0,s.spread)+s.blur*1.5+2)));},
+ paintShadow(doc,ctx,width,height,pad,ratio,radius,shadows) {
+  if(!shadows.length)return;
+  const layer=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas');layer.width=Math.ceil((width+pad*2)*ratio);layer.height=Math.ceil((height+pad*2)*ratio);
+  const shadow=layer.getContext('2d');shadow.scale(ratio,ratio);
+  // CSS box-shadow uses a Gaussian sigma of half the blur radius. Draw only
+  // the shadow geometry: capturing beyond the panel can leak composed PDF text.
+  for(const s of [...shadows].reverse()){
+   const w=width+2*s.spread,h=height+2*s.spread;if(w<=0||h<=0)continue;
+   shadow.filter=s.blur?'blur('+s.blur*ratio/2+'px)':'none';shadow.fillStyle=s.color;
+   shadow.beginPath();shadow.roundRect(pad+s.x-s.spread,pad+s.y-s.spread,w,h,Math.max(0,Math.min(radius+s.spread,w/2,h/2)));shadow.fill();
+  }
+  shadow.filter='none';shadow.globalCompositeOperation='destination-out';shadow.fillStyle='#000';shadow.beginPath();shadow.roundRect(pad,pad,width,height,radius);shadow.fill();
+  ctx.save();ctx.globalCompositeOperation='destination-over';ctx.drawImage(layer,0,0,layer.width,layer.height,0,0,layer.width/ratio,layer.height/ratio);ctx.restore();layer.width=layer.height=0;
+ },
  mesh(panel,orb) {
   const doc=panel.ownerDocument,win=doc.defaultView,b=panel.getBoundingClientRect(),o=orb.getBoundingClientRect();
-  const anchor={x:o.x+o.width/2-b.x,y:o.y+o.height*.54-b.y},pad=32;
+  const anchor={x:o.x+o.width/2-b.x,y:o.y+o.height*.54-b.y},style=win.getComputedStyle(panel),shadows=this.outerShadows(style.boxShadow),pad=this.shadowPadding(shadows);
   const source=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas'),ratio=Math.min(2,win.devicePixelRatio||1);
   source.width=Math.ceil((b.width+pad*2)*ratio);source.height=Math.ceil((b.height+pad*2)*ratio);
-  const ctx=source.getContext('2d'),style=win.getComputedStyle(panel),radius=parseFloat(style.borderRadius)||22;
+  const ctx=source.getContext('2d'),radius=parseFloat(style.borderRadius)||22;
   if(!ctx?.drawWindow)throw Error('Window capture unavailable');
   ctx.scale(ratio,ratio);
   // Gecko can retain composed PDF pixels outside an isolated panel. Clip the
   // capture itself, including its padding, before any texture deformation.
-  ctx.beginPath();ctx.roundRect(pad,pad,b.width,b.height,radius);ctx.clip();
+  ctx.save();ctx.beginPath();ctx.roundRect(pad,pad,b.width,b.height,radius);ctx.clip();
   // drawWindow does not reproduce Gecko's composited backdrop-filter surface.
   // Capture only the actual foreground (with its user/theme alpha), never a
   // flattened screenshot containing PDF text. All overrides are restored in
@@ -39,6 +62,7 @@ var PaperVoiceDockMotion = {
   isolation.textContent='[data-pl-capture-hidden]{visibility:hidden!important}[data-pl-capture-path]:not([data-pl-capture-panel]){background:transparent!important;box-shadow:none!important;outline:0!important}[data-pl-capture-panel]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
   (doc.head||doc.documentElement).append(isolation);
   try{ctx.drawWindow(win,b.x-pad,b.y-pad,b.width+pad*2,b.height+pad*2,'rgba(0,0,0,0)');}finally{isolation.remove();for(const [node,key,value] of marked)value===null?node.removeAttribute(key):node.setAttribute(key,value);}
+  ctx.restore();this.paintShadow(doc,ctx,b.width,b.height,pad,ratio,radius,shadows);
   const left=Math.floor(Math.min(b.x-pad,o.x-pad)),top=Math.floor(Math.min(b.y-pad,o.y-pad));
   const width=Math.ceil(Math.max(b.right+pad,o.right+pad)-left),height=Math.ceil(Math.max(b.bottom+pad,o.bottom+pad)-top);
   const blurPad=72,background=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas'),blurred=doc.createElementNS('http://www.w3.org/1999/xhtml','canvas');
@@ -58,7 +82,7 @@ var PaperVoiceDockMotion = {
   try {
    const shader=(kind,text)=>{const s=gl.createShader(kind);gl.shaderSource(s,text);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){gl.deleteShader(s);throw Error('Window mesh shader unavailable');}return s;};
    vertex=shader(gl.VERTEX_SHADER,'attribute vec2 a_position;attribute vec2 a_uv;varying vec2 v_uv;varying vec2 v_screen;void main(){gl_Position=vec4(a_position,0.,1.);v_uv=a_uv;v_screen=vec2((a_position.x+1.)*.5,(1.-a_position.y)*.5);}');
-   fragment=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec2 v_uv;varying vec2 v_screen;uniform sampler2D u_image;uniform sampler2D u_backdrop;uniform vec4 u_panel;uniform vec4 u_bgRect;void main(){vec4 fg=texture2D(u_image,v_uv);vec2 pixel=v_uv*(u_panel.xy+2.*u_panel.z)-u_panel.z;vec2 q=abs(pixel-u_panel.xy*.5)-(u_panel.xy*.5-u_panel.w);float edge=length(max(q,0.))+min(max(q.x,q.y),0.)-u_panel.w;float cover=1.-smoothstep(-.5,.5,edge);vec4 bg=texture2D(u_backdrop,u_bgRect.xy+v_screen*u_bgRect.zw);fg*=cover;float glass=(1.-fg.a)*cover;gl_FragColor=vec4(fg.rgb+bg.rgb*glass,fg.a+bg.a*glass);}');
+   fragment=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec2 v_uv;varying vec2 v_screen;uniform sampler2D u_image;uniform sampler2D u_backdrop;uniform vec4 u_panel;uniform vec4 u_bgRect;void main(){vec4 fg=texture2D(u_image,v_uv);vec2 pixel=v_uv*(u_panel.xy+2.*u_panel.z)-u_panel.z;vec2 q=abs(pixel-u_panel.xy*.5)-(u_panel.xy*.5-u_panel.w);float edge=length(max(q,0.))+min(max(q.x,q.y),0.)-u_panel.w;float cover=1.-smoothstep(-.5,.5,edge);vec4 bg=texture2D(u_backdrop,u_bgRect.xy+v_screen*u_bgRect.zw);float glass=(1.-fg.a)*cover;gl_FragColor=vec4(fg.rgb+bg.rgb*glass,fg.a+bg.a*glass);}');
    program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);
    if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('Window mesh linking unavailable');
    gl.useProgram(program);gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);

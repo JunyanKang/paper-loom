@@ -19,7 +19,7 @@ try{for(const reader of [r,null]){const doc=reader?reader._iframeWindow.document
   }
   if(tab==='appearance'){
    for(const row of f.querySelectorAll('.pl-update-schedule,.cl-update-row,.cl-update-links')){same(label+' updates left '+row.className,rect(row).left,left);same(label+' updates right '+row.className,rect(row).right,right);}
-   const links=[...f.querySelectorAll('.cl-update-links button')];same(label+' first link left',rect(links[0]).left,left);same(label+' last link right',rect(links.at(-1)).right,right);
+   const links=[...f.querySelectorAll('.cl-update-links button')];check(label+' resources consolidated in About',links.length===1);same(label+' About entry centered',(rect(links[0]).left+rect(links[0]).right)/2,(left+right)/2);
    for(const c of f.querySelectorAll('.cl-update-footer input[type=checkbox]'))same(label+' update toggle left',rect(c).left,left);
   }
   if(tab==='shortcuts'){const keys=[...inside.querySelectorAll('.pv-shortcut-key')].filter(visible);check(label+' shortcut controls share both column edges',keys.every(k=>Math.abs(rect(k).left-rect(keys[0]).left)<1&&Math.abs(rect(k).right-right)<1));}

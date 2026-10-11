@@ -38,7 +38,7 @@ test('synthesis error is shown and does not produce audio',async()=>{
  assert.equal(p.state,'error');assert.equal(p.status,'engine failed');assert.deepEqual(played,[]);
 });
 test('selection rerenders debounce and avoid duplicate speech',async()=>{
- const {p}=setup();p.translateSelection=()=>{};let calls=[];p.speak=async text=>calls.push(text);
+ const {p}=setup();p.set('auto',true);p.set('mode','selection');p.translateSelection=()=>{};let calls=[];p.speak=async text=>calls.push(text);
  const doc={createElement:()=>({dataset:{},style:{},setAttribute(){},addEventListener(){}})};
  const e={doc,reader:{},params:{annotation:{text:'Selected words',position:{pageIndex:0}}},append(){}};
  p.onSelection(e);p.onSelection(e);p.onSelection(e);await new Promise(r=>setTimeout(r,330));assert.deepEqual(calls,['Selected words']);
@@ -104,7 +104,7 @@ test('resume follows the latest actual reading in every mode, including partial 
  }
 });
 test('progress is isolated by PDF; loading, stopped and sample speech cannot overwrite it',async()=>{
- const {p,generated}=setup(),r=progressReader(),other=progressReader(43);p.set('progress.42','original');
+ const {p,generated}=setup(),r=progressReader(),other=progressReader(43);p.set('mode','selection');p.set('progress.42','original');
  p.selectionContexts.set(r,{text:'First sentence.',pageIndex:0});
  const speech=p.speak('First sentence.',r);await tick();assert.equal(p.get('progress.42'),'original');p.stop();generated[0].resolve();await speech;
  p.rememberPlayback({reader:r,unit:{pageIndex:0,text:'Old'},generation:p.generation-1,mode:'selection'});assert.equal(p.get('progress.42'),'original');
@@ -151,7 +151,7 @@ test('last mode switch wins; stop cancels pending continuation',async()=>{
  const task=p.runUnits(navigationUnits,{navigate:async()=>{}},p.generation,{mode:'document',loops:1});await tick();p.setMode('sentence');p.setMode('paragraph');assert.equal(p.session.pendingMode,'paragraph');p.stop();await task;assert.equal(played.length,1);
 });
 test('selection repeat is independent and caches speech',async()=>{
- const {p,played}=setup();p.set('selectionRepeat',3);let count=0;p.requestSpeech=async text=>{count++;return {audio:text}};await p.speak('Selected sentence.',{});assert.equal(played.length,3);assert.equal(count,1);
+ const {p,played}=setup();p.set('mode','selection');p.set('selectionRepeat',3);let count=0;p.requestSpeech=async text=>{count++;return {audio:text}};await p.speak('Selected sentence.',{});assert.equal(played.length,3);assert.equal(count,1);
 });
 test('navigation groups sentence fragments across pages and moves by paragraph',()=>{
  assert.equal(core.scopeUnits(navigationUnits,navigationUnits[1],'sentence').length,2);
@@ -195,12 +195,12 @@ test('automatic reading prompts for uncertain or unsupported language without ge
  for(const text of ['RNA','Hola, este documento está escrito en español.']){const {p}=setup();p.set('speechLanguage','auto');p.documentUnits=async()=>[];let count=0;p.requestSpeech=async()=>{count++;return{audio:'x'}};await p.speak(text,{});assert.equal(count,0);assert.equal(p.state,'error');assert.match(p.status,/手动选择/);}
 });
 test('single click toggles translated audio without changing target; double click toggles captions only',()=>{
- const {p,host}=setup();let job,cleared=0;host.setTimeout=fn=>{job=fn;return 1};host.clearTimeout=()=>{job=null;cleared++};p.syncSettings=()=>{};p.hideTranslation=()=>{};p.setStatus=()=>{};p.translationVoiceLanguage=target=>!target||['zh-Hans','ja','fr','en'].includes(target)?'en':null;p.toggleTranslation=enabled=>p.set('translation',enabled);
+ const {p,host}=setup();let job,cleared=0;host.setTimeout=fn=>{job=fn;return 1};host.clearTimeout=()=>{job=null;cleared++};p.syncSettings=()=>{};p.hideTranslation=()=>{};p.refreshTranslation=()=>{};p.setStatus=()=>{};p.translationVoiceLanguage=target=>!target||['zh-Hans','ja','fr','en'].includes(target)?'en':null;p.toggleTranslation=enabled=>p.set('translation',enabled);
  p.quickTranslationClick({detail:1});assert.equal(p.get('readTranslation',false),false);job();assert.equal(p.get('readTranslation'),true);assert.equal(p.get('translationTarget','zh-Hans'),'zh-Hans');
  p.quickTranslationClick({detail:1});job();assert.equal(p.get('readTranslation'),false);
  p.quickTranslationClick({detail:1});p.quickTranslationClick({detail:2});p.quickTranslationDoubleClick();assert.equal(job,null);assert.equal(p.get('translation'),true);assert.equal(p.get('readTranslation'),false);assert.ok(cleared>0);
  p.quickTranslationDoubleClick();assert.equal(p.get('translation'),false);
- p.set('readTranslation',true);p.setTranslationTarget('de');assert.equal(p.get('translationTarget','zh-Hans'),'zh-Hans');assert.equal(p.get('readTranslation'),true);p.setReadTranslation(false);p.setTranslationTarget('de');assert.equal(p.get('translationTarget'),'de');
+ p.set('readTranslation',true);p.setTranslationTarget('de');assert.equal(p.get('translationTarget'),'de');assert.equal(p.get('readTranslation'),true);p.setReadTranslation(false);p.setTranslationTarget('de');assert.equal(p.get('translationTarget'),'de');
  p.quickTranslationClick({detail:1});p.stop();assert.equal(job,null);
 });
 test('new installation defaults to translation while an explicit off preference remains off',()=>{const {p,context}=setup();context.Zotero.Prefs.set(p.prefix+'translation',undefined);assert.equal(p.get('translation',false),true);p.set('translation',false);assert.equal(p.get('translation',true),false);});
@@ -411,13 +411,13 @@ test('selection popup shows preparation immediately and keeps its captured locat
 });
 
 test('popup closes on actual audio playback, including after a scroll repositions it',async()=>{
- const {p,host,nativePlay}=setup();const annotation={},popup={annotation},state={primaryViewSelectionPopup:popup};let closed=0,cleared=0;
+ const {p,host,nativePlay}=setup();const annotation={text:'Original sentence.',position:{pageIndex:0,rects:[[1,2,3,4]]}},popup={annotation},state={primaryViewSelectionPopup:popup};let closed=0,cleared=0;
  const reader={_internalReader:{_state:state,_primaryView:{clearSelection:()=>cleared++,_onSetSelectionPopup:value=>{closed++;state.primaryViewSelectionPopup=value;}}}};
  host.atob=()=>'';host.Blob=class {};host.URL={createObjectURL:()=> 'blob:test',revokeObjectURL(){}};
  host.Audio=class {paused=false;play(){return Promise.resolve();}pause(){this.paused=true;}removeAttribute(){}load(){}};
  p.currentReader=reader;p.t=s=>s;p.selectionAction={reader,generation:p.generation,popupKey:'primaryViewSelectionPopup',popup,button:{isConnected:true,dataset:{},setAttribute(){}}};
  const task=nativePlay.call(p,'',reader,p.generation,'Playing');assert.equal(closed,0);assert.equal(cleared,0);
- state.primaryViewSelectionPopup={annotation,rect:[1,2,3,4]};p.audio.onplaying();assert.equal(closed,1);assert.equal(cleared,1);p.stop();await task;
+ state.primaryViewSelectionPopup={annotation:JSON.parse(JSON.stringify(annotation)),rect:[1,2,3,4]};p.selectionAction.button.isConnected=false;p.updateSelectionAction();p.audio.onplaying();assert.equal(closed,1);assert.equal(cleared,1);p.stop();await task;
 });
 test('popup dismissal never closes a newer selection, other reader or cancelled request',()=>{
  const {p}=setup();const annotation={},popup={annotation};let closed=0,cleared=0;const reader={_internalReader:{_state:{primaryViewSelectionPopup:{annotation:{}}},_primaryView:{clearSelection:()=>cleared++,_onSetSelectionPopup:()=>closed++}}};
@@ -425,7 +425,7 @@ test('popup dismissal never closes a newer selection, other reader or cancelled 
  p.dismissReadingSelectionPopup(reader,p.generation);p.dismissReadingSelectionPopup({},p.generation);p.dismissReadingSelectionPopup(reader,p.generation-1);assert.equal(closed,0);assert.equal(cleared,0);
 });
 test('selection translation uses the configured service and ignores stale selection results',async()=>{
- const {p}=setup(),reader={};p.t=s=>s;p.set('translationTarget','ja');p.set('translationProvider','google');p.translationLanguage=()=>({label:'日本語'});const pending=[];p.translate=(text,source,options)=>new Promise(resolve=>pending.push({text,source,options,resolve}));
+ const {p}=setup(),reader={};p.set('mode','selection');p.t=s=>s;p.set('translationTarget','ja');p.set('translationProvider','google');p.translationLanguage=()=>({label:'日本語'});const pending=[];p.translate=(text,source,options)=>new Promise(resolve=>pending.push({text,source,options,resolve}));
  const ui=()=>({card:{isConnected:true,dataset:{}},heading:{},translation:{},retry:{setAttribute(){}},language:{setAttribute(){}},flag:{},languageGroup:{},languages:{children:[]},scopes:[]}),first={text:'The human retina transforms light.'},second={text:'Neural cells detect signals.'},a=ui(),b=ui();
  p.selectionContexts.set(reader,first);p.translateSelection(reader,first,a);await new Promise(r=>setTimeout(r,250));assert.equal(a.translation.textContent,'正在翻译…');assert.equal(pending[0].options.target,'ja');assert.equal(pending[0].options.provider,'google');
  p.selectionContexts.set(reader,second);p.translateSelection(reader,second,b);pending[0].resolve({text:'stale'});await tick();assert.notEqual(a.translation.textContent,'stale');await new Promise(r=>setTimeout(r,250));pending[1].resolve({text:'神経細胞'});await tick();assert.equal(b.translation.textContent,'神経細胞');assert.equal(b.card.dataset.translationState,'ready');
@@ -518,4 +518,37 @@ test('changing translation voice discards prefetched voice at next sentence',asy
 
 test('leaving caption before sentence end cancels automatic pause; manual pause stays paused',()=>{
  const {p}=setup(),r={};p.currentReader=r;p.state='playing';p.requestCaptionPause(r);assert.equal(p.captionPauseGeneration,p.generation);p.releaseCaptionPause(r);assert.equal(p.captionPauseGeneration,null);p.togglePause();assert.equal(p.state,'paused');p.releaseCaptionPause(r);assert.equal(p.state,'paused');
+});
+
+test('fresh reading defaults to manual paragraph once',()=>{const {p}=setup();assert.equal(p.get('mode','selection'),'paragraph');assert.equal(p.get('auto',true),false);assert.equal(p.get('repeat',0),1);});
+test('voice matrix selection updates language and shared translated target together',()=>{const {p}=setup();p.syncSettings=()=>{};p.refreshTranslation=()=>{};p.set('readTranslation',true);p.setVoice('jf_alpha');assert.equal(p.settingsVoice(),'jf_alpha');assert.equal(p.get('voiceFor_ja'),'jf_alpha');assert.equal(p.get('translationTarget'),'ja');assert.equal(p.settingsVoiceLanguage(),'ja');p.setVoice('bf_emma');assert.equal(p.get('voiceFor_en-GB'),'bf_emma');assert.equal(p.get('translationTarget'),'en');});
+test('sample task voice and language override global translated-audio settings',async()=>{const {p}=setup(),calls=[];p.set('readTranslation',true);p.set('translationTarget','zh-Hans');p.requestSpeech=async(text,voice)=>{calls.push(voice);return {audio:text}};await p.speak('Read this original abstract.',{},true,false,{voice:'bf_emma',language:'en'});assert.deepEqual(calls,['bf_emma']);});
+
+test('translated language and voice stay synchronized through unsupported targets',()=>{
+ const {p}=setup();p.syncSettings=()=>{};p.refreshTranslation=()=>{};
+ p.set('translationTarget','ja');p.set('voiceFor_ja','jf_alpha');p.setReadTranslation(true);
+ assert.equal(p.settingsVoice(),'jf_alpha');assert.equal(p.settingsVoiceLanguage(),'ja');
+ p.setTranslationTarget('de');assert.equal(p.get('readTranslation'),true);assert.equal(p.settingsVoiceLanguage(),null);assert.equal(p.settingsVoice(),'');
+ p.setVoice('bf_emma');assert.equal(p.get('translationTarget'),'de');
+ p.setTranslationTarget('fr');assert.equal(p.settingsVoice(),'ff_siwis');assert.equal(p.settingsVoiceLanguage(),'fr');
+ p.setSpeechLanguage('en');assert.equal(p.get('translationTarget'),'en');assert.equal(p.settingsVoiceLanguage(),'en');
+ p.selectTranslationVoice('en-GB','bf_emma');assert.equal(p.settingsVoice(),'bf_emma');assert.equal(p.get('voice','af_heart'),'af_heart');
+});
+test('translated reading detects source independently of synchronized output language',async()=>{
+ const {p,translations,voices}=translatedSetup('ja');p.syncTranslationVoice();
+ await p.speak('The retina detects light.',{});assert.equal(translations[0].source,'en');assert.equal(voices[0],'jf_tebukuro');
+});
+
+test('bilingual abstract units alternate source and target voices once without changing preferences',async()=>{
+ const {p,played}=setup(),calls=[];p.set('readTranslation',true);p.set('translation',true);p.set('voice','af_heart');p.set('repeat',5);
+ p.requestSpeech=async(text,voice)=>{calls.push({text,voice});return {audio:voice+':'+text};};
+ const units=[{text:'First sentence.',language:'en',voice:'am_michael'},{text:'第一句。',language:'zh',voice:'zf_xiaoxiao'},{text:'Second sentence.',language:'en',voice:'am_michael'},{text:'第二句。',language:'zh',voice:'zf_xiaoxiao'}];
+ await p.speak(units.map(x=>x.text).join('\n'),{},true,false,{units});
+ assert.deepEqual(played,units.map(x=>x.voice+':'+x.text));assert.equal(calls.length,4);assert.equal(p.get('voice'),'af_heart');assert.equal(p.get('readTranslation'),true);assert.equal(p.get('repeat'),5);
+});
+test('same source text at a different PDF position is a new selection',()=>{
+ const {p}=setup(),a={text:'Repeated sentence.',position:{pageIndex:0,rects:[[1,2,3,4]]}};
+ assert.equal(p.sameReadingSelection(a,structuredClone(a)),true);
+ assert.equal(p.sameReadingSelection(a,{...a,position:{...a.position,pageIndex:1}}),false);
+ assert.equal(p.sameReadingSelection(a,{...a,position:{...a.position,rects:[[2,3,4,5]]}}),false);
 });

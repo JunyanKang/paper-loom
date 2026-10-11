@@ -326,3 +326,12 @@
 .pv-reading-modes .pv-mode-options button{width:28px;height:28px;min-width:28px;margin:0;padding:5px;border:0;background:transparent}
 .pv-reading-modes .pv-mode-options button span{display:none}
 .pv-reading-modes .pv-mode-options button[aria-pressed=true]{background:var(--pv-soft);border-radius:6px}
+
+.pv-shell .pv-orb:is(:focus,:focus-visible,:-moz-focusring){outline:none!important;box-shadow:none!important;background:transparent!important}
+.pv-shell .pv-orb:focus-visible .pv-mascot-interaction{filter:brightness(1.08)}
+
+/* A country row shares its right edge with the selected voice. */
+.pv-shell .pv-select-popover.pl-voice-menu{display:flex;flex-direction:column;gap:4px;min-width:0;width:max-content;padding:6px}
+.pv-shell .pl-voice-country{display:flex;justify-content:flex-end;gap:4px}
+.pv-shell .pv-select-popover.pl-voice-menu .pl-voice-country>[role=option]{display:flex;flex:none;justify-content:center;width:34px;min-width:34px;height:34px;min-height:34px;padding:4px;gap:0}
+.pl-embedded [data-field=repeatRow],.pl-embedded [data-field=documentRow],.pl-embedded .pv-reading-modes{display:none!important}
