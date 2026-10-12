@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.22 · 2026-10-12
+
+Panels stay open when you move from the floating book into their controls, including after clicking in a PDF. Controls remain usable during opening, and panel motion no longer scales or distorts text.
+
+The author network gently unfolds on its first appearance. Entering a node brings the camera closer; going back restores the wider view. Reopening preserves the existing view, hidden graphs stop animating, and system reduced-motion preferences are respected.
+
+Opening and closing panels no longer captures window screenshots or creates graphics textures. Hovering over the book no longer preloads the speech engine. Stale page listeners and graph search resources are released, with fewer layout reads and background repaints.
+
 ## 1.0.21 · 2026-10-12
 
 Improve citation recognition for institutional authors, cross-page and mixed-column references, and undated preprints with a DOI. Keep publication months, page locators and wrapped DOI text out of article titles. Preserve distinct references by the same author in the same year instead of merging them.

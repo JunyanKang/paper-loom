@@ -273,7 +273,7 @@ var PaperVoice = {
   },
   ensurePanel(reader) {
     const old=this.panels.get(reader);
-    if(old){try{if(old.root.isConnected&&old.root.ownerDocument===reader._iframeWindow.document)return old;}catch(_){}this.panels.delete(reader);}
+    if(old){try{if(old.root.isConnected&&old.root.ownerDocument===reader._iframeWindow.document)return old;}catch(_){}try{old.dispose?.();}catch(_){}this.panels.delete(reader);}
     if (!this.panels.has(reader)) {
       this.panels.set(reader, PaperVoiceUI.create(this, reader));
       this.syncSettings(); this.updatePanels();
@@ -283,7 +283,7 @@ var PaperVoice = {
   *livePanels() {
     for(const [reader,panel] of this.panels){
       try{if(panel.root.isConnected&&panel.root.ownerDocument===reader._iframeWindow?.document){yield panel;continue;}}catch(_){}
-      this.panels.delete(reader);
+      try{panel.dispose?.();}catch(_){}this.panels.delete(reader);
     }
   },
   showPanel(reader, toggle = false) {

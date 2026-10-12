@@ -8,6 +8,12 @@ var CiteLensNetworkView=(()=>{
   const width=Math.max(1,w-padding.left-padding.right),height=Math.max(1,h-padding.top-padding.bottom),k=Math.min(2.2,width/Math.max(1,right-left),height/Math.max(1,bottom-top));
   return {k,x:padding.left+width/2-(left+right)/2*k,y:padding.top+height/2-(top+bottom)/2*k};
  }
+ // Bounded screen-space motion; layout coordinates and worker results stay untouched.
+ function flight(from,to,progress){
+  const t=clamp(progress,0,1);if(t===0)return {...from};if(t===1)return {...to};const ease=t*t*t*(t*(t*6-15)+10),k=Math.exp(Math.log(from.k)+(Math.log(to.k)-Math.log(from.k))*ease);
+  return {k,x:from.x+(to.x-from.x)*ease,y:from.y+(to.y-from.y)*ease};
+ }
+ function bloom(progress){const t=clamp(progress,0,1),ease=1-(1-t)**3,angle=ease===1?0:(1-ease)*-.18;return {scale:.72+.28*ease,spread:.25+.75*ease,cos:Math.cos(angle),sin:Math.sin(angle),alpha:.3+.7*ease,labels:t===1?1:clamp((t-.55)/.45,0,1)};}
  function evidenceGroups(evidence){
   const groups=new Map();
   for(const item of evidence||[])for(const source of item.sources||[{paperID:item.paperID,quote:item.source?.text}]){
@@ -170,6 +176,6 @@ var CiteLensNetworkView=(()=>{
   }
   return accepted;
  }
- return{fitCamera,labelPlacer,revealMembers,sortPapers,contextDescriptions,evidenceGroups,nearest,magnetic,opacity,hoverOpacity,wheel,zoom,step,index,scene,labels,lineWidth,nodeLabel,textLines,emphasis,detail};
+ return{flight,bloom,fitCamera,labelPlacer,revealMembers,sortPapers,contextDescriptions,evidenceGroups,nearest,magnetic,opacity,hoverOpacity,wheel,zoom,step,index,scene,labels,lineWidth,nodeLabel,textLines,emphasis,detail};
 })();
 if(typeof module!=='undefined')module.exports=CiteLensNetworkView;

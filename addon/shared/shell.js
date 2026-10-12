@@ -28,7 +28,7 @@ var PaperLoom = {
   },
   removeWindow(win){const nodes=this.windows.get(win);nodes?.item.remove();nodes?.entry.remove();if(nodes?.key)win.removeEventListener('keydown',nodes.key,true);this.windows.delete(win);win.document.getElementById('paper-loom-style')?.remove();},
   installOutsideCollapse(ui,reader){
-    const doc=ui.root.ownerDocument,win=doc.defaultView,U=this.referencesScope.CiteLensUI,surfaces=new Set(),orb=ui.action('orb');let disposed=false,closeTimer=0,openTask=null,hovered=false,lastView=null;
+    const doc=ui.root.ownerDocument,win=doc.defaultView,U=this.referencesScope.CiteLensUI,surfaces=new Map(),orb=ui.action('orb');let disposed=false,closeTimer=0,openTask=null,hovered=false,lastView=null;
     const inside=node=>{
       for(let current=node;current;){
         if(current.closest?.('.pv-orb,.pl-workspace-page,.cl-dialog,.cl-summary,.cl-select-popover,.cl-tooltip,.pv-tooltip,.pv-select-popover,.cl-menu,.cl-citation-locations,.pv-selection-card,.pl-library-entry,#paper-loom-tools'))return true;
@@ -37,7 +37,7 @@ var PaperLoom = {
     };
     const cancel=()=>{win.clearTimeout(closeTimer);closeTimer=0;};
     const close=()=>{cancel();ui._hoverWorkspace=false;for(const view of U.livePages(doc))if(!view.container.hidden&&view.frame.dataset.dockMotion!=='closing'){lastView=view;view.dismiss();}};
-    const schedule=()=>{if(closeTimer)return;closeTimer=win.setTimeout(()=>{closeTimer=0;if(!disposed&&!hovered)close();},this.hoverDismissDelay);};
+    const schedule=()=>{if(closeTimer)return;closeTimer=win.setTimeout(()=>{closeTimer=0;if(!disposed&&!hovered){const occupied=orb.matches(':hover')||[...U.livePages(doc)].some(v=>!v.container.hidden&&v.frame.matches(':hover'));if(!occupied)close();}},this.hoverDismissDelay);};
     const open=()=>{
       if(disposed)return;hovered=true;ui._hoverWorkspace=true;cancel();
       const active=[...U.livePages(doc)].find(v=>!v.container.hidden);
@@ -45,16 +45,17 @@ var PaperLoom = {
       if(openTask)return;
       openTask=Promise.resolve(lastView?.frame.isConnected?lastView.activate():this.showHome(reader,doc)).catch(e=>Zotero.logError(e)).finally(()=>{openTask=null;if(!hovered&&!disposed)schedule();});
     };
-    const over=event=>{if(disposed||event.pointerType==='touch')return;if(inside(event.target)){hovered=true;cancel();if(orb.contains(event.target)&&!event.buttons)open();}else if(ui._hoverWorkspace){hovered=false;schedule();}};
+    const over=event=>{if(disposed||event.pointerType==='touch'||event.type==='pointermove'&&!ui._hoverWorkspace)return;if(inside(event.target)){hovered=true;cancel();if(event.type!=='pointermove'&&orb.contains(event.target)&&!event.buttons)open();}else if(ui._hoverWorkspace){hovered=false;schedule();}};
     const out=event=>{if(disposed||!ui._hoverWorkspace)return;if(inside(event.relatedTarget)){hovered=true;cancel();}else{hovered=false;schedule();}};
     const outside=event=>{if(disposed||inside(event.target))return;hovered=false;close();};
     const visible=event=>{if(event.target._clPage)lastView=event.target._clPage;};doc.addEventListener('cl-page-visible',visible,true);
     const scan=surface=>{try{for(const frame of surface.querySelectorAll('iframe,browser'))if(frame.contentDocument)watch(frame.contentDocument,true);}catch(_){} };
     const loaded=event=>{try{const frame=event.target;if(frame.contentDocument)watch(frame.contentDocument,true);else if(frame.nodeType===9)watch(frame,true);}catch(_){} };
-    const watch=(surface,deep=false)=>{if(!surface||surfaces.has(surface))return;surfaces.add(surface);surface.addEventListener('pointerdown',outside,true);surface.addEventListener('pointerover',over,true);surface.addEventListener('pointerout',out,true);if(deep){surface.addEventListener('load',loaded,true);scan(surface);}};
+    const unwatch=surface=>{const unloading=surfaces.get(surface);if(!unloading)return;surfaces.delete(surface);try{surface.defaultView?.removeEventListener('pagehide',unloading);surface.removeEventListener('pointerdown',outside,true);surface.removeEventListener('pointerover',over,true);surface.removeEventListener('pointerout',out,true);surface.removeEventListener('pointermove',over,true);surface.removeEventListener('load',loaded,true);}catch(_){}};
+    const watch=(surface,deep=false)=>{if(!surface||surfaces.has(surface))return;const unloading=()=>unwatch(surface);surfaces.set(surface,unloading);surface.defaultView?.addEventListener('pagehide',unloading,{once:true});surface.addEventListener('pointerdown',outside,true);surface.addEventListener('pointerover',over,true);surface.addEventListener('pointerout',out,true);surface.addEventListener('pointermove',over,true);if(deep){surface.addEventListener('load',loaded,true);scan(surface);}};
     watch(doc,true);try{for(let window=doc.defaultView;window?.frameElement;){window=window.frameElement.ownerDocument.defaultView;watch(window.document);}}catch(_){}
     if(reader._window?.document)watch(reader._window.document);
-    ui._outside=outside;ui._openWorkspace=open;const dispose=ui.dispose;ui.dispose=()=>{disposed=true;cancel();doc.removeEventListener('cl-page-visible',visible,true);for(const surface of surfaces)try{surface.removeEventListener('pointerdown',outside,true);surface.removeEventListener('pointerover',over,true);surface.removeEventListener('pointerout',out,true);surface.removeEventListener('load',loaded,true);}catch(_){}surfaces.clear();dispose();};
+    ui._outside=outside;ui._openWorkspace=open;const dispose=ui.dispose;ui.dispose=()=>{disposed=true;cancel();doc.removeEventListener('cl-page-visible',visible,true);for(const surface of [...surfaces.keys()])unwatch(surface);surfaces.clear();dispose();};
   },
   mainNavigation(doc,reader,active='settings'){
     const nav=this.el(doc,'nav',null,'pl-main-actions');nav.setAttribute('aria-label','Paper Loom');

@@ -443,7 +443,6 @@ var PaperVoiceUI = {
   for(const b of modePopover.querySelectorAll('button'))b.onclick=()=>{controller.setMode(b.dataset.quickMode);closeModePopover();};
   for(const b of audioPopover.querySelectorAll('button'))b.onclick=()=>{controller.setTranslationTarget(b.dataset.quickLanguage);closeAudioPopover();};
   const quickReveal=this.bindQuickReveal(root,find('quick'),action('orb'),()=>{closeNavigation();closeAudioPopover();closeModePopover();});
-  action('orb').addEventListener('pointerenter',()=>controller.scheduleWarmup());
   action('orb').addEventListener('pointerleave',()=>{if(panel.hidden){controller.host.clearTimeout(controller.warmupTimer);controller.warmupTimer=null;}});
   root.addEventListener('pointerdown',e=>{if(!tools.contains(e.target))closeNavigation();if(!translationTools.contains(e.target))closeAudioPopover();if(!modeTools.contains(e.target))closeModePopover();});
   action('quickMode').onclick=()=>modeMenu.open();
@@ -491,7 +490,7 @@ var PaperVoiceUI = {
    const index=forced||gestureQueues[state].shift();lastGestures[state]=index;
    root.dataset.interactionSet=state;root.dataset.interaction=index;root.removeAttribute('data-resting');player.play(index);
   };
-  const dockCompanion=(progress,moving)=>{
+  const dockCompanion=(progress,moving,locate=true)=>{
    if(disposed||!root.isConnected)return;
    const enabled=controller.get('companionInteractions',true)&&!win.matchMedia('(prefers-reduced-motion: reduce)').matches;
    if(!enabled){if(dockGesture||dockPose){dockGesture=dockPose=false;root.removeAttribute('data-interaction');root.removeAttribute('data-resting');}return;}
@@ -500,7 +499,7 @@ var PaperVoiceUI = {
    dockGesture=moving;dockPose=true;root.dataset.interactionSet=companionState();root.dataset.interaction='dock-present';
    if(moving)root.removeAttribute('data-resting');else{root.dataset.resting='true';resetCompanionSchedule();}
    if(!moving){dockPose=false;player.still('listening');}
-   const hand=PaperVoiceCompanion.hand(progress),bounds=sprite.getBoundingClientRect();return {x:bounds.left+bounds.width*hand.x,y:bounds.top+bounds.height*hand.y};
+   if(!locate)return;const hand=PaperVoiceCompanion.hand(progress),bounds=sprite.getBoundingClientRect();return {x:bounds.left+bounds.width*hand.x,y:bounds.top+bounds.height*hand.y};
   };
   dockMotion.setCompanion(dockCompanion);
   const setContext=context=>{companionContext=PaperVoiceCompanion.sets[context]?context:context==='listening'?'listening':'ready';root.dataset.companionContext=companionContext;resetCompanionSchedule();};

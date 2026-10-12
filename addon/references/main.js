@@ -81,7 +81,7 @@ var CiteLens = {
       state.observer=new doc.defaultView.MutationObserver(records=>{
         if(records.some(r=>r.target.closest?.('.toolbar')))this.normalizeToolbar(doc);
         // Ignore our own subtree updates so async status changes cannot start a mutation loop.
-        if(records.every(r=>(r.target.nodeType===3?r.target.parentElement:r.target).closest?.('.cl-card,.cl-root,.cl-overlay,.cl-citation-group,.cl-summary,.cl-select-popover,.cl-tooltip,.pv-shell,.pv-caption,.pv-caption-tools,.pv-selection-translation,.pl-engine,.pn-map-window')))return;
+        if(records.every(r=>(r.target.nodeType===3?r.target.parentElement:r.target)?.closest?.('.cl-card,.cl-root,.cl-overlay,.cl-citation-group,.cl-summary,.cl-select-popover,.cl-tooltip,.pv-shell,.pv-caption,.pv-caption-tools,.pv-selection-translation,.pl-engine,.pn-map-window')))return;
         // Mutation delivery runs before paint. A timer here exposes the native blue
         // citation for one or more frames before our replacement is ready.
         this.enhance(reader);

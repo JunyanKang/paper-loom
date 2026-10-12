@@ -2,7 +2,7 @@
  * readback, temporary textures or per-frame JavaScript are needed. */
 var CiteLensDockMotion = {
  create(panel,orb,fit,onSettled=()=>{},onProgress=()=>{}) {
-  const win=panel.ownerDocument.defaultView,query=win.matchMedia('(prefers-reduced-motion: reduce)'),duration=360;
+  const win=panel.ownerDocument.defaultView,query=win.matchMedia('(prefers-reduced-motion: reduce)'),duration=220;
   let animation=null,target=false,disposed=false,clock=null;
   const follow=()=>{if(!animation)return;onProgress(animation.effect.getComputedTiming().progress??Number(target),true);clock=win.requestAnimationFrame(follow);};
   const settle=show=>{
@@ -15,11 +15,11 @@ var CiteLensDockMotion = {
    if(disposed)return;visible=!!visible;if(target===visible&&(animation||panel.hidden===!visible))return;target=visible;
    if(!visible&&panel.contains(panel.ownerDocument.activeElement))orb.focus({preventScroll:true});
    if(query.matches||!panel.animate){settle(visible);if(visible)fit();return;}
-   const wasHidden=panel.hidden;panel.hidden=false;panel.inert=true;panel.style.pointerEvents='none';panel.dataset.clVisible=String(visible);panel.dataset.dockMotion=visible?'opening':'closing';
+   const wasHidden=panel.hidden;panel.hidden=false;panel.inert=!visible;panel.style.pointerEvents=visible?'':'none';panel.dataset.clVisible=String(visible);panel.dataset.dockMotion=visible?'opening':'closing';
    if(!animation){
-    fit();const b=panel.getBoundingClientRect(),o=orb.getBoundingClientRect(),base=win.getComputedStyle(panel).transform,transform=base==='none'?'':base;
-    panel.style.transformOrigin=`${o.x+o.width/2-b.x}px ${o.y+o.height/2-b.y}px`;panel.style.willChange='transform,opacity';
-    animation=panel.animate([{transform:transform+' scale(.015,.035)',opacity:0},{transform:transform+' scale(.38,.62)',opacity:.82,offset:.42},{transform:base,opacity:1}],{duration,easing:'cubic-bezier(.2,.75,.22,1)',fill:'both'});
+    fit();const base=win.getComputedStyle(panel).transform,transform=base==='none'?'':base;
+    panel.style.willChange='transform';
+    animation=panel.animate([{transform:transform+' translateY(10px)'},{transform:base}],{duration,easing:'cubic-bezier(.2,.75,.22,1)',fill:'both'});
     animation.pause();animation.currentTime=wasHidden?0:duration;
    }
    panel.dataset.dockRenderer='compositor';const current=animation;current.playbackRate=visible?1:-1.12;current.play();if(clock!==null)win.cancelAnimationFrame(clock);follow();

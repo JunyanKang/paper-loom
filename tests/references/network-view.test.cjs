@@ -91,3 +91,9 @@ test('fit includes peripheral members at large scales and reserves control space
  for(const size of [{w:600,h:420},{w:320,h:240}]){const camera=V.fitCamera({nodes,contextNodes},size);assert.ok(camera.k<.08);for(const n of [...nodes,...contextNodes]){const x=n.x*camera.k+camera.x,y=n.y*camera.k+camera.y;assert.ok(x>=36-1e-6&&x<=size.w-36+1e-6);assert.ok(y>=58-1e-6&&y<=size.h-44+1e-6);}}
  assert.equal(V.fitCamera({nodes:[]},{w:600,h:420}),null);
 });
+
+ test('camera flight has exact endpoints and smooth bounded zoom in both directions',()=>{
+ const a={x:12,y:-40,k:.04},b={x:-500,y:80,k:2};
+ for(const [from,to] of [[a,b],[b,a]]){assert.deepEqual(V.flight(from,to,0),from);const end=V.flight(from,to,1);for(const key of ['x','y','k'])assert.ok(Math.abs(end[key]-to[key])<1e-10);for(let t=0;t<=1;t+=.02){const p=V.flight(from,to,t);assert.ok(p.k>=.04-1e-10&&p.k<=2+1e-10);assert.ok(Number.isFinite(p.x+p.y+p.k));}}
+ });
+ test('one-shot bloom settles exactly without altering graph geometry',()=>{const start=V.bloom(0),end=V.bloom(1);assert.equal(start.labels,0);assert.equal(end.scale,1);assert.equal(end.spread,1);assert.equal(end.sin,0);assert.equal(end.cos,1);assert.equal(end.labels,1);assert.deepEqual(V.bloom(2),end);});

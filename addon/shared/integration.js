@@ -43,7 +43,7 @@ Object.assign(PaperLoom,{
       RS.CiteLensUI.logo=(doc,size)=>this.logo(doc,size);
       // One expanded workspace per document; each Reader keeps its own state.
       const U=RS.CiteLensUI;
-      const readerUI=doc=>[...V.livePanels()].find(ui=>ui.root.ownerDocument===doc);
+      const readerUIs=new WeakMap(),readerUI=doc=>readerUIs.get(doc);
       const fitWorkspace=doc=>{
         if(!doc.documentElement.classList.contains('pl-reader-workspace'))return;
         const ui=readerUI(doc);if(!ui)return;const win=doc.defaultView,o=ui.action('orb').getBoundingClientRect();
@@ -54,9 +54,9 @@ Object.assign(PaperLoom,{
         if(style.getPropertyValue('--pl-dock-bottom')!==base)style.setProperty('--pl-dock-bottom',base);
       };
       this.managedWorkspaces=true;
-      U.fitPage=fitWorkspace;U.onDockProgress=(doc,p,m)=>readerUI(doc)?.dockCompanion(p,m);
+      U.fitPage=fitWorkspace;U.onDockProgress=(doc,p,m)=>readerUI(doc)?.dockCompanion(p,m,false);
       U.onPageActivate=doc=>doc._clAbstract?.close(true);
-      RS.CiteLensDockMotion.create=(panel,orb,fit,settled,progress)=>{const motion=VS.PaperVoiceDockMotion.create(panel,orb,fit);motion.setSettled(settled);motion.setCompanion(progress);return motion;};
+      // Workspace hover uses the live compositor surface, not a PDF screenshot mesh.
       V.showPanel=(reader,toggle=false)=>{
         V.ensurePanel(reader);const doc=reader._iframeWindow.document;
         const active=[...U.livePages(doc)].find(v=>!v.container.hidden);
@@ -82,7 +82,7 @@ Object.assign(PaperLoom,{
       };
       const create=VS.PaperVoiceUI.create.bind(VS.PaperVoiceUI);
       VS.PaperVoiceUI.create=(controller,reader)=>{
-        const ui=create(controller,reader);
+        const ui=create(controller,reader);readerUIs.set(ui.root.ownerDocument,ui);const releaseUI=ui.dispose;ui.dispose=()=>{if(readerUIs.get(ui.root.ownerDocument)===ui)readerUIs.delete(ui.root.ownerDocument);releaseUI();};
         this.style(ui.root.ownerDocument);if(!ui.root.ownerDocument.location.href.endsWith('shared/settings-frame.html'))ui.root.ownerDocument.documentElement.classList.add('pl-reader-workspace');
         ui.root.querySelector('.pv-brand-icon').src=this.assetURI+'loom.png';
         ui.root.querySelector('.pv-orb>.pv-mascot:not(.pv-mascot-reading)').src=this.assetURI+'loom.png';
@@ -96,7 +96,7 @@ Object.assign(PaperLoom,{
           ui.action('orb').onclick=e=>{if(e.detail&&ui._hoverWorkspace){ui._openWorkspace();return;}const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
           RS.CiteLensI18n.install(doc);
         }
-        const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=()=>{try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);ui.action('orb').removeEventListener('pointermove',refit);}catch(_){}dispose();};refit();}
+        const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=event=>{if(event?.type==='pointermove'&&!event.buttons)return;try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);ui.action('orb').removeEventListener('pointermove',refit);}catch(_){}dispose();};refit();}
         ui.action('settings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument);
         for(const [action,key] of [['help','guide'],['feedback','feedback'],['privacy','privacy']])ui.action(action).onclick=()=>this.showInfo(key,ui.root.ownerDocument);
         return ui;
