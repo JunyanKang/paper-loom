@@ -153,10 +153,13 @@ var LoomDesignStyle = `
 /* Fixed right-side tab coordinates, independent of workspace width. */
 .pv-shell .pv-panel.pl-workspace-page{width:var(--pl-panel-width)}
 .pl-workspace-page{padding-bottom:4px!important}
-/* A shared art canvas crops from the top as compact pages change height. */
-.pl-workspace-page{--pl-art-size:auto max(480px,calc(100vh - 112px))}
-.pv-shell[data-theme] .pv-panel.pl-workspace-page::before{background-position:left bottom;background-size:100% 100%,var(--pl-art-size);background-repeat:no-repeat}
-:is(.cl-root,.cl-settings).pl-workspace-page::before{background-position:left bottom;background-size:100% 100%,100% 100%,var(--pl-art-size);background-repeat:no-repeat}
+/* All workspace pages reveal the same viewport-sized artwork at their shared
+   bottom-right anchor. Changing the frame width never rescales the image. */
+.pl-workspace-page{--pl-art-width:calc(100vw - 32px);--pl-art-height:max(480px,calc(100vh - 112px))}
+.pv-shell[data-theme] .pv-panel.pl-workspace-page::before,
+:is(.cl-root,.cl-settings,.pn-map-window).pl-workspace-page::before{inset:auto 0 0 auto;width:var(--pl-art-width);height:var(--pl-art-height);background-position:right bottom;background-repeat:no-repeat}
+.pv-shell[data-theme] .pv-panel.pl-workspace-page::before{background-size:100% 100%,cover}
+:is(.cl-root,.cl-settings,.pn-map-window).pl-workspace-page::before{background-size:100% 100%,100% 100%,cover}
 .pl-workspace-page>.pl-main-actions{justify-content:flex-end;height:38px;padding:0 var(--pl-nav-right,58px) 2px 0;gap:12px}
 .pl-workspace-page>.pl-main-actions>button{height:36px!important;min-height:36px!important;padding:7px 10px!important}
 @media(max-width:350px){.pl-workspace-page{--pl-nav-right:12px}}
@@ -197,8 +200,6 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .cl-settings.pl-settings .cl-settings-tabs::before{left:12px;right:calc(var(--pl-category-right) + 48px)}
 .cl-settings.pl-settings .cl-settings-tabs::after{left:calc(100% - var(--pl-category-right));right:12px}
 .cl-select-check,.pv-select-check{display:none!important}
-.pv-shell[data-background-mode=global] .pv-panel.pl-workspace-page::before{background-position:center;background-size:100% 100%,cover}
-html[data-cl-background-mode=global] :is(.cl-root,.cl-settings).pl-workspace-page::before{background-position:center;background-size:100% 100%,100% 100%,cover}
 /* Open content surface; only the lower edge flows into the active tab. */
 .pl-workspace-content{background:transparent;box-shadow:none;border-radius:0}
 .cl-settings.pl-settings .cl-dialog-body{background:transparent;box-shadow:none}

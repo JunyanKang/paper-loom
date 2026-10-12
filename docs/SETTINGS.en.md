@@ -6,9 +6,11 @@
 
 ## Appearance and interface language
 
-Theme previews remain expanded and run from light to dark. Below them are four global backgrounds and one custom slot. Click the empty slot to import a PNG, JPG, or WebP. The image fills from the center; click its thumbnail again to remove it.
+Theme previews remain expanded and run from light to dark. Below them are four global backgrounds and one custom slot. Click the empty slot to import a PNG, JPG, or WebP. The image is anchored to the bottom-right of the workspace; click its thumbnail again to remove it.
 
 Use the slider for transparency. The interface supports Chinese, English, Japanese, French, and German. Changing it does not translate the paper or change the translation target. Book interactions are enabled at one-minute intervals and respect reduced-motion preferences.
+
+Settings, the reading list, and the author network share one background canvas anchored at the bottom-right. Switching pages does not rescale the image.
 
 ## Shortcuts
 

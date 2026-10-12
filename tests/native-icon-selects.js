@@ -17,11 +17,11 @@ const inspect=async(button,menuSelector,name)=>{
 try{
  V.set('llmConfigs','{}');check('unconfigured LLM has a generic symbol',L.providerMeta('llm').id==='llm');V.set('llmProvider','deepseek');V.set('llmConfigs',JSON.stringify({deepseek:{model:'deepseek-flash'}}));check('configured LLM uses its provider logo',L.providerMeta('llm').id==='deepseek');V.set('llmConfigs',savedConfigs);V.set('llmProvider',savedProvider);
  await L.showSettings(reader,doc);await U.pageScopes.get(doc)?.queue;await wait(700);const f=doc.querySelector('.cl-settings');
- await inspect(f.querySelector('[data-translation-setting-proxy=translationTarget]'),'.cl-select-popover','translation flags');
+ check('translation language remains in reading controls',!f.querySelector('[data-translation-setting-proxy=translationTarget]').getBoundingClientRect().height);
  await inspect(f.querySelector('[data-translation-setting-proxy=translationProvider]'),'.cl-select-popover','translation services');
  const service=f.querySelector('select[data-translation-setting=translationProvider]');service.value='llm';service.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(200);f.querySelector('.pl-provider-settings').click();await wait(300);
  await inspect(f.querySelector('[data-translation-setting-proxy=llmProvider]'),'.cl-select-popover','LLM providers');
- f._plSelect('appearance');await wait(200);check('switching settings category hides model editor',f.querySelector('.cl-llm-settings').hidden&&!f.querySelector('.cl-settings-tabs').hidden);await inspect(f.querySelector('iframe').contentDocument.querySelector('[data-select-field=language] button'),'.pv-select-popover','interface flags');
+ f.querySelector('.pl-provider-settings').click();await wait(200);check('closing model editor preserves unified settings',f.querySelector('.cl-llm-settings').hidden&&!f.querySelector('.cl-settings-tabs'));await inspect(f.querySelector('iframe').contentDocument.querySelector('[data-select-field=language] button'),'.pv-select-popover','interface flags');
  check('voice tab is removed',!f.querySelector('.cl-settings-tabs [data-pane=voice]'));
 
  return {passed:true,checks};

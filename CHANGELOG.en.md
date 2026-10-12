@@ -2,6 +2,12 @@
 
 [Home](README.en.md) · [简体中文](CHANGELOG.md)
 
+## 1.0.14 · 2026-10-12
+
+- Anchor settings, reading-list, and author-network backgrounds to the same bottom-right artwork canvas, without resizing the image when switching page widths.
+- Apply the same rule to built-in themes, global backgrounds, and custom images.
+- Update Windows regression checks for unified settings and remove obsolete tab-layout assertions.
+
 ## 1.0.13 · 2026-10-12
 
 - Merged settings into one page with themes, shortcuts, translation, citations, and service maintenance. Update, Guide, Privacy, and Feedback stay at the bottom.
