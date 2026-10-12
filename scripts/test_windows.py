@@ -23,8 +23,11 @@ with (results/'zotero.log').open('w',encoding='utf-8') as log:
    time.sleep(1)
   else:raise TimeoutError('Zotero startup')
   subprocess.run([sys.executable,str(r/'scripts/run_native.py'),'native-windows-release.js','1500'],check=True,timeout=1520)
+  failures=[]
   for name in ['native-credentials.js','native-workspace-entry.js','native-playback-shortcuts.js','native-library-main.js','native-theme-controls.js','native-settings-refinements.js','native-unified-settings.js','native-release-interactions.js','native-performance-audit.js','native-observer-audit.js','native-speed-range.js','native-animation-bounds.js','native-workspace-motion.js','native-dock-shadow.js','native-selection-controls.js','native-selection-dismiss.js','native-caption-controls.js','native-caption-hover.js','native-abstract-state.js','native-about.js','native-language-sync.js','native-hover-surfaces.js','native-language-audit.js','native-icon-selects.js','native-dropdown-layout.js','native-workspace-art.js','native-model-popover.js']:
-   subprocess.run([sys.executable,str(r/'scripts/run_native.py'),name,'240'],check=True,timeout=260)
+   result=subprocess.run([sys.executable,str(r/'scripts/run_native.py'),name,'240'],check=False,timeout=260)
+   if result.returncode:failures.append(name)
+  if failures:raise RuntimeError('Failed native checks: '+', '.join(failures))
  finally:
   # Only the isolated CI process tree.
   subprocess.run(['taskkill','/PID',str(proc.pid),'/T','/F'],check=False,stdout=subprocess.DEVNULL)
