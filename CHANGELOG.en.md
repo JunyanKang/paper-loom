@@ -2,6 +2,10 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.17 · 2026-10-12
+
+Limit transparency to 0–10%, including existing saved values. The update action shows Check until a release is available, then Update. Download and installation progress appears in the version slot, which returns to the new version when installation finishes.
+
 ## 1.0.16 · 2026-10-12
 
 Align the reference list and author network header spacing and control heights. Settings show the installed version between temporary update messages.

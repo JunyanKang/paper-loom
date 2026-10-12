@@ -32,7 +32,7 @@ Click the shield to check the engine. It turns green on success, and the success
 
 ## Update the plugin
 
-Choose **Update** at the bottom of Settings, then follow the installation prompt. This version does not schedule checks or install updates automatically. You can also install a newer XPI from Releases. Unchanged voice assets are reused.
+Choose **Check** at the bottom of Settings. When a new release is found, the button changes to **Update**. Click it to download and install; progress appears in place of the version number until the new version is ready. This version does not schedule checks or install updates automatically. You can also install a newer XPI from Releases. Unchanged voice assets are reused.
 
 ## Move from the earlier plugins
 

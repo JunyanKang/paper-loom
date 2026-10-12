@@ -1,12 +1,12 @@
 /* Zotero owns update discovery, SHA-512 verification, download and installation. */
 var CiteLensUpdater = {
-  phase:'idle',message:'',errorKind:'',automatic:true,globallyEnabled:true,subscribers:new Set(),epoch:0,dead:true,
+  progress:null,installStage:'',completedVersion:'',phase:'idle',message:'',errorKind:'',automatic:true,globallyEnabled:true,subscribers:new Set(),epoch:0,dead:true,
   manager(){return ChromeUtils.importESModule('resource://gre/modules/AddonManager.sys.mjs').AddonManager;},
-  snapshot(){return {phase:this.phase,message:this.message,errorKind:this.errorKind,automatic:this.automatic,globallyEnabled:this.globallyEnabled,version:this.owner?.version||this.installedVersion||'',availableVersion:this.install?.version||''};},
+  snapshot(){return {phase:this.phase,message:this.message,errorKind:this.errorKind,automatic:this.automatic,globallyEnabled:this.globallyEnabled,progress:this.progress,installStage:this.installStage,version:this.completedVersion||this.owner?.version||this.installedVersion||'',availableVersion:this.install?.version||''};},
   emit(){if(this.dead)return;for(const listener of [...this.subscribers])try{listener(this.snapshot());}catch(e){Zotero.logError(e);}},
-  set(phase,message='',errorKind=''){this.phase=phase;this.message=message;this.errorKind=errorKind;this.emit();},
+  set(phase,message='',errorKind=''){if(phase!=='installing'){this.progress=null;this.installStage='';}this.phase=phase;this.message=message;this.errorKind=errorKind;this.emit();},
   subscribe(listener){this.subscribers.add(listener);listener(this.snapshot());return ()=>this.subscribers.delete(listener);},
-  async start(owner){this.owner=owner;this.host=Zotero.getMainWindow();this.dead=false;this.epoch++;this.phase='idle';this.message='';this.install=null;await this.load();},
+  async start(owner){this.owner=owner;this.host=Zotero.getMainWindow();this.dead=false;this.epoch++;this.phase='idle';this.message='';this.install=null;this.progress=null;this.installStage='';this.completedVersion='';await this.load();},
   async load(){
     const ticket=this.epoch;
     try{const manager=this.manager(),addon=await manager.getAddonByID(this.owner.id);if(this.dead||ticket!==this.epoch)return;if(!addon)throw Error('Plugin unavailable');
@@ -61,15 +61,19 @@ var CiteLensUpdater = {
   },
   async apply(){
     if(this.dead||this.phase!=='available'||!this.install)return;
-    const install=this.install,ticket=this.epoch;this.set('installing','正在下载并校验…');
+    const install=this.install,ticket=this.epoch;this.progress=null;this.installStage='download';this.set('installing','正在下载并校验…');
     await new Promise(resolve=>{
       let finished=false,timer;
       const clear=()=>{if(finished)return false;finished=true;this.host.clearTimeout(timer);try{install.removeListener(listener);}catch(_){}if(this.installCleanup===clear)this.installCleanup=null;resolve();return true;};
       const fail=()=>{if(clear()&&!this.dead&&ticket===this.epoch){this.install=null;this.set('error','更新未完成，请重新检查','install');}};
       const listener={
-        onDownloadProgress:()=>{if(!finished&&!this.dead&&ticket===this.epoch&&install.maxProgress>0)this.set('installing','正在下载 '+Math.round(install.progress/install.maxProgress*100)+'%');},
+        onDownloadProgress:()=>{if(!finished&&!this.dead&&ticket===this.epoch&&this.installStage==='download'){
+          this.progress=install.maxProgress>0?Math.max(this.progress||0,Math.min(100,Math.round(install.progress/install.maxProgress*100))):null;
+          this.set('installing','正在下载并校验…');
+        }},
+        onInstallStarted:()=>{if(!finished&&!this.dead&&ticket===this.epoch){this.installStage='install';this.progress=null;this.set('installing','更新中…');}},
         onDownloadFailed:fail,onDownloadCancelled:fail,onInstallFailed:fail,onInstallCancelled:fail,
-        onInstallEnded:()=>{if(clear()&&!this.dead&&ticket===this.epoch){this.install=null;this.set('current','更新已安装');}},
+        onInstallEnded:(_install,addon)=>{if(clear()&&!this.dead&&ticket===this.epoch){this.completedVersion=addon?.version||install.version||this.installedVersion;this.installedVersion=this.completedVersion;this.install=null;this.set('current','更新已安装');}},
       };
       this.installCleanup=clear;
       timer=this.host.setTimeout(()=>{if(finished)return;fail();try{install.cancel();}catch(_){}},this.installTimeout);

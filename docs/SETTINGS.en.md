@@ -10,7 +10,7 @@
 
 Theme previews remain expanded and run from light to dark. Below them are four global backgrounds and one custom slot. Click the empty slot to import a PNG, JPG, or WebP. The image is anchored to the bottom-right of the workspace; click its thumbnail again to remove it.
 
-Use the slider for transparency. The interface supports Chinese, English, Japanese, French, and German. Changing it does not translate the paper or change the translation target. Book interactions are enabled at one-minute intervals and respect reduced-motion preferences.
+Use the slider to set transparency from 0–10%, keeping the surface readable. The interface supports Chinese, English, Japanese, French, and German. Changing it does not translate the paper or change the translation target. Book interactions are enabled at one-minute intervals and respect reduced-motion preferences.
 
 Settings, the reading list, and the author network share one background canvas anchored at the bottom-right. Switching pages does not rescale the image.
 
@@ -34,4 +34,4 @@ Speed, reading modes, repeat counts, language, and voice live in the reading con
 
 ## At the bottom
 
-**Update, Guide, Privacy, and Feedback** stay at the bottom. Updates are checked and installed manually. Settings and the paper list share a height; scroll to reach content in smaller windows.
+**Check, Guide, Privacy, and Feedback** stay at the bottom. Check changes to Update when a release is available. During download and installation, a progress bar replaces the version number; completion restores the new version and Check action. Settings and the paper list share a height; scroll to reach content in smaller windows.

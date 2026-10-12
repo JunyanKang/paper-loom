@@ -20,3 +20,18 @@ test('changing plugin policy clears stale status without changing the host globa
 test('transient connection failure automatically recovers once without stale install',async()=>{let calls=0,first;const {U}=setup(l=>{calls++;if(calls===1){first=l;l.onUpdateAvailable(null,{version:'stale'});l.onUpdateFinished(null,-2);}else l.onUpdateFinished(null,0);});await U.start({id:'x'});const c=clock(U),pending=U.check();await tick();assert.equal(U.phase,'checking');c.fire(U.retryDelay);await pending;first.onUpdateAvailable(null,{version:'late'});assert.equal(calls,2);assert.equal(U.phase,'current');assert.equal(U.install,null);U.stop();});
 test('invalid manifests and security failures are identified and never retried',async()=>{for(const [code,kind] of [[-3,'manifest'],[-4,'manifest'],[-5,'security'],[-6,'cancelled']]){let calls=0;const {U}=setup(l=>{calls++;l.onUpdateFinished(null,code);});await U.start({id:'x'});await U.check();assert.equal(calls,1);assert.equal(U.errorKind,kind);assert.equal(U.phase,'error');U.stop();}});
 test('stopping during retry delay settles and does not issue a second request',async()=>{let calls=0;const {U}=setup(l=>{calls++;l.onUpdateFinished(null,-2);});await U.start({id:'x'});const c=clock(U),pending=U.check();await tick();U.stop();await pending;assert.equal(calls,1);assert.equal(c.timers.size,0);});
+
+test('download progress is monotonic, installation waits, and success reports the new version',async()=>{
+ let listener;const install={version:'0.4.0',progress:0,maxProgress:100,addListener:l=>listener=l,removeListener(){},install(){}};
+ const {U}=setup(l=>{l.onUpdateAvailable(null,install);l.onUpdateFinished(null,0)});await U.start({id:'x',version:'0.3.3'});await U.check();const pending=U.apply();
+ assert.equal(U.snapshot().progress,null);assert.equal(U.snapshot().installStage,'download');
+ install.progress=40;listener.onDownloadProgress();assert.equal(U.snapshot().progress,40);
+ install.progress=20;listener.onDownloadProgress();assert.equal(U.snapshot().progress,40);
+ install.progress=150;listener.onDownloadProgress();assert.equal(U.snapshot().progress,100);
+ listener.onInstallStarted();assert.equal(U.snapshot().progress,null);assert.equal(U.snapshot().installStage,'install');listener.onDownloadProgress();assert.equal(U.snapshot().installStage,'install');
+ listener.onInstallEnded(install,{version:'0.4.0'});await pending;assert.equal(U.snapshot().version,'0.4.0');assert.equal(U.phase,'current');assert.equal(U.snapshot().progress,null);assert.equal(U.install,null);U.stop();
+});
+test('unknown download size and failed install never imply success or change the version',async()=>{
+ let listener;const install={version:'0.4.0',progress:20,maxProgress:-1,addListener:l=>listener=l,removeListener(){},install(){}};
+ const {U}=setup(l=>{l.onUpdateAvailable(null,install);l.onUpdateFinished(null,0)});await U.start({id:'x',version:'0.3.3'});await U.check();const pending=U.apply();listener.onDownloadProgress();assert.equal(U.snapshot().progress,null);listener.onInstallFailed();await pending;assert.equal(U.snapshot().version,'0.3.3');assert.equal(U.phase,'error');assert.equal(U.snapshot().progress,null);assert.equal(U.snapshot().installStage,'');U.stop();
+});

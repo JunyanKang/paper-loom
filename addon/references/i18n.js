@@ -1959,3 +1959,5 @@ for (const [source, values] of Object.entries({
   "原文下方": ["Below text", "原文の下", "Sous le texte", "Unter dem Text"],
   "原文上方": ["Above text", "原文の上", "Au-dessus", "Über dem Text"]
 })) for (const [i, lang] of ["en", "ja", "fr", "de"].entries()) CiteLensI18n.catalogs[lang][source] = values[i];
+
+for(const [lang,label] of Object.entries({en:'Check',ja:'確認',fr:'Vérifier',de:'Prüfen'}))CiteLensI18n.catalogs[lang]['检查']=label;

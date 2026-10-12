@@ -365,7 +365,7 @@ var PaperVoice = {
     if(this.caption)try{this.applyCaptionTypography(this.caption.box);this.positionTranslation(this.caption);}catch(_){this.caption=null;}
     for(const reader of Zotero.Reader._readers)try{for(const box of reader._iframeWindow?.document.querySelectorAll('.pv-selection-translation')||[])this.applyCaptionTypography(box);}catch(_){}
   },
-  surfaceOpacity() {return 1-Math.max(0,Math.min(80,Number(this.get('surfaceTransparency',0))||0))/100;},
+  surfaceOpacity() {return 1-Math.max(0,Math.min(10,Number(this.get('surfaceTransparency',0))||0))/100;},
   async setCaptionPlacement(value) {
     if(!['above','below'].includes(value))return;
     this.set('captionPlacement',value);Services.prefs.savePrefFile(null);this.syncSettings();
@@ -374,7 +374,7 @@ var PaperVoice = {
     if(value==='above'){const match=this.findSentence(c.reader,c.unit);if(match)await this.focusReadingPosition(match);}
     if(this.caption===c)this.positionTranslation(c);
   },
-  setSurfaceTransparency(value) {this.set('surfaceTransparency',Math.max(0,Math.min(80,Math.round(Number(value)||0))));this.syncSettings();if(this.caption)this.caption.box.style.setProperty('--pv-caption-opacity',String(this.surfaceOpacity()));},
+  setSurfaceTransparency(value) {this.set('surfaceTransparency',Math.max(0,Math.min(10,Math.round(Number(value)||0))));this.syncSettings();if(this.caption)this.caption.box.style.setProperty('--pv-caption-opacity',String(this.surfaceOpacity()));},
   setVoice(id) {
     if(this.get('readTranslation',false)&&!this.translationVoiceLanguage())return;
     const voice=PaperVoiceCore.voices.find(v=>v.id===id);if(!voice)return;
@@ -407,7 +407,7 @@ var PaperVoice = {
       if(find('companion'))find('companion').checked=this.get('companionInteractions',true);
       if(find('captionPlacement'))find('captionPlacement').value=this.get('captionPlacement','below');
       if(find('captionFont')){this.syncCaptionFonts(find('captionFont'));find('captionSize').value=this.get('captionSize',12);}
-      if(find('transparency')){find('transparency').value=this.get('surfaceTransparency',0);find('transparencyLabel').textContent=this.get('surfaceTransparency',0)+'%';}
+      if(find('transparency')){const value=Math.max(0,Math.min(10,Math.round(Number(this.get('surfaceTransparency',0))||0)));find('transparency').value=value;find('transparencyLabel').textContent=value+'%';}
       if(find('language')){find('language').value=this.get('interfaceLanguage','auto');find('language').querySelector('[value=auto]').textContent=this.t('跟随系统');}
       const select=find('voice');if(select&&!select.dataset.allVoices){select.dataset.allVoices='true';select.replaceChildren();
         for(const v of PaperVoiceCore.voices){const option=root.ownerDocument.createElement('option');option.value=v.id;option.textContent=v.label;select.append(option);}}

@@ -370,7 +370,15 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .cl-settings.pl-settings .cl-dialog-footer.cl-update-footer{flex:none;border:0;margin:0;padding:6px var(--pl-content-inset) 12px;min-height:40px;background:transparent}
 .cl-settings.pl-settings .cl-update-links.pl-resource-links{justify-content:center!important;gap:14px}
 .cl-settings.pl-settings .pl-resource-links button{gap:4px;font-size:12px}
-.cl-settings.pl-settings .cl-update-footer>[data-update-status]{flex:none;font-size:11px!important;text-align:center;white-space:normal;line-height:1.4;margin:0 0 4px}
+.cl-settings.pl-settings .cl-update-footer>[data-update-status]{min-height:16px;flex:none;font-size:11px!important;text-align:center;white-space:normal;line-height:1.4;margin:0 0 4px}
+.pl-update-progress{display:flex;align-items:center;justify-content:center;gap:8px;height:16px;width:180px;max-width:100%;margin-inline:auto}
+.pl-update-progress progress{appearance:none;flex:1;min-width:0;height:5px;border:0;border-radius:4px;overflow:hidden;background:var(--cl-soft);accent-color:var(--cl-accent)}
+.pl-update-progress progress::-moz-progress-bar{background:var(--cl-accent);border-radius:4px}
+.pl-update-progress progress:indeterminate::-moz-progress-bar{background:linear-gradient(90deg,transparent,var(--cl-accent),transparent);width:40%;animation:pl-update-wait 1.2s ease-in-out infinite alternate}
+.pl-update-progress span{min-width:28px;white-space:nowrap;font:inherit;font-variant-numeric:tabular-nums}
+@keyframes pl-update-wait{to{transform:translateX(150%)}}
+@media(prefers-reduced-motion:reduce){.pl-update-progress progress:indeterminate::-moz-progress-bar{animation:none}}
+
 
 .cl-settings.pl-settings .cl-ncbi-row [data-ncbi-test].cl-success{color:#278255!important}
 .cl-settings.pl-settings .cl-ncbi-row [data-ncbi-test].cl-error{color:#c44842!important}

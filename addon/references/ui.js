@@ -854,6 +854,8 @@ var CiteLensUI = {
     citationSelect.addEventListener('change',async()=>{const previous=S.state.settings.citationStyle;citationSelect.disabled=true;this.status(citationStatus,'');try{await CiteLensCitationFormat.load(citationSelect.value);S.state.settings.citationStyle=citationSelect.value;await S.persist();CiteLensCitationFormat.refresh();}catch(e){citationSelect.value=CiteLensCitationFormat.id(previous);this.status(citationStatus,e.message,true);}finally{citationSelect.disabled=false;}});
     const automatic=this.el(doc,'input');automatic.type='checkbox';automatic.id='cl-setting-autoUpdate';const autoLabel=this.el(doc,'label',null,'cl-auto-update');autoLabel.htmlFor=automatic.id;autoLabel.append(automatic,this.el(doc,'span','自动更新'));updateRow.append(autoLabel,updateStatus,release,update);
     automatic.addEventListener('change',async()=>{automatic.disabled=true;try{await CiteLensUpdater.setAutomatic(automatic.checked);}finally{automatic.disabled=false;}});
+    const updateProgress=this.el(doc,'div',null,'pl-update-progress'),updateBar=this.el(doc,'progress'),updatePercent=this.el(doc,'span');
+    updateBar.max=100;updateBar.setAttribute('aria-label','正在更新');updateProgress.append(updateBar,updatePercent);
     const updateWindow=doc.defaultView;let updateStatusTimer=0,updateVersion=CiteLens.version,updateSignature='',firstUpdateSnapshot=true;
     const showUpdateStatus=(message,error=false)=>{this.status(updateStatus,message,error);updateStatus.hidden=false;updateStatus.setAttribute('aria-label',message);};
     const showInstalledVersion=()=>{updateStatusTimer=0;showUpdateStatus('v'+updateVersion);};
@@ -863,8 +865,14 @@ var CiteLensUI = {
       automatic.checked=state.automatic;updateVersion=state.version||CiteLens.version;version.textContent='v'+updateVersion;
       update.textContent=state.phase==='available'?'安装 v'+state.availableVersion:state.phase==='checking'?'检查中…':state.phase==='installing'?'更新中…':state.phase==='error'?'重试检查':'检查更新';
       const busy=['checking','installing'].includes(state.phase);update.disabled=busy;release.hidden=state.phase!=='error';
-      const signature=[state.phase,state.message,state.errorKind,updateVersion].join('|');if(signature===updateSignature)return;updateSignature=signature;
+      const signature=[state.phase,state.message,state.errorKind,updateVersion,state.progress,state.installStage].join('|');if(signature===updateSignature)return;updateSignature=signature;
       updateWindow.clearTimeout(updateStatusTimer);updateStatusTimer=0;
+      if(state.phase==='installing'){
+        updateStatus.hidden=false;updateStatus.classList.remove('cl-error');updateStatus.replaceChildren(updateProgress);updateStatus.title='';updateStatus.setAttribute('aria-label','正在更新');
+        if(state.progress===null||state.progress===undefined)updateBar.removeAttribute('value');else updateBar.value=state.progress;
+        updatePercent.textContent=state.installStage==='install'?'更新中…':state.progress===null||state.progress===undefined?'更新中…':state.progress+'%';firstUpdateSnapshot=false;return;
+      }
+      if(state.phase==='current'&&state.message==='更新已安装'){showInstalledVersion();firstUpdateSnapshot=false;return;}
       const message=state.phase==='error'?({timeout:'检查超时',network:'连接失败',manifest:'更新信息异常',security:'安全校验失败',cancelled:'检查已取消',install:'更新失败'}[state.errorKind]||'更新暂不可用'):busy?(state.phase==='checking'?'检查中…':'更新中…'):state.message;
       // A newly opened settings page shows its installed version, not a stale result.
       if((firstUpdateSnapshot&&!busy)||!message)showInstalledVersion();

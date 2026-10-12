@@ -76,8 +76,12 @@ PaperLoom.extendSettings=async function(ctx) {
   for(const page of Object.values(ctx.modelPages))page.bindDocument?.(inside);
   const links=ctx.footer.querySelector('.cl-update-links');links.replaceChildren();
   const updater=this.referencesScope.CiteLensUpdater,update=this.button(doc,'',()=>updater.phase==='available'?updater.apply():updater.check()),updateIcon=this.el(doc,'span',null,'pl-about-tab-icon');
-  updateIcon.style.setProperty('--pl-info-icon','url("'+this.voice.assetURI+'icons/download.svg")');updateIcon.setAttribute('aria-hidden','true');update.dataset.section='update';update.append(updateIcon,this.el(doc,'span','更新'));
-  cleanups.push(updater.subscribe(state=>{update.disabled=['checking','installing'].includes(state.phase);update.setAttribute('aria-busy',String(update.disabled));}));
+  updateIcon.setAttribute('aria-hidden','true');update.dataset.section='update';const updateLabel=this.el(doc,'span','检查');update.append(updateIcon,updateLabel);
+  cleanups.push(updater.subscribe(state=>{
+    const available=state.phase==='available'||state.phase==='installing',label=available?'更新':'检查';
+    updateIcon.style.setProperty('--pl-info-icon','url("'+this.voice.assetURI+'icons/'+(available?'download':'rotate-ccw')+'.svg")');
+    updateLabel.textContent=label;update.setAttribute('aria-label',label);update.disabled=['checking','installing'].includes(state.phase);update.setAttribute('aria-busy',String(update.disabled));this.referencesScope.CiteLensI18n.apply(update);
+  }));
   links.classList.add('pl-resource-links');links.append(update,...this.infoActions(doc));
   const updateStatus=ctx.footer.querySelector('[data-update-status]');ctx.footer.querySelector('.cl-update-row').remove();ctx.footer.prepend(updateStatus);
   data.classList.add('pl-settings-group');root.after(ctx.footer);select();
