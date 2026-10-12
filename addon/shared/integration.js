@@ -112,7 +112,7 @@ Object.assign(PaperLoom,{
       LoomSettings.connect(this);
       V.initTranslation();
       try{
-        await R.start();await V.start();await LoomRuntime.init(this);this.started=true;
+        await R.start();await LoomSettings.normalizeAppearance();await V.start();await LoomRuntime.init(this);this.started=true;
         for(const win of Zotero.getMainWindows())R.addWindow(win);
         // Manual updates only; keep the native verification and install path.
         V.stopUpdateSchedule();V.updateAuto=false;V.set('updateCheckEnabled',false);this.connectUpdates();await RS.CiteLensUpdater.setAutomatic(false);

@@ -50,9 +50,11 @@ var LoomSettings = {
   connect(owner) {
     this.owner=owner;const V=owner.voice,R=owner.referencesScope,T=R.CiteLensTranslation,S=R.CiteLensServices,rawGet=V.get.bind(V),rawSet=V.set.bind(V);
     const appearance={theme:'theme',interfaceLanguage:'interfaceLanguage',surfaceTransparency:'transparency',themeImageEnabled:'customThemeImage',globalBackground:'globalBackground'};
-    // Clamp older saved values before any workspace or embedded control renders.
-    const transparency=Math.max(0,Math.min(10,Math.round(Number(S.state.settings.transparency??rawGet('surfaceTransparency',0))||0)));
-    if(S.state.settings.transparency!==transparency){S.state.settings.transparency=transparency;S.persist().catch(e=>Zotero.logError(e));}
+    // Services loads its saved state during start; normalize only after that load.
+    this.normalizeAppearance=async()=>{
+      const transparency=Math.max(0,Math.min(10,Math.round(Number(S.state.settings.transparency??rawGet('surfaceTransparency',0))||0)));
+      if(S.state.settings.transparency!==transparency){S.state.settings.transparency=transparency;await S.persist();}
+    };
     const aliases={captionSize:'translationSize',captionFont:'translationFont'};
     V.get=(key,fallback)=>aliases[key]?T.get(aliases[key],fallback):this.isShared(key)?T.get(key,fallback):appearance[key]&&S.state?.settings?(S.state.settings[appearance[key]]??rawGet(key,fallback)):rawGet(key,fallback);
     V.set=(key,value)=>{
