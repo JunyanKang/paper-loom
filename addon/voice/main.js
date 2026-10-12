@@ -6,7 +6,7 @@ var PaperVoice = {
   generation: 0, process: null, processStart: null, pending: new Map(), sequence: 0,
   audio: null, audioURL: null, lastText: '', currentReader: null, state: 'idle', status: '选择文字，点击耳麦开始朗读',
   lastSelections: new Map(), selectionContexts: new Map(), timers: new Map(), dead: false, translationTicket: 0,
-  get(name, fallback) { return Zotero.Prefs.get(this.prefix + name, true) ?? ({translation:true,mode:'paragraph',auto:false,repeat:1}[name]??fallback); },
+  get(name, fallback) { return Zotero.Prefs.get(this.prefix + name, true) ?? ({translation:true,mode:'paragraph',auto:false,repeat:1,interfaceLanguage:'en'}[name]??fallback); },
   set(name, value) { Zotero.Prefs.set(this.prefix + name, name==='rate'?String(value):value, true); },
   language() { return PaperVoiceI18n.resolveLanguage(this.get('interfaceLanguage','auto'),Zotero.locale||Services.locale?.appLocaleAsBCP47||'en'); },
   t(text) { return typeof PaperVoiceI18n==='undefined'?text:PaperVoiceI18n.translate(text,this.language()); },

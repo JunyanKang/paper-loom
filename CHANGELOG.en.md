@@ -4,7 +4,7 @@
 
 ## 1.0.15 · 2026-10-12
 
-Translate caption placement options as complete phrases in English, Japanese, French and German. Retain the bottom-right anchored workspace backgrounds from 1.0.14.
+Use a consistent English interface on a fresh installation. Translate caption placement options as complete phrases in English, Japanese, French and German. Retain the bottom-right anchored workspace backgrounds from 1.0.14.
 
 Model settings use the available space in shorter windows without covering the footer. Documentation screenshots now display at their actual interface scale, with consistent headings and spacing across both languages.
 

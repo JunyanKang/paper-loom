@@ -8,3 +8,5 @@ test('caption placement translates whole options in every supported interface la
  const expected={en:['Below text','Above text'],ja:['原文の下','原文の上'],fr:['Sous le texte','Au-dessus'],de:['Unter dem Text','Über dem Text']};
  for(const [lang,values] of Object.entries(expected)) for(const [index,key] of ['原文下方','原文上方'].entries()) assert.equal(I.text(key,lang),values[index]);
 });
+
+test('unset interface language uses the same English default as reading controls',()=>{const ctx={CiteLensServices:{state:{settings:{}}},Zotero:{locale:'zh-CN'}};require('node:vm').runInNewContext(require('node:fs').readFileSync('addon/references/i18n.js','utf8'),ctx);assert.equal(ctx.CiteLensI18n.language(),'en');});

@@ -11,10 +11,10 @@ const inspect=async(frame,label)=>{
  for(const match of background.backgroundImage.matchAll(/url\(["']?([^"')]+)["']?\)/g))assets.add(match[1]);
  for(const img of frame.querySelectorAll('img[src]'))assets.add(img.src);
  await wait(450);const settled=rect();check(label+' keeps dimensions after first paint',Math.abs(first.width-settled.width)<1&&Math.abs(first.height-settled.height)<1,{first,settled:settled.toJSON()});
- for(const row of frame.querySelectorAll('.cl-setting-row')){const labelEl=row.querySelector('label');if(!labelEl||!labelEl.getBoundingClientRect().height)continue;const b=labelEl.getBoundingClientRect();check(label+' label stays inside '+labelEl.textContent,b.left>=settled.left&&b.right<=settled.right&&labelEl.scrollWidth<=labelEl.clientWidth+1);}
+ for(const row of frame.querySelectorAll('.cl-setting-row')){const labelEl=row.querySelector('label');if(!labelEl||!labelEl.getBoundingClientRect().height)continue;const b=labelEl.getBoundingClientRect();check(label+' label stays inside '+labelEl.textContent,b.left>=settled.left&&b.right<=settled.right&&(!labelEl.clientWidth||labelEl.scrollWidth<=labelEl.clientWidth+1),{label:b.toJSON(),frame:settled.toJSON(),client:labelEl.clientWidth,scroll:labelEl.scrollWidth});}
 };
 try{
- check('no voice installation carried over',!Runtime.installed);check('default language is English',V.get('interfaceLanguage','en')==='en');
+ check('no voice installation carried over',!Runtime.installed);check('default language is English',V.language()==='en'&&Q.CiteLensI18n.language()==='en');
  w.resizeTo(1100,820);w.Zotero_Tabs.select('zotero-pane');
  await L.showSettings(null,d);await U.pageScopes.get(d)?.queue;await inspect(d.querySelector('.cl-settings'),'cold settings');
  const embedded=d.querySelector('.cl-settings iframe'),inside=embedded.contentDocument;

@@ -1570,7 +1570,7 @@ var CiteLensI18n = {
 },
  documents:new Map(),sources:new WeakMap(),
  resolve(value,system='en'){const code=(value&&value!=='auto'?value:system).toLowerCase().split(/[-_]/)[0];return ['zh','en','ja','fr','de'].includes(code)?code:'en';},
- language(){return this.resolve(CiteLensServices.state.settings.interfaceLanguage||'zh',Zotero.locale||'en');},
+ language(){return this.resolve(CiteLensServices.state.settings.interfaceLanguage||'en',Zotero.locale||'en');},
  text(value,language=this.language()){
    if(!value||language==='zh'||!/[\u3400-\u9fff]/.test(value))return value;const catalog=this.catalogs[language];if(catalog[value])return catalog[value];
    const page={en:'Page $1',ja:'$1 ページ',fr:'Page $1',de:'Seite $1'};
