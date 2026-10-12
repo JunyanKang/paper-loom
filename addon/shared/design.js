@@ -306,7 +306,6 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .pl-settings .pl-engine .pl-engine-status{font:400 11px/16px var(--pl-font);text-align:left;margin:0;min-height:16px}
 .pl-embedded .pv-theme-choices .pv-theme-swatch{height:28px;padding:5px;border-radius:7px}
 .pl-embedded .pv-theme-choices{gap:5px;padding:2px 0 4px}
-.pl-embedded .pv-global-backgrounds{margin-top:4px}
 .pl-settings .cl-update-footer>.cl-update-links{min-height:24px;margin-top:4px}
 .pl-embedded.pv-shell .pv-shortcut-key{height:22px;min-height:22px;padding-block:0}
 .pl-embedded .pv-shortcut-group{margin-top:2px}
@@ -326,7 +325,6 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .cl-settings.pl-settings .cl-update-row>.cl-auto-update{flex:none}
 .cl-settings.pl-settings .cl-update-row>button:last-child{margin-left:auto;flex:none}
 .pl-embedded .pv-theme-choices .pv-theme-swatch{height:20px}
-.pl-embedded .pv-global-backgrounds{margin:2px 0 0}
 .pl-embedded.pv-shell .pv-companion-preview{height:24px;min-height:24px;padding:2px}
 .pl-embedded .pl-shortcuts-inline .pv-shortcut-footer{display:flex;justify-content:flex-end;margin-top:4px}
 .pl-settings .cl-update-links .pl-shortcut-reset{position:absolute;left:0;width:24px;min-height:24px;padding:3px!important}

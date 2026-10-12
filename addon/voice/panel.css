@@ -303,9 +303,8 @@
 /* Theme cards stay expanded; previews contain no printed labels. */
 .pv-theme-choices .pv-theme-swatch{height:40px;padding:9px;border-radius:9px}
 .pv-theme-choices{padding:3px 0;gap:7px}
-.pv-global-backgrounds{margin-top:8px;margin-bottom:8px}
-.pv-global-backgrounds .pv-theme-swatch{padding:0;background-color:var(--pv-soft);--pv-swatch-accent:var(--pv-accent);--pv-swatch-ink:var(--pv-primary-ink)}
-.pv-global-backgrounds .pv-theme-swatch::before{display:none}
+[data-global-background] .pv-theme-swatch,.pv-custom-background .pv-theme-swatch{padding:0;background-color:var(--pv-soft);--pv-swatch-accent:var(--pv-accent);--pv-swatch-ink:var(--pv-primary-ink)}
+[data-global-background] .pv-theme-swatch::before,.pv-custom-background .pv-theme-swatch::before{display:none}
 .pv-custom-background .pv-theme-swatch{align-items:center;justify-content:center}
 .pv-custom-background .pv-theme-swatch>.pv-icon{width:23px;height:23px;opacity:.8}
 .pv-custom-background[data-has-image=true] .pv-icon{display:none}

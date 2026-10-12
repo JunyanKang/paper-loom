@@ -1,0 +1,128 @@
+[
+  {
+    "raw": "25. Chu, L.-F. et al. An in vitro human segmentation clock model derived from embryonic stem cells. Cell Rep. 28, 2247–2255.e5 (2019).",
+    "title": "An in vitro human segmentation clock model derived from embryonic stem cells",
+    "year": "2019",
+    "author": "Chu",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "27. Diaz-Cuadros, M. et al. In vitro characterization of the human segmentation clock. Nature 580, 113–118 (2020). Together with references 25 and 26, this article establishes in vitro systems using human PSCs to identify the human segmentation clock.",
+    "title": "In vitro characterization of the human segmentation clock",
+    "year": "2020",
+    "author": "Diaz-Cuadros",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "28. van den Brink, S. C. et al. Single-cell and spatial transcriptomics reveal somitogenesis in gastruloids. Nature 582, 405–409 (2020).",
+    "title": "Single-cell and spatial transcriptomics reveal somitogenesis in gastruloids",
+    "year": "2020",
+    "author": "van den Brink",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "31. Miao, Y. et al. Reconstruction and deconstruction of human somitogenesis in vitro. Nature 614, 500–508 (2023). This article establishes two organoid models of human somite formation, called somitoid and segmentoid, and reveals that cell sorting underlies somite anteroposterior polarity patterning.",
+    "title": "Reconstruction and deconstruction of human somitogenesis in vitro",
+    "year": "2023",
+    "author": "Miao",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "32. Yamanaka, Y. et al. Reconstituting human somitogenesis in vitro. Nature 614, 509–520 (2023). Here, the authors establish an organoid model of human somite formation called axioloid, characterize the model in detail and identify a crucial role of retinoic acid in somite epithelization in vitro.",
+    "title": "Reconstituting human somitogenesis in vitro",
+    "year": "2023",
+    "author": "Yamanaka",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "33. Yaman, Y. I. & Ramanathan, S. Controlling human organoid symmetry breaking reveals signaling gradients drive segmentation clock waves. Cell 186, 497–512 (2023). This article reports the use of bioengineering tools to establish an organoid model of human trunk consisting of the neural tube and somites and delineates roles of signalling gradients in regulating the wave dynamics of clock oscillations.",
+    "title": "Controlling human organoid symmetry breaking reveals signaling gradients drive segmentation clock waves",
+    "year": "2023",
+    "author": "Yaman",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "34. Schoenwolf, G. C., Bleyl, S. B., Brauer, P. R. & Francis-West, P. H. Larsen’s Human Embryology E-Book (Elsevier Health Sciences, 2020).",
+    "title": "Larsen’s Human Embryology E-Book",
+    "year": "2020",
+    "author": "Schoenwolf",
+    "type": "book"
+  },
+  {
+    "raw": "40. Sonnen, K. F. et al. Modulation of phase shift between wnt and Notch signaling oscillations controls mesoderm segmentation. Cell 172, 1079–1090.e12 (2018). The authors develop a microfluidic device to entrain oscillations of WNT and Notch signalling and propose that the phase relationship between clock sub-oscillators encodes positional information for segmental determination.",
+    "title": "Modulation of phase shift between wnt and Notch signaling oscillations controls mesoderm segmentation",
+    "year": "2018",
+    "author": "Sonnen",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "43. Tzouanacou, E., Wegener, A., Wymeersch, F. J., Wilson, V. & Nicolas, J.-F. Redefining the progression of lineage segregations during mammalian embryogenesis by clonal analysis. Dev. Cell 17, 365–376 (2009).",
+    "title": "Redefining the progression of lineage segregations during mammalian embryogenesis by clonal analysis",
+    "year": "2009",
+    "author": "Tzouanacou",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "89. Venzin, O. F. & Oates, A. C. What are you synching about? Emerging complexity of Notch signaling in the segmentation clock. Dev. Biol. 460, 40–54 (2020).",
+    "title": "What are you synching about? Emerging complexity of Notch signaling in the segmentation clock",
+    "year": "2020",
+    "author": "Venzin",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "90. Yoshioka-Kobayashi, K. et al. Coupling delay controls synchronized oscillation in the segmentation clock. Nature 580, 119–123 (2020). This article establishes a live imaging system of clock oscillations with single-cell resolution in the mouse embryo and identifies a coupling delay control mechanism by Lfng in maintaining synchronized clock oscillations.",
+    "title": "Coupling delay controls synchronized oscillation in the segmentation clock",
+    "year": "2020",
+    "author": "Yoshioka-Kobayashi",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "114. Riedel-Kruse, I. H., Müller, C. & Oates, A. C. Synchrony dynamics during initiation, failure, and rescue of the segmentation clock. Science 317, 1911–1915 (2007).",
+    "title": "Synchrony dynamics during initiation, failure, and rescue of the segmentation clock",
+    "year": "2007",
+    "author": "Riedel-Kruse",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "118. Oginuma, M. et al. Intracellular pH controls WNT downstream of glycolysis in amniote embryos. Nature 584, 98–101 (2020). This paper identifies that glycolysis regulates WNT signalling in the tailbud by modulating intracellular pH and describes cascades of regulation that links gradients of FGF, glycolysis and WNT signalling along the PSM.",
+    "title": "Intracellular pH controls WNT downstream of glycolysis in amniote embryos",
+    "year": "2020",
+    "author": "Oginuma",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "127. Dequéant, M.-L. et al. A complex oscillating network of signaling genes underlies the mouse segmentation clock. Science 314, 1595–1598 (2006).",
+    "title": "A complex oscillating network of signaling genes underlies the mouse segmentation clock",
+    "year": "2006",
+    "author": "Dequéant",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "129. Simsek, M. F. et al. Periodic inhibition of Erk activity drives sequential somite segmentation. Nature 613, 153–159 (2022). This article demonstrates the oscillatory dynamics of phosphorylated Erk gradient in zebrafish, shows that periodic FGF inhibition is sufficient to bring about sequential segmentation without the segmentation clock and proposes a segmentation model whereby the oscillatory clock serves as an upstream input to the wavefront.",
+    "title": "Periodic inhibition of Erk activity drives sequential somite segmentation",
+    "year": "2022",
+    "author": "Simsek",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "134. Dunty, W. C. Jr et al. Wnt3a/beta-catenin signaling controls posterior body development by coordinating mesoderm formation and segmentation. Development 135, 85–94 (2008).",
+    "title": "Wnt3a/beta-catenin signaling controls posterior body development by coordinating mesoderm formation and segmentation",
+    "year": "2008",
+    "author": "Dunty Jr",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "158. Boareto, M., Tomka, T. & Iber, D. Positional information encoded in the dynamic differences between neighboring oscillators during vertebrate segmentation. Cell Dev. 168, 203737 (2021).",
+    "title": "Positional information encoded in the dynamic differences between neighboring oscillators during vertebrate segmentation",
+    "year": "2021",
+    "author": "Boareto",
+    "type": "journalArticle"
+  },
+  {
+    "raw": "196. Naganathan, S. R., Popović, M. & Oates, A. C. Left-right symmetry of zebrafish embryos requires somite surface tension. Nature 605, 516–521 (2022). Here, the authors demonstrate that initially imprecise somites are progressively adjusted by surface tension to achieve bilateral symmetry in zebrafish and show that the adjustment is independent of the molecular clock, highlighting roles of mechanics in achieving precise tissue shapes.",
+    "title": "Left-right symmetry of zebrafish embryos requires somite surface tension",
+    "year": "2022",
+    "author": "Naganathan",
+    "type": "journalArticle"
+  }
+]

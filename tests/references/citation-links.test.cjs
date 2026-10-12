@@ -75,3 +75,14 @@ test('superscripts after a punctuated year resolve without admitting mathematica
  for(const base of ['1961,','1961.']){const chars=raised(base,'1'),page=L.page(chars);assert.deepEqual(L.resolve({offset:chars.at(-1).offset},page,refs).records,refs);}
  for(const base of ['10','1961','3.14','cm','x'])assert.equal(L.superscripts(raised(base,'2')).length,0);
 });
+
+test('native citation rectangles establish typography without a word offset array',()=>{
+ const chars=raised('embryos','26'),page=L.page(chars,[{type:'citation',position:{rects:chars.slice(-2).map(c=>c.rect)}}]);assert.equal(page.pointRuns.length,1);
+ const later=L.page(raised('embryos','27',{offset:100})),pages=new Map([[0,page],[1,later]]),refs=[{number:26,title:'First study'},{number:27,title:'Later study'}];L.calibrateSuperscripts(pages,refs);assert.equal(later.pointRuns.length,1);assert.equal(L.occurrences(pages,refs).size,2);
+});
+test('explicit reference abbreviations resolve even without superscript typography',()=>{const refs=[{number:126,title:'Fgf4 maintains Hes7 levels'}];assert.deepEqual(C.findCitations('Hes7 (ref. 126).',refs),refs);assert.equal(C.citationMentions('refs. 125–126')[0].keys.length,2);});
+
+test('repeated unlinked superscripts need distinct higher-numbered bibliography matches',()=>{
+ const refs=[11,12,13].map(number=>({number,title:'Reference '+number})),pages=new Map(refs.map((r,i)=>[i,L.page(raised('embryos',String(r.number),{offset:i*100}))]));L.calibrateSuperscripts(pages,refs);assert.equal([...pages.values()].flatMap(p=>p.pointRuns).length,3);
+ const alone=new Map([[0,L.page(raised('embryos','11'))]]);L.calibrateSuperscripts(alone,refs);assert.equal(alone.get(0).pointRuns.length,0);
+});

@@ -203,9 +203,9 @@ var PaperVoiceUI = {
      </div>
      <div id="pv-settings-appearance" data-settings-pane="appearance" role="tabpanel" aria-labelledby="pv-tab-appearance" hidden>
        <div class="pv-theme-browser" data-field="themeBrowser">
-        <div class="pv-theme-choices" data-field="themeChoices" role="group" aria-label="窗口主题">${controller.themes.map(themeTile).join('')}</div>
+        <div class="pv-theme-choices" data-field="themeChoices" role="group" aria-label="窗口主题">${controller.themes.map(themeTile).join('')}${controller.globalBackgrounds.map(t=>`<button type="button" data-global-background="${t.id}" aria-label="${t.name}" aria-pressed="false"><span class="pv-theme-swatch" style="background-image:url('${controller.assetURI}themes/${t.art}')"></span></button>`).join('')}<button type="button" data-field="customBackground" data-action="customBackground" class="pv-custom-background" aria-label="导入背景图片" aria-pressed="false"><span class="pv-theme-swatch">${icon('image-add')}</span></button></div>
        </div>
-       <div class="pv-theme-choices pv-global-backgrounds" role="group" aria-label="全局背景">${controller.globalBackgrounds.map(t=>`<button type="button" data-global-background="${t.id}" aria-label="${t.name}" aria-pressed="false"><span class="pv-theme-swatch" style="background-image:url('${controller.assetURI}themes/${t.art}')"></span></button>`).join('')}<button type="button" data-field="customBackground" data-action="customBackground" class="pv-custom-background" aria-label="导入背景图片" aria-pressed="false"><span class="pv-theme-swatch">${icon('image-add')}</span></button></div>
+
        <span class="pv-theme-hint" data-field="themeHint" role="status"></span>
        <div class="pv-setting-row pv-transparency-row"><label for="pv-transparency">透明度</label><input id="pv-transparency" data-field="transparency" type="range" min="0" max="10" step="1" aria-label="窗口透明度"/><span data-field="transparencyLabel">0%</span></div>
        <div class="pv-setting-row"><label for="pv-language">界面语言</label><select id="pv-language" data-field="language" aria-label="Interface language / 界面语言"><option value="auto">跟随系统</option><option value="zh">简体中文</option><option value="en">English</option><option value="ja">日本語</option><option value="fr">Français</option><option value="de">Deutsch</option></select></div>
@@ -291,8 +291,11 @@ var PaperVoiceUI = {
   const themeChoices=find('themeChoices'),themeButtons=[...themeChoices.querySelectorAll('[data-theme-choice]')];
   root._pvRevealTheme=()=>{};root._pvCloseThemePicker=()=>{};
   const themeKeyboard=buttons=>{for(const b of buttons)b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const i=buttons.indexOf(b),delta=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:e.key==='ArrowDown'?5:-5,j=e.key==='Home'?0:e.key==='End'?buttons.length-1:Math.max(0,Math.min(buttons.length-1,i+delta));buttons.forEach((x,k)=>x.tabIndex=k===j?0:-1);buttons[j].focus();};};
-  themeKeyboard(themeButtons);for(const b of themeButtons)b.onclick=()=>controller.setTheme(b.dataset.themeChoice);
-  const backgrounds=[...root.querySelectorAll('[data-global-background]')];themeKeyboard([...backgrounds,action('customBackground')]);for(const b of backgrounds)b.onclick=()=>controller.setGlobalBackground(b.dataset.globalBackground);
+  // Preview brightness order includes both artwork and palette presets.
+  const themeOrder=['tidal','sakura','inkstone','porcelain','amber','silver','mist','sand','grove','night','midnight','botanical','aurora','velvet'];
+  for(const id of themeOrder){const tile=themeChoices.querySelector(`[data-theme-choice="${id}"],[data-global-background="${id}"]`);if(tile)themeChoices.append(tile);}themeChoices.append(action('customBackground'));
+  themeKeyboard([...themeChoices.children]);for(const b of themeButtons)b.onclick=()=>controller.setTheme(b.dataset.themeChoice);
+  const backgrounds=[...root.querySelectorAll('[data-global-background]')];for(const b of backgrounds)b.onclick=()=>controller.setGlobalBackground(b.dataset.globalBackground);
   action('customBackground').onclick=async()=>{const b=action('customBackground');if(b.disabled)return;b.disabled=true;find('themeHint').textContent='';try{if(controller.customThemeImage)await controller.removeThemeImage();else await controller.chooseThemeImage();}catch(e){find('themeHint').textContent=String(e.message||e);}finally{b.disabled=false;controller.syncSettings();}};
   find('companionInterval').onchange=e=>controller.setCompanionInterval(e.target.value);
   find('companion').onchange=e=>{controller.set('companionInteractions',e.target.checked);if(!e.target.checked)finishInteraction();};

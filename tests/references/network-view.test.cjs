@@ -97,3 +97,15 @@ test('fit includes peripheral members at large scales and reserves control space
  for(const [from,to] of [[a,b],[b,a]]){assert.deepEqual(V.flight(from,to,0),from);const end=V.flight(from,to,1);for(const key of ['x','y','k'])assert.ok(Math.abs(end[key]-to[key])<1e-10);for(let t=0;t<=1;t+=.02){const p=V.flight(from,to,t);assert.ok(p.k>=.04-1e-10&&p.k<=2+1e-10);assert.ok(Number.isFinite(p.x+p.y+p.k));}}
  });
  test('one-shot bloom settles exactly without altering graph geometry',()=>{const start=V.bloom(0),end=V.bloom(1);assert.equal(start.labels,0);assert.equal(end.scale,1);assert.equal(end.spread,1);assert.equal(end.sin,0);assert.equal(end.cos,1);assert.equal(end.labels,1);assert.deepEqual(V.bloom(2),end);});
+
+test('anchored camera flight follows a straight screen path even far from the world origin',()=>{
+ const anchor={x:7800,y:-14000},from={k:.03,x:-100,y:520},to={k:1.2,x:400-anchor.x*1.2,y:260-anchor.y*1.2};
+ const start={x:anchor.x*from.k+from.x,y:anchor.y*from.k+from.y};
+ for(let i=0;i<=100;i++){const p=V.flight(from,to,i/100,anchor),x=anchor.x*p.k+p.x,y=anchor.y*p.k+p.y;assert.ok(x>=Math.min(start.x,400)-1e-8&&x<=Math.max(start.x,400)+1e-8);assert.ok(y>=Math.min(start.y,260)-1e-8&&y<=Math.max(start.y,260)+1e-8);}
+});
+test('viewport projection fills an ellipse and never changes the underlying graph',()=>{
+ const nodes=Array.from({length:24},(_,i)=>({id:String(i),kind:'author',x:800+50*Math.cos(i*Math.PI/12),y:-900+50*Math.sin(i*Math.PI/12)})),edges=[{source:'0',target:'1'}],source={nodes,edges},original=JSON.stringify(source),project=V.projector();
+ for(const size of [{w:1000,h:500},{w:640,h:500}]){const scene=project(source,size),b=V.bounds(scene.nodes),c=V.fitCamera(scene,size);assert.ok(Math.abs(b.width/b.height-(size.w-72)/(size.h-116))<1e-8);assert.ok(Math.abs(b.x*c.k+c.x-size.w/2)<1e-8);assert.ok(Math.abs(b.y*c.k+c.y-size.h/2)<1e-8);assert.equal(project(source,size).nodes,scene.nodes);assert.equal(scene.edges,edges);}
+ assert.equal(JSON.stringify(source),original);
+});
+test('view counts include unique papers and every author represented by visible communities',()=>{const nodes=[{id:'a',kind:'author',members:['p','q']},{id:'b',kind:'author',members:['p']}],index=V.index({nodes,edges:[]}),papers=new Map([['p',{local:true}],['q',{local:false}]]);assert.deepEqual(V.sceneStats({nodes:[{kind:'community',members:['a','b']}]},index,papers),{authors:2,papers:1});assert.deepEqual(V.sceneStats({nodes:[nodes[0]]},index,papers),{authors:1,papers:1});});

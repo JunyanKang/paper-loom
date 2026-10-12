@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.23 · 2026-10-12
+
+Every network level fits an elliptical layout to the available viewport. Child graphs and author details appear together. Navigation moves from the selected group into its network and returns to the original group position; selecting a leaf author updates details without rebuilding the graph. Counts reflect the current network, and repeated navigation reuses the existing layout.
+
+Selection translations hide when their source text leaves the PDF viewport and return with the existing translation when it comes back into view. Theme and background previews now form one light-to-dark sequence, with the custom image slot last.
+
+Reference parsing separates editorial recommendations from titles and handles dotted or hyphenated author initials and name suffixes. Wrapped DOIs stay separate from journal names, and compound hyphens are preserved. Citation recognition now uses coordinate-only links across pages and supports explicit references such as “ref. 126”.
+
 ## 1.0.22 · 2026-10-12
 
 Panels stay open when you move from the floating book into their controls, including after clicking in a PDF. Controls remain usable during opening, and panel motion no longer scales or distorts text.

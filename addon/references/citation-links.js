@@ -17,8 +17,8 @@ var CiteLensCitationLinks={
       runs.push({text,ratio,offsets:group.map(c=>c.offset),rects:group.map(c=>c.rect)});i=end-1;
     }
     // Repeated raised numbers after personal names are author affiliations, not references.
-    const affiliations=runs.filter(r=>{const at=chars.findIndex(c=>c.offset===r.offsets[0]);let start=at-1;while(start>0&&!chars[start-1].lineBreakAfter&&at-start<100)start--;const lead=chars.slice(start,at).map(c=>c.c+(c.spaceAfter?' ':'')).join('');return /(?:^|[,&]\s*)(?:[\p{Lu}][\p{L}'’.-]*\s+){1,4}[\p{Lu}][\p{L}'’.-]*$/u.test(lead);});
-    return runs.filter(r=>{const end=chars.findIndex(c=>c.offset===r.offsets.at(-1))+1,following=chars.slice(end,end+65).map(c=>c.c+(c.spaceAfter?' ':'')).join('');if(/^(?:Department|Institute|University|Centre|Center|Present address|These authors|European Molecular|Wellcome|Theory of)\b/.test(following))return false;return !affiliations.includes(r)||affiliations.filter(a=>Math.abs(a.rects[0][1]-r.rects[0][1])<3).length<2;});
+    const affiliations=runs.filter(r=>{const at=chars.findIndex(c=>c.offset===r.offsets[0]);let start=at-1;while(start>0&&!chars[start-1].lineBreakAfter&&at-start<100)start--;const lead=chars.slice(start,at).map(c=>c.c+(c.spaceAfter?' ':'')).join('');return /(?:^|[,&]\s*)(?:[\p{Lu}][\p{L}'’.-]*\s+){1,4}[\p{Lu}][\p{L}'’.-]*$/u.test(lead.trim());});
+    return runs.filter(r=>{const end=chars.findIndex(c=>c.offset===r.offsets.at(-1))+1,following=chars.slice(end,end+65).map(c=>c.c+(c.spaceAfter?' ':'')).join('');if(/^(?:Department|Institute|University|Centre|Center|Present address|These authors|European Molecular|Wellcome|Theory of)\b/.test(following)||/^[\p{Lu}][\p{L} -]{0,60}\b(?:University|Institute|Hospital)\b/u.test(following))return false;return !affiliations.includes(r)||affiliations.filter(a=>Math.abs(a.rects[0][1]-r.rects[0][1])<3).length<2;});
   },
   readingOrder(chars,{width,headers=new Set(),pageIndex=0}={}){
     const usable=(chars||[]).filter(c=>!headers.has(pageIndex+':'+c.offset)&&(!c.rotation||c.rotation===0)),runs=[];let run=[];
@@ -32,7 +32,7 @@ var CiteLensCitationLinks={
   page(chars,overlays=[],options={}){
     chars=this.readingOrder(chars,options);let text='';const offsets=new Map(),scriptBoundaries=[];
     let previous;for(const c of chars||[]){if(previous&&/[\p{Lu}]/u.test(c.c)&&previous.fontSize<c.fontSize*.85&&c.rect&&previous.rect&&c.rect[0]-previous.rect[2]>c.fontSize*.08&&Math.abs(c.baseline-previous.baseline)>c.fontSize*.1&&!/\s$/.test(text)){text+=' ';scriptBoundaries.push(text.length);}offsets.set(c.offset,text.length);previous=c;if(!c.ignorable)text+=c.c+((c.spaceAfter||c.lineBreakAfter)&&!(c.lineBreakAfter&&/[-‐]/.test(c.c))?' ':'');}
-    const numericRuns=this.superscripts(chars),native=new Set(overlays.filter(o=>o.type==='citation').flatMap(o=>(o.word||[]).map(c=>c.offset))),ratios=numericRuns.filter(r=>r.offsets.some(o=>native.has(o))).map(r=>r.ratio);
+    const numericRuns=this.superscripts(chars),native=new Set(overlays.filter(o=>o.type==='citation').flatMap(o=>(o.word||[]).map(c=>c.offset))),linkedRects=overlays.filter(o=>o.type==='citation').flatMap(o=>o.position?.rects||[]),ratios=numericRuns.filter(r=>r.offsets.some(o=>native.has(o))||r.rects.some(a=>linkedRects.some(b=>(a[0]+a[2])/2>=b[0]&&(a[0]+a[2])/2<=b[2]&&(a[1]+a[3])/2>=b[1]&&(a[1]+a[3])/2<=b[3]))).map(r=>r.ratio);
     // Unlinked raised numbers need the page's established citation typography.
     // This excludes the differently scaled author-affiliation numbers on article page 1.
     const pointRuns=numericRuns.filter(r=>ratios.some(ratio=>Math.abs(ratio-r.ratio)<.025));
@@ -48,6 +48,16 @@ var CiteLensCitationLinks={
     }
     for(const start of scriptBoundaries){const m=CiteLensCore.citationMentions(text.slice(start,start+180)).find(m=>m.start===0&&m.keys[0]?.author);if(m){const end=start+m.end;mentions=mentions.filter(old=>old.end<=start||old.start>=end);mentions.push({...m,start,end});}}
     mentions.sort((a,b)=>a.start-b.start);return {text,offsets,chars,overlays,mentions,numericRuns,pointRuns};
+  },
+  calibrateSuperscripts(pages,refs){
+    // Some PDFs only provide citation links on their opening pages. Share that
+    // confirmed typography with later pages, while requiring valid bibliography numbers.
+    const confirmed=[...pages.values()].flatMap(p=>(p.pointRuns||[]).map(r=>r.ratio)),evidence=new Map(),valid=new Map();
+    for(const page of pages.values())for(const run of page.numericRuns||[]){const result=this.result(CiteLensCore.citationMentions(run.text,{nativeNumeric:true}),refs);if(!result.records.length||result.unresolved.length)continue;valid.set(run,result);const ratio=Math.round(run.ratio*1000)/1000,group=evidence.get(ratio)||{runs:0,numbers:new Set()};group.runs++;for(const r of result.records)if(r.number>9)group.numbers.add(r.number);evidence.set(ratio,group);}
+    // Native links may not exist at all (or be built lazily by the reader).
+    // Infer only repeated raised-number typography backed by distinct bibliography entries.
+    const styles=[...new Set([...confirmed,...[...evidence].filter(([,e])=>e.runs>=3&&e.numbers.size>=3).map(([ratio])=>ratio)])];
+    for(const page of pages.values())page.pointRuns=(page.numericRuns||[]).filter(run=>valid.has(run)&&styles.some(r=>Math.abs(r-run.ratio)<.025));
   },
   bridgePages(pages,headers=new Set()){
     for(const [id,left] of pages){const right=pages.get(id+1);if(!right)continue;

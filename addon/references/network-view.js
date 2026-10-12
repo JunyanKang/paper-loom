@@ -1,19 +1,27 @@
 /* Screen-space navigation and level of detail. Independent of Zotero and the renderer. */
 var CiteLensNetworkView=(()=>{
  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
- function fitCamera(scene,{w,h},padding={left:36,right:36,top:58,bottom:44}){
+ function fitCamera(scene,{w,h},padding={left:36,right:36,top:58,bottom:58}){
   let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
   for(const nodes of [scene?.nodes||[],scene?.contextNodes||[]])for(const n of nodes){if(!Number.isFinite(n.x)||!Number.isFinite(n.y))continue;left=Math.min(left,n.x);right=Math.max(right,n.x);top=Math.min(top,n.y);bottom=Math.max(bottom,n.y);}
   if(!Number.isFinite(left)||w<=0||h<=0)return null;
-  const width=Math.max(1,w-padding.left-padding.right),height=Math.max(1,h-padding.top-padding.bottom),k=Math.min(2.2,width/Math.max(1,right-left),height/Math.max(1,bottom-top));
+  const width=Math.max(1,w-padding.left-padding.right),height=Math.max(1,h-padding.top-padding.bottom),k=Math.min(5,width/Math.max(1,right-left),height/Math.max(1,bottom-top));
   return {k,x:padding.left+width/2-(left+right)/2*k,y:padding.top+height/2-(top+bottom)/2*k};
  }
  // Bounded screen-space motion; layout coordinates and worker results stay untouched.
- function flight(from,to,progress){
+ function flight(from,to,progress,anchor={x:0,y:0}){
   const t=clamp(progress,0,1);if(t===0)return {...from};if(t===1)return {...to};const ease=t*t*t*(t*(t*6-15)+10),k=Math.exp(Math.log(from.k)+(Math.log(to.k)-Math.log(from.k))*ease);
-  return {k,x:from.x+(to.x-from.x)*ease,y:from.y+(to.y-from.y)*ease};
+  const ax=anchor.x,ay=anchor.y;return {k,x:(ax*from.k+from.x)*(1-ease)+(ax*to.k+to.x)*ease-ax*k,y:(ay*from.k+from.y)*(1-ease)+(ay*to.k+to.y)*ease-ay*k};
  }
  function bloom(progress){const t=clamp(progress,0,1),ease=1-(1-t)**3,angle=ease===1?0:(1-ease)*-.18;return {scale:.72+.28*ease,spread:.25+.75*ease,cos:Math.cos(angle),sin:Math.sin(angle),alpha:.3+.7*ease,labels:t===1?1:clamp((t-.55)/.45,0,1)};}
+ function bounds(nodes){let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;for(const n of nodes||[]){if(!Number.isFinite(n.x+n.y))continue;left=Math.min(left,n.x);right=Math.max(right,n.x);top=Math.min(top,n.y);bottom=Math.max(bottom,n.y);}return Number.isFinite(left)?{x:(left+right)/2,y:(top+bottom)/2,width:right-left,height:bottom-top}:null;}
+ // Reuse computed topology; only stretch its display coordinates to the viewport.
+ function projector(){let cache=[];const project=(source,viewport)=>{if(!source)return null;const w=Math.max(80,viewport.w-72),h=Math.max(80,viewport.h-116),found=cache.find(c=>c.nodes===source.nodes&&c.context===source.contextNodes&&c.w===w&&c.h===h);if(found)return {...source,...found.value};
+  const all=[...source.nodes,...(source.contextNodes||[])],b=bounds(all);if(!b)return source;
+  const stretch=b.width>1&&b.height>1?(w/h)/(b.width/b.height):1,copy=n=>({...n,x:b.x+(n.x-b.x)*stretch}),nodes=source.nodes.map(copy),contextNodes=(source.contextNodes||[]).map(copy),value={nodes,contextNodes,index:windowlessIndex(nodes,source.edges),contextByID:new Map(contextNodes.map(n=>[n.id,n])),center:{x:b.x,y:b.y}};
+  cache.push({nodes:source.nodes,context:source.contextNodes,w,h,value});if(cache.length>6)cache.shift();return {...source,...value};
+ };project.clear=()=>{cache=[];};return project;}
+ function sceneStats(scene,index,papers){const authors=new Set(),ids=new Set();for(const node of scene?.nodes||[]){if(node.kind==='community'){for(const id of node.members||[])authors.add(id);}else if(node.kind==='author')authors.add(node.id);else if(node.kind==='paper')ids.add(node.id);}for(const id of authors)for(const paper of index.byID.get(id)?.members||[])ids.add(paper);return {authors:authors.size,papers:[...ids].filter(id=>papers.get(id)?.local!==false&&papers.has(id)).length};}
  function evidenceGroups(evidence){
   const groups=new Map();
   for(const item of evidence||[])for(const source of item.sources||[{paperID:item.paperID,quote:item.source?.text}]){
@@ -53,7 +61,7 @@ var CiteLensNetworkView=(()=>{
  }
  function zoom(camera,factor,x,y){const k=clamp(camera.k*factor,.001,5),ratio=k/camera.k;return{x:x-(x-camera.x)*ratio,y:y-(y-camera.y)*ratio,k};}
  function step(camera,target,dt=16,reduced=false){const alpha=reduced?1:1-Math.exp(-clamp(dt,1,40)/35);for(const key of ['x','y','k'])camera[key]+=(target[key]-camera[key])*alpha;const pending=Math.abs(camera.x-target.x)+Math.abs(camera.y-target.y)>.08||Math.abs(camera.k-target.k)>.0001;if(!pending)Object.assign(camera,target);return pending;}
- function index(model){const byID=new Map(model.nodes.map(n=>[n.id,n])),adj=new Map(model.nodes.map(n=>[n.id,new Set([n.id])])),primary=new Map(),links=new Map(model.nodes.map(n=>[n.id,[]]));for(const e of model.edges){adj.get(e.source)?.add(e.target);adj.get(e.target)?.add(e.source);links.get(e.source)?.push(e);links.get(e.target)?.push(e);}for(const n of model.nodes)if(n.group){if(!primary.has(n.group))primary.set(n.group,[]);primary.get(n.group).push(n);}return{byID,adj,primary,links};}
+ function index(model){const byID=new Map(model.nodes.map(n=>[n.id,n])),adj=new Map(model.nodes.map(n=>[n.id,new Set([n.id])])),primary=new Map(),owners=new Map(),links=new Map(model.nodes.map(n=>[n.id,[]]));for(const e of model.edges){adj.get(e.source)?.add(e.target);adj.get(e.target)?.add(e.source);links.get(e.source)?.push(e);links.get(e.target)?.push(e);}for(const n of model.nodes)if(n.group){if(!primary.has(n.group))primary.set(n.group,[]);primary.get(n.group).push(n);}for(const n of model.nodes)if(n.kind==='author')for(const paper of n.members||[]){if(!owners.has(paper))owners.set(paper,[]);owners.get(paper).push(n.id);}return{byID,adj,primary,links,owners};}
  function scene(model,index,{selected='',focused=false,k=1,detail=false,community=''}={}){
   if(model.communities?.length)return communityScene(model,index,{selected,focused,k,community});
   if(index.overview){const near=index.detail?.id===selected?index.detail.near:index.adj.get(selected),allEdges=index.detail?index.detail.edges:index.overview,nodes=focused?model.nodes.filter(n=>near?.has(n.id)):model.nodes,ids=focused?new Set(nodes.map(n=>n.id)):null;return {nodes,edges:ids?allEdges.filter(e=>ids.has(e.source)&&ids.has(e.target)):allEdges,near,aggregate:!focused&&!detail&&model.nodes.length>70&&k<.9,hidden:model.nodes.length-nodes.length};}
@@ -176,6 +184,6 @@ var CiteLensNetworkView=(()=>{
   }
   return accepted;
  }
- return{flight,bloom,fitCamera,labelPlacer,revealMembers,sortPapers,contextDescriptions,evidenceGroups,nearest,magnetic,opacity,hoverOpacity,wheel,zoom,step,index,scene,labels,lineWidth,nodeLabel,textLines,emphasis,detail};
+ return{bounds,projector,sceneStats,flight,bloom,fitCamera,labelPlacer,revealMembers,sortPapers,contextDescriptions,evidenceGroups,nearest,magnetic,opacity,hoverOpacity,wheel,zoom,step,index,scene,labels,lineWidth,nodeLabel,textLines,emphasis,detail};
 })();
 if(typeof module!=='undefined')module.exports=CiteLensNetworkView;

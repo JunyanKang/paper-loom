@@ -18,7 +18,7 @@ var CiteLensCore = (() => {
   const plainTitle = value => clean(titleParts(value).map(p=>p.text).join(''));
   const norm = s => plainTitle(s).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
   function doi(s) {
-    let text=clean(s).replace(/10\.\s+(?=\d{4,9}\/)/g,'10.');try{text=decodeURIComponent(text);}catch(_){}
+    let text=clean(s).replace(/10\.\s+(?=\d{4,9}\/)/g,'10.').replace(/(10\.\d{4,9}\/)\s+(?=[a-z0-9])/gi,'$1');try{text=decodeURIComponent(text);}catch(_){}
     // Some PDF producers split every DOI glyph. Rejoin only an explicit terminal DOI URL.
     text=text.replace(/h\s+t\s*t\s*p\s*s?\s*:\s*\/\s*\/\s*d\s*o\s*i\s*\.\s*o\s*r\s*g\s*\/\s*(1\s*0\s*\.[a-z0-9\s./_();:+-]+)$/i,(_,tail)=>'https://doi.org/'+tail.replace(/\s/g,''));
     const m=text.match(/10\.\d{4,9}\/(?:[^\s<>"#]|<\d+::[a-z0-9._;:-]+>)+/i); if(!m)return '';
@@ -38,8 +38,27 @@ var CiteLensCore = (() => {
     const marks={'´':'\u0301','`':'\u0300','¨':'\u0308','ˆ':'\u0302','˜':'\u0303'};
     return String(text??'').replace(/ı(?=\s*[\p{M}´`])/gu,'i').replace(/([\p{L}])\s*([\p{M}´`¨ˆ˜])\s*(?=[\p{L}])/gu,(_,letter,mark)=>letter+(marks[mark]||mark)).normalize('NFC');
   }
+  // Nature-style entries put the publication year after the title and locator.
+  // Consume the complete creator prefix so dotted/hyphenated initials cannot be titles.
+  function endYearReference(raw,position) {
+    const numbered=raw.match(/^\[?(\d{1,4})\]?[.)]?\s+/),body=raw.slice(numbered?.[0].length||0),creators=[];
+    const person=/^([\p{L}][\p{L}'’–\- ]*),\s*((?:\p{Lu}\.\s*(?:[-‐–]\s*)?){1,6})(?:(Jr|Sr)\.?\s*)?/u;
+    let rest=body;
+    while(true){const m=rest.match(person);if(!m)break;creators.push({lastName:m[1].trim()+(m[3]?' '+m[3]:''),firstName:m[2].replace(/\s+/g,''),creatorType:'author'});rest=rest.slice(m[0].length);const separator=rest.match(/^(?:,\s*(?:&\s*)?|&\s*|and\s+)/);if(separator&&person.test(rest.slice(separator[0].length)))rest=rest.slice(separator[0].length);else break;}
+    if(!creators.length)return null;rest=rest.replace(/^et al\.\s*/,'');
+    const ending=rest.match(/^(.+?)\s*\(((?:1[6-9]|20)\d{2})([a-z])?\)\.(?:\s+https?:\/\/\S+)?$/);
+    const book=rest.match(/^(.{8,}?)\s+\(([^()]+),\s*((?:1[6-9]|20)\d{2})\)\.?$/);
+    let fields;
+    if(ending){const publication=ending[1].match(/^(.{8,}?[.!?])\s+((?:(?:\p{Lu}[\p{L}]*|eLife|bioRxiv|medRxiv|of|the|and|in|de)[.&’'–-]?\s*){1,12})\s+(\d+)(?:\s*\(([^)]+)\))?[,;:]\s*([\w.–-]+)$/u);const online=!publication&&ending[1].match(/^(.{8,}?[.!?])\s+((?:(?:\p{Lu}[\p{L}]*|eLife|bioRxiv|medRxiv|of|the|and|in|de)[.&’'–-]?\s*){1,12})\s+https?:\/\/(?:dx\.)?doi\.org\/10\.\d{4,9}\/\S+$/u),entry=publication||online;if(!entry)return null;fields={title:entry[1].replace(/\.$/,''),journal:entry[2].replace(/[.\s]+$/,''),year:ending[2],suffix:ending[3]||'',volume:entry[3]||'',issue:entry[4]||'',pages:entry[5]||'',publisher:'',type:'journalArticle'};}
+    else if(book&&/\b(?:Elsevier|Springer|Wiley|Press|Publishing|Publishers|Verlag|Lippincott)\b/i.test(book[2]))fields={title:book[1],journal:'',year:book[3],suffix:'',volume:'',issue:'',pages:'',publisher:book[2],type:'book'};
+    else return null;
+    return {raw,...fields,author:creators[0].lastName,creators,number:Number(numbered?.[1])||undefined,DOI:doi(raw),position,source:'PDF 原始参考文献',verified:false};
+  }
   function parse(raw,position=null) {
-    raw=clean(repairPDFAccents(raw)).replace(/(10\.\d{4,9}\/[^\s]*[-/])\s+(?=[a-z0-9])/gi,'$1');const yearMatch=raw.match(/\b(1[6-9]\d{2}|20\d{2})([a-z])?\)(?=[.\s]|$)/)||raw.match(/\b(1[6-9]\d{2}|20\d{2})(?:F(?=[a-z][.)]))?([a-z])?(?:[–-](?:(?:19|20)\d{2}|\d{2}))?\b/);
+    raw=clean(repairPDFAccents(raw)).replace(/(10\.\d{4,9}\/)\s+(?=[a-z0-9])/gi,'$1').replace(/(10\.\d{4,9}\/[^\s]*[-/])\s+(?=[a-z0-9])/gi,'$1');
+    raw=raw.replace(/(\((?:19|20)\d{2}[a-z]?\)\.)\s+(?:This (?:article|paper)\b|Here, the authors\b|Together with references\b|The authors (?:develop|demonstrate|show)\b).*$/,'$1');
+    const endYear=endYearReference(raw,position);if(endYear)return endYear;
+    const yearMatch=raw.match(/\b(1[6-9]\d{2}|20\d{2})([a-z])?\)(?=[.\s]|$)/)||raw.match(/\b(1[6-9]\d{2}|20\d{2})(?:F(?=[a-z][.)]))?([a-z])?(?:[–-](?:(?:19|20)\d{2}|\d{2}))?\b/);
     const year=yearMatch?.[1]||'', suffix=yearMatch?.[2]||'';
     const before=yearMatch?raw.slice(0,yearMatch.index).replace(/^\[?\d+\]?[.)]?\s*/, '').trim():'';
     let author=before.split(',')[0].replace(/\(\s*$/,'').trim();
@@ -182,6 +201,7 @@ var CiteLensCore = (() => {
     const out=[],numeric=/[[(]\s*(\d+(?:\s*[-–,;]\s*\d+)*)\s*[\])]/g;
     const numbers=value=>{const nums=[];for(const part of value.split(/[,;]/)){const [a,b]=part.trim().split(/[-–]/).map(Number);if(!a||a>=1600||b!==undefined&&(b<a||b-a>100))return [];for(let n=a;n<=(b??a);n++)nums.push({number:n});}return nums;};
     for(const m of text.matchAll(numeric)){if(m[0][0]==='('&&(!parenthesizedNumeric||/^\d{1,3}(?:,\d{3})+$/.test(m[1])))continue;out.push({start:m.index,end:m.index+m[0].length,text:m[0],keys:numbers(m[1])});}
+    for(const m of text.matchAll(/\brefs?\.\s*(\d+(?:\s*[-–,;]\s*\d+)*)/gi))out.push({start:m.index,end:m.index+m[0].length,text:m[0],keys:numbers(m[1])});
     if(nativeNumeric&&/^\s*\d+(?:\s*[-–,;]\s*\d+)*\s*$/.test(text))out.push({start:0,end:text.length,text,keys:numbers(text)});
     const surname="(?:(?:[Vv]an|[Vv]on|[Dd]e|[Dd]el|[Dd]er|[Dd]en|[Dd]a|[Dd]i|[Ll]a|[Ll]e|tom) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+(?: +(?:(?:y|de|del|da|van|von) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+){0,2}";
     const authors="("+surname+")(?:(?:,? +et +al\\.?)|(?: +(?:and|&) +("+surname+")))?";

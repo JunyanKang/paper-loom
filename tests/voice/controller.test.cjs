@@ -6,7 +6,7 @@ function setup(){
  const prefs=new Map(),errors=[];
  const host={setTimeout,clearTimeout,setInterval,clearInterval};
  const context={PaperVoiceCore:core,PaperVoiceShortcuts:require('../../addon/voice/shortcuts.js'),Services:{prefs:{savePrefFile(){}}},Components:{utils:{waiveXrays:x=>x}},PaperVoiceTranslation:{},Zotero:{Prefs:{get:k=>prefs.get(k),set:(k,v)=>prefs.set(k,v)},getMainWindow:()=>host,logError:e=>errors.push(e)},console};
- context.PaperVoiceSelectionUI={updateButton(button,text){button.textContent=text;},create(c,d,button){return {card:button};}};
+ context.PaperVoiceSelectionUI={watchAnchor:()=>()=>{},updateButton(button,text){button.textContent=text;},create(c,d,button){return {card:button};}};
  vm.createContext(context);vm.runInContext(fs.readFileSync('addon/voice/main.js','utf8'),context);
  for(const file of ['pipeline.js','stream-player.js','performance.js'])vm.runInContext(fs.readFileSync('addon/voice/'+file,'utf8'),context);
  const p=context.PaperVoice;p.watchToolbar=()=>{};p.normalizeToolbar=()=>{};p.showPanel=()=>{};p.ensurePanel=()=>{};p.updatePanels=()=>{};p.set('speechLanguage','en');p.set('translation',false);

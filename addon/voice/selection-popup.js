@@ -1,5 +1,43 @@
 /* Selection translation and reading share a compact card inside Zotero's popup. */
 var PaperVoiceSelectionUI = {
+ // Test the source rectangles, never the popup that Zotero clamps to the screen.
+ anchorVisible(view,position) {
+  const win=view?._iframeWindow,doc=win?.document,viewer=win?.PDFViewerApplication?.pdfViewer;
+  if(!viewer||!Number.isInteger(position?.pageIndex))return true;
+  const container=viewer.container||doc.getElementById('viewerContainer'),clip=container?.getBoundingClientRect();
+  const viewport={left:Math.max(0,clip?.left||0),top:Math.max(0,clip?.top||0),right:Math.min(win.innerWidth,clip?.right??win.innerWidth),bottom:Math.min(win.innerHeight,clip?.bottom??win.innerHeight)};
+  for(const [pageIndex,rects] of [[position.pageIndex,position.rects],[position.pageIndex+1,position.nextPageRects]]){
+   if(!rects?.length)continue;
+   const page=viewer.getPageView(pageIndex),element=page?.div||doc.querySelector(`.page[data-page-number="${pageIndex+1}"]`);
+   if(!element?.isConnected||!page?.viewport)continue;
+   const bounds=element.getBoundingClientRect();
+   for(const rect of rects){
+    const [x1,y1,x2,y2]=page.viewport.convertToViewportRectangle(Components.utils.cloneInto(Array.from(rect),win));
+    const left=bounds.left+element.clientLeft+Math.min(x1,x2),right=bounds.left+element.clientLeft+Math.max(x1,x2),top=bounds.top+element.clientTop+Math.min(y1,y2),bottom=bounds.top+element.clientTop+Math.max(y1,y2);
+    if(right>viewport.left&&left<viewport.right&&bottom>viewport.top&&top<viewport.bottom)return true;
+   }
+  }
+  return false;
+ },
+ watchAnchor(controller,reader,selection,card) {
+  const win=card.ownerDocument.defaultView;let frame=0,timer=0,disposed=false,popup,view,pdfWindow,observer,resize,eventBus,mountAttempts=0;const events=['pagerendered','scalechanging','rotationchanging','updateviewarea'];
+  const dispose=()=>{if(disposed)return;disposed=true;win.clearTimeout(timer);win.cancelAnimationFrame(frame);pdfWindow?.document.removeEventListener('scroll',schedule,true);pdfWindow?.removeEventListener('resize',schedule);observer?.disconnect();resize?.disconnect();for(const name of events)eventBus?.off(name,schedule);if(popup)delete popup.dataset.pvAnchorHidden;};
+  const update=()=>{frame=0;if(disposed)return;if(controller.dead||!card.isConnected){dispose();return;}popup.dataset.pvAnchorHidden=String(!this.anchorVisible(view,selection.position));};
+  const schedule=()=>{if(!disposed&&!frame)frame=win.requestAnimationFrame(update);};
+  const mount=()=>{
+   if(disposed)return;
+   if(!card.isConnected){if(++mountAttempts<12)timer=win.setTimeout(mount,16);else dispose();return;}
+   popup=card.closest('.selection-popup');if(!popup){dispose();return;}
+   const internal=reader._internalReader,key=controller.captureSelectionPopup(reader,selection).popupKey;
+   view=key==='secondaryViewSelectionPopup'?internal?._secondaryView:internal?._primaryView;pdfWindow=view?._iframeWindow;if(!pdfWindow){dispose();return;}
+   pdfWindow.document.addEventListener('scroll',schedule,true);pdfWindow.addEventListener('resize',schedule);
+   eventBus=pdfWindow.PDFViewerApplication?.eventBus;if(eventBus?.on&&eventBus?.off)for(const name of events)eventBus.on(name,schedule);else eventBus=null;
+   observer=new win.MutationObserver(()=>{if(!card.isConnected)dispose();});observer.observe(popup.parentNode,Components.utils.cloneInto({childList:true,subtree:true},win));
+   resize=new win.ResizeObserver(schedule);const viewer=pdfWindow.PDFViewerApplication?.pdfViewer;for(const element of [viewer?.container,viewer?.getPageView(selection.position?.pageIndex)?.div])if(element)resize.observe(element);
+   update();
+  };timer=win.setTimeout(mount,0);
+  return dispose;
+ },
  updateButton(button,text,loading=false,progress=null) {
   let label=button.querySelector('.pv-selection-read-label');
   if(!label){const doc=button.ownerDocument;label=doc.createElement('span');label.className='pv-selection-read-label';const dots=doc.createElement('span');dots.className='pv-selection-dots';dots.setAttribute('aria-hidden','true');for(let i=0;i<3;i++)dots.append(doc.createElement('i'));const track=doc.createElement('span');track.className='pv-selection-load';track.setAttribute('role','progressbar');track.append(doc.createElement('i'));button.replaceChildren(label,dots,track);}
@@ -21,6 +59,7 @@ var PaperVoiceSelectionUI = {
    .selection-popup:has(.pv-selection-card){box-sizing:border-box!important;width:296px!important;min-width:0!important;max-width:calc(100% - 16px)!important;padding:8px!important}
    .selection-popup:has(.pv-selection-card)>.custom-sections,.selection-popup:has(.pv-selection-card) .section:has(.pv-selection-card){box-sizing:border-box;width:100%;min-width:0;max-width:100%}
    .selection-popup[data-pv-selection]{color:var(--pv-ink);background:var(--pv-glass);border:0;outline:1px solid var(--pv-glass-line);outline-offset:-1px;border-radius:15px;box-shadow:var(--pv-small-shadow),inset 0 1px 0 var(--pv-rim-light);backdrop-filter:blur(18px);animation:pv-selection-enter .16s ease-out}
+   .selection-popup[data-pv-anchor-hidden=true]{visibility:hidden!important;pointer-events:none!important}
    .selection-popup[data-pv-selection]>.tool-toggle{background:var(--pv-soft)}
    .selection-popup[data-pv-selection]>.tool-toggle>button{color:var(--pv-muted)}
    .selection-popup[data-pv-selection]>.tool-toggle>button.active{background:var(--pv-paper);color:var(--pv-accent)}

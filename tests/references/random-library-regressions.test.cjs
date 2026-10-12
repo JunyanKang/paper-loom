@@ -61,3 +61,18 @@ test('publication month ranges and a one-digit wrapped DOI continuation are pres
  const raw='10. Tan Y, Fukutomi A, Sun MT, Durkin S, Gilhotra J, Chan WO. Anti-VEGF crunch syndrome in proliferative diabetic retinopathy: a review. Surv Ophthalmol. 2021 Nov-Dec;66(6):926–32. h t t ps : // d o i. org /1 0 .1 0 1 6/ j. s urvop h t ha l. 2 0 2 1 . 0 3 . 0 0';
  const refs=B.parse([{pageIndex:0,width:600,height:800,items:[item('References',40,700),item(raw,40,680),item('1.',55,665),item('11. Smith AB. Another study of retinal cells. Cell. 2020;1:22–24.',40,650)]}]);assert.equal(refs.length,2);assert.equal(refs[0].title,'Anti-VEGF crunch syndrome in proliferative diabetic retinopathy: a review');assert.equal(refs[0].DOI,'10.1016/j.survophthal.2021.03.001');
 });
+
+test('Nature review end-year references separate full creator initials, titles and editorial notes',()=>{
+ for(const expected of require('../fixtures/nature-review-references.json')){const actual=C.parse(expected.raw);for(const key of ['title','year','author','type'])assert.equal(actual[key],expected[key],expected.raw);assert.doesNotMatch(actual.raw,/This article|Here, the authors|Together with references/);}
+});
+test('suspended compound hyphens are not joined to the conjunction',()=>{
+ const refs=B.parse([{pageIndex:0,width:600,height:800,items:[item('References',40,700),item('1. Hughes, D. S. T. Extensive molecular differences between anterior- and posterior-half-sclerotomes. BMC Dev. Biol. 9, 30 (2009).',40,680)]}]);assert.match(refs[0].title,/anterior- and/);
+});
+
+test('online-first reference preserves a wrapped DOI separately from its journal',()=>{
+ const r=C.parse('59. Gribaudo, S. et al. Self-organizing models of human trunk organogenesis recapitulate spinal cord and spine co-morphogenesis. Nat. Biotechnol. https://doi.org/10.1038/ s41587-023-01956-9 (2023).');
+ assert.equal(r.title,'Self-organizing models of human trunk organogenesis recapitulate spinal cord and spine co-morphogenesis');assert.equal(r.journal,'Nat. Biotechnol');assert.equal(r.DOI,'10.1038/s41587-023-01956-9');assert.equal(r.year,'2023');assert.equal(r.volume,'');assert.equal(C.doi('https://doi.org/10.1038/ s41587-023-01956-9 (2023).'),r.DOI);
+ });
+test('wrapped digit-ended gene compounds retain their hyphen without an extra space',()=>{
+ const refs=B.parse([{pageIndex:0,width:600,height:800,items:[item('References',40,700),item('147. Zhao, W. Segmental border is defined by Ripply2-',40,680),item('mediated Tbx6 repression independent of Mesp2. Dev. Biol. 400, 105–117 (2015).',55,668)]}]);assert.match(refs[0].title,/Ripply2-mediated/);
+ });

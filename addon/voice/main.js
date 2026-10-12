@@ -115,7 +115,7 @@ var PaperVoice = {
     for (const h of this.readerHooks.get(reader) || []) {
       try { h.doc.removeEventListener('pointerdown', h.down, true);h.doc.removeEventListener('wheel',h.wheel,true); h.doc.defaultView.removeEventListener('keydown', h.key, true); } catch (_) {}
     }
-    this.readerHooks.delete(reader); this.lastSelections.delete(reader);this.selectionContexts.delete(reader);
+    this.readerHooks.delete(reader); this.lastSelections.delete(reader);this.selectionContexts.get(reader)?.disposeVisibility?.();this.selectionContexts.delete(reader);
     const panel=this.panels.get(reader);try{if(panel?.dispose)panel.dispose();else panel?.root.remove();}catch(_){}finally{this.panels.delete(reader);}
     if (this.currentReader === reader) this.stop();
   },
@@ -202,9 +202,10 @@ var PaperVoice = {
     selected.button=button;
     this.localize(button);
     this.selectedPage=params.annotation?.position?.pageIndex ?? null;
-    this.selectionContexts.set(reader,selected);
+    this.selectionContexts.get(reader)?.disposeVisibility?.();this.selectionContexts.set(reader,selected);
     if(typeof PaperVoiceSelectionUI!=='undefined'){
       const ui=PaperVoiceSelectionUI.create(this,doc,button,startReading);append(ui.card);
+      selected.disposeVisibility=PaperVoiceSelectionUI.watchAnchor(this,reader,selected,ui.card);
       this.translateSelection(reader,selected,ui);
     }else append(button);
     if (!this.get('auto', false) || this.get('mode','selection')==='document') return;

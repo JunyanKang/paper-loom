@@ -1,0 +1,8 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const context={Components:{utils:{cloneInto:x=>x}}};vm.createContext(context);vm.runInContext(fs.readFileSync(require('node:path').resolve(__dirname,'../../addon/voice/selection-popup.js'),'utf8'),context);const UI=context.PaperVoiceSelectionUI;
+const fixture=(positions,clip={left:20,top:40,right:780,bottom:560})=>({_iframeWindow:{innerWidth:800,innerHeight:600,document:{querySelector:()=>null},PDFViewerApplication:{pdfViewer:{container:{getBoundingClientRect:()=>clip},getPageView:i=>positions[i]&&{div:{isConnected:true,clientLeft:0,clientTop:0,getBoundingClientRect:()=>positions[i]},viewport:{convertToViewportRectangle:r=>r}}}}}});
+const selection={pageIndex:0,rects:[[10,10,110,30]]};
+test('selected text disappears at all clipped viewport edges and returns when visible',()=>{for(const p of [{left:100,top:-30},{left:100,top:550},{left:-120,top:100},{left:780,top:100}])assert.equal(UI.anchorVisible(fixture([p]),selection),false);assert.equal(UI.anchorVisible(fixture([{left:100,top:100}]),selection),true);});
+test('a partly visible selection stays visible',()=>assert.equal(UI.anchorVisible(fixture([{left:100,top:15}]),selection),true));
+test('cross-page selection stays visible if only the continuation is on screen',()=>assert.equal(UI.anchorVisible(fixture([{left:0,top:-900},{left:100,top:100}]),{...selection,nextPageRects:[[20,20,100,40]]}),true));
+test('unmounted PDF pages hide and unsupported document viewers are left alone',()=>{assert.equal(UI.anchorVisible(fixture([]),selection),false);assert.equal(UI.anchorVisible({},selection),true);});
