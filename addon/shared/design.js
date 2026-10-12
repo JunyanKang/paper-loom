@@ -184,6 +184,9 @@ var LoomDesignStyle = `
 .cl-settings .cl-llm-popover::before{content:'';position:absolute;left:clamp(18px,calc(var(--pl-model-anchor) - 7px),calc(100% - 30px));top:-7px;width:14px;height:14px;background:var(--cl-bg);transform:rotate(45deg);box-shadow:-1px -1px var(--pl-tab-line);z-index:1;pointer-events:none}
 .cl-settings .cl-llm-provider{display:flex;justify-content:center;align-items:center;height:28px;margin:0 0 4px}
 .cl-select-popover.pl-language-menu.pl-provider-grid{display:grid;grid-template-rows:repeat(2,32px);grid-auto-flow:column;grid-auto-columns:36px;gap:2px;width:max-content!important;min-width:0!important;max-width:calc(100vw - 16px);overflow:auto}
+.cl-llm-connected-surface{position:absolute;z-index:-1;overflow:visible;pointer-events:none;fill:var(--cl-bg);stroke:var(--pl-tab-line);stroke-width:1;filter:drop-shadow(0 8px 14px #172c3d26)}
+.cl-settings .cl-llm-connected .cl-llm-content,.cl-select-popover.pl-connected-menu{background:transparent!important;box-shadow:none!important}
+.cl-settings .cl-llm-connected::before{display:none}
 .pl-provider-grid .cl-select-option{padding:4px;min-height:0;justify-content:center}
 .cl-settings .cl-llm-provider .cl-select-trigger{height:28px;min-height:28px;background:transparent!important;box-shadow:none}.cl-settings .cl-llm-provider .cl-select-trigger::before{background:transparent!important}
 .cl-settings .cl-llm-content .cl-setting-row{grid-template-columns:56px minmax(0,1fr) auto;min-height:28px;gap:8px}

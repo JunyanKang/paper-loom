@@ -22,7 +22,7 @@ Object.assign(PaperLoom,{
         this[name+'Scope']=scope;
       }
       const VS=this.voiceScope,RS=this.referencesScope,V=this.voice=VS.PaperVoice,R=this.references=RS.CiteLens;
-      V.providerMeta=code=>this.providerMeta(code);RS.CiteLensControls.providerMeta=code=>this.providerMeta(code);V.flagURI=code=>this.flagURI(code);RS.CiteLensControls.flagURI=code=>this.flagURI(code);
+      V.providerMeta=code=>this.providerMeta(code);RS.CiteLensControls.providerMeta=code=>this.providerMeta(code);V.flagURI=code=>this.flagURI(code);RS.CiteLensControls.flagURI=code=>this.flagURI(code);RS.CiteLensControls.connectedSurfacePath=(rects,radius)=>VS.PaperVoiceUI.connectedSurfacePath(rects,radius);
       // Ship the worker with the plugin so existing voice assets gain new capabilities
       // without rewriting the installed engine or downloading models again.
       V.workerArguments=async root=>{
