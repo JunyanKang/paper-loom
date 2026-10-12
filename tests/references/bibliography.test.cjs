@@ -22,3 +22,14 @@ test('chapter continuation is not mistaken for an author and swallowing the foll
 test('repeated article headers are removed before bibliography line grouping',()=>{
  const headers=new Set();headers.lines=new Set(['article','10.1234/current']);const refs=B.parse([{pageIndex:1,width:600,height:800,items:[item('References',40,765),item('13. Smith, A. A developmental mechanism in stem cells.',40,745),item('Article',350,745),item('Genes Dev. 38, 655–674 (2024).',40,733),item('https://doi.org/10.1234/current',40,92)]}],headers);assert.equal(refs.length,1);assert.equal(refs[0].title,'A developmental mechanism in stem cells');assert.ok(!refs[0].raw.includes('Article'));assert.equal(refs[0].DOI,'');
 });
+test('Cell mixed-layout bibliography retains all 98 references and cross-page continuations',()=>{
+ const fixture=require('../fixtures/zhao-2024-citations.json'),headers=B.runningHeaders({0:{chars:[],viewBox:[0,0,600,800]}});headers.lines=new Set([...fixture.headers.lines,'open access']);
+ const refs=B.parse(fixture.pages,headers);
+ assert.deepEqual(refs.map(r=>r.number),Array.from({length:98},(_,i)=>i+1));
+ assert.equal(refs[5].author,'López-Otín');assert.match(refs[10].title,/basic biology and clinical relevance/);assert.ok(refs.every(r=>!r.raw.includes('OPEN ACCESS')));
+ const L=require('../../addon/references/citation-links'),page=L.page(fixture.citationChars);
+ for(const [text,numbers] of [['2–7',[2,3,4,5,6,7]],['2–6,8–10',[2,3,4,5,6,8,9,10]],['3,5,6,11–15',[3,5,6,11,12,13,14,15]]]){
+  const run=page.numericRuns.find(r=>r.text===text);assert.ok(run,text);assert.deepEqual(L.resolve({offset:run.offsets[0]},page,refs).records.map(r=>r.number),numbers);
+  for(let i=0;i<run.rects.length;i++){const r=run.rects[i],hit=L.pointed(page,[(r[0]+r[2])/2,(r[1]+r[3])/2],refs);assert.ok(hit?.records.length,text+' glyph '+i);assert.equal(hit.unresolved.length,0);}
+ }
+});

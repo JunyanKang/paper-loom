@@ -10,7 +10,7 @@ Open the author icon in the bottom navigation and choose a library or collection
   <a href="images/network-en.png"><img src="images/network-en.png" alt="Author network: demonstration library" width="784"></a>
 </p>
 
-Search for a person or paper and select a node. Focus on an author to browse collaborators and shared papers. Pan, zoom, or use the overview control. Returning from details preserves the graph position.
+Search for a person or paper and select a node. Focus on an author to browse collaborators and shared papers. Pan, zoom, or use the overview control. Returning from details preserves the graph position. Fit-to-view includes peripheral authors; the eye button shows or hides name labels.
 
 The pictured authors and papers are demonstration data. Your graph reflects your collection, not every collaboration online. Check same-name authors against papers, affiliations, and ORCID.
 

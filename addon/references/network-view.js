@@ -1,6 +1,13 @@
 /* Screen-space navigation and level of detail. Independent of Zotero and the renderer. */
 var CiteLensNetworkView=(()=>{
  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ function fitCamera(scene,{w,h},padding={left:36,right:36,top:58,bottom:44}){
+  let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
+  for(const nodes of [scene?.nodes||[],scene?.contextNodes||[]])for(const n of nodes){if(!Number.isFinite(n.x)||!Number.isFinite(n.y))continue;left=Math.min(left,n.x);right=Math.max(right,n.x);top=Math.min(top,n.y);bottom=Math.max(bottom,n.y);}
+  if(!Number.isFinite(left)||w<=0||h<=0)return null;
+  const width=Math.max(1,w-padding.left-padding.right),height=Math.max(1,h-padding.top-padding.bottom),k=Math.min(2.2,width/Math.max(1,right-left),height/Math.max(1,bottom-top));
+  return {k,x:padding.left+width/2-(left+right)/2*k,y:padding.top+height/2-(top+bottom)/2*k};
+ }
  function evidenceGroups(evidence){
   const groups=new Map();
   for(const item of evidence||[])for(const source of item.sources||[{paperID:item.paperID,quote:item.source?.text}]){
@@ -38,7 +45,7 @@ var CiteLensNetworkView=(()=>{
   const discrete=e.deltaMode!==0||(!e.deltaX&&Math.abs(e.deltaY)>=50&&[50,100,120].some(n=>Math.abs(e.deltaY)%n===0));
   return e.ctrlKey||discrete?{zoom:Math.exp(-clamp(dy,-180,180)*(e.ctrlKey?.008:.0025)),x:0,y:0}:{zoom:1,x:-dx,y:-dy};
  }
- function zoom(camera,factor,x,y){const k=clamp(camera.k*factor,.06,5),ratio=k/camera.k;return{x:x-(x-camera.x)*ratio,y:y-(y-camera.y)*ratio,k};}
+ function zoom(camera,factor,x,y){const k=clamp(camera.k*factor,.001,5),ratio=k/camera.k;return{x:x-(x-camera.x)*ratio,y:y-(y-camera.y)*ratio,k};}
  function step(camera,target,dt=16,reduced=false){const alpha=reduced?1:1-Math.exp(-clamp(dt,1,40)/35);for(const key of ['x','y','k'])camera[key]+=(target[key]-camera[key])*alpha;const pending=Math.abs(camera.x-target.x)+Math.abs(camera.y-target.y)>.08||Math.abs(camera.k-target.k)>.0001;if(!pending)Object.assign(camera,target);return pending;}
  function index(model){const byID=new Map(model.nodes.map(n=>[n.id,n])),adj=new Map(model.nodes.map(n=>[n.id,new Set([n.id])])),primary=new Map(),links=new Map(model.nodes.map(n=>[n.id,[]]));for(const e of model.edges){adj.get(e.source)?.add(e.target);adj.get(e.target)?.add(e.source);links.get(e.source)?.push(e);links.get(e.target)?.push(e);}for(const n of model.nodes)if(n.group){if(!primary.has(n.group))primary.set(n.group,[]);primary.get(n.group).push(n);}return{byID,adj,primary,links};}
  function scene(model,index,{selected='',focused=false,k=1,detail=false,community=''}={}){
@@ -163,6 +170,6 @@ var CiteLensNetworkView=(()=>{
   }
   return accepted;
  }
- return{labelPlacer,revealMembers,sortPapers,contextDescriptions,evidenceGroups,nearest,magnetic,opacity,hoverOpacity,wheel,zoom,step,index,scene,labels,lineWidth,nodeLabel,textLines,emphasis,detail};
+ return{fitCamera,labelPlacer,revealMembers,sortPapers,contextDescriptions,evidenceGroups,nearest,magnetic,opacity,hoverOpacity,wheel,zoom,step,index,scene,labels,lineWidth,nodeLabel,textLines,emphasis,detail};
 })();
 if(typeof module!=='undefined')module.exports=CiteLensNetworkView;

@@ -4,7 +4,7 @@
 
 ## Open a paper
 
-Click the book for Settings. The three bottom icons open authors, papers, and settings. Click outside or click the book again to collapse the window. Drag the book to move it. Switching workspaces does not interrupt audio.
+Hover over the book to open Settings on first use, or return to your last workspace. The three bottom icons open authors, papers, and settings. Moving away from both the book and workspace closes it after a brief delay; crossing the gap or moving back keeps it open. Press Esc to close it, or drag the book to move it. Switching workspaces does not interrupt audio.
 
 ## Choose how much to read
 

@@ -4,7 +4,8 @@ let searchIndex=null;
 onmessage=event=>{
  const {action,payload}=event.data;
  try{
-  if(action==='cache-encode')postMessage({result:{text:JSON.stringify(payload.value,(_,value)=>value instanceof Map?{__pnMap:[...value]}:value instanceof Set?{__pnSet:[...value]}:value)}});
+  if(action==='author-input')postMessage({result:JSON.stringify({nodes:payload.nodes,hierarchy:payload.hierarchy||[]},(key,value)=>key==='dateModified'?undefined:value)});
+  else if(action==='cache-encode')postMessage({result:{text:JSON.stringify(payload.value,(_,value)=>value instanceof Map?{__pnMap:[...value]}:value instanceof Set?{__pnSet:[...value]}:value)}});
   else if(action==='cache-decode')postMessage({result:{value:JSON.parse(payload.text,(_,value)=>value&&typeof value==='object'&&Object.keys(value).length===1&&Array.isArray(value.__pnMap)?new Map(value.__pnMap):value&&typeof value==='object'&&Object.keys(value).length===1&&Array.isArray(value.__pnSet)?new Set(value.__pnSet):value)}});
   else if(action==='expand'){
    const graph=payload.graph;graph.openEntities=payload.openEntities;graph.selected=payload.selected;graph.positions=payload.positions?.length?payload.positions:graph.nodes.map(n=>({id:n.id,x:n.x,y:n.y,pinned:n.pinned}));CiteLensNetworkMap.expandMembers(graph);

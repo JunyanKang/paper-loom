@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.20 · 2026-10-12
+
+Fixed missing bibliography entries when reference indentation differs from the surrounding page, including numbered citation ranges and entries continuing onto the next page.
+
+Reference lists are prepared in small batches and displayed together. Switching between authors and references preserves existing text and scroll position without resizing the text during the transition. PDFs share completed author layouts while retaining independent view state.
+
+Fit-to-view includes peripheral authors. An eye button shows or hides names. Hover over the book to open the workspace; moving away briefly closes it, and moving back cancels dismissal.
+
 ## 1.0.19 · 2026-10-12
 
 Match the coauthor network window height to the reference list while preserving header control heights and spacing. Add an author-label toggle beside the zoom controls; the choice is saved for future visits.

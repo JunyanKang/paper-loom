@@ -227,7 +227,7 @@ var CiteLensNetwork = {
   },
   async referenceKey(reader,pdf){
     const item=await Zotero.Items.getAsync(reader.itemID);if(!item?.getFilePathAsync)return null;const file=await item.getFilePathAsync();if(!file)return null;const stat=await IOUtils.stat(file);
-    return this.cacheKey(['references-v5',this.revisions.references,item.libraryID,item.key,item.dateModified,stat.size,stat.lastModified,pdf.fingerprints||pdf.fingerprint||'',pdf.numPages]);
+    return this.cacheKey(['references-v5',this.revisions.references,item.libraryID,item.key,stat.size,stat.lastModified,pdf.fingerprints||pdf.fingerprint||'',pdf.numPages]);
   },
   // Keep one job per unchanged snapshot/scope/mode, including jobs still running.
   // Changing the visible tab never cancels or restarts inference.
@@ -236,7 +236,7 @@ var CiteLensNetwork = {
     if(!this.isEnabled())throw Error('文献网络未启用');
     if(payload.mode!=='authors')throw Error('主题网络正在开发中');
     const key=JSON.stringify([payload.cacheKey,'authors',payload.limit,[...(payload.openEntities||[])].sort(),payload.openEntities?.length?payload.selected:'',this.revisions.authors,payload.refresh||0]);
-    let job=this.graphJobs.get(key);if(job&&job.snapshot===snapshot&&!job.controller.signal.aborted){this.graphJobs.delete(key);this.graphJobs.set(key,job);return job;}
+    let job=this.graphJobs.get(key);if(job&&(job.snapshot===snapshot||snapshot.authorInputKey&&job.snapshot.authorInputKey===snapshot.authorInputKey)&&!job.controller.signal.aborted){this.graphJobs.delete(key);this.graphJobs.set(key,job);return job;}
     job?.controller.abort();const win=Zotero.getMainWindow();
     job={snapshot,mode:'authors',expanded:!!payload.openEntities?.length,controller:new win.AbortController(),listeners:new Set(),value:null,progress:null};this.graphJobs.set(key,job);
     job.promise=(async()=>{await Zotero.Promise.delay(0);const emit=p=>{job.progress=p;for(const fn of job.listeners)fn(p);};const result=payload.openEntities?.length?await this.compute('expand',{graph:await this.graphJob(snapshot,{...payload,openEntities:[],selected:'',positions:[]}).promise,openEntities:payload.openEntities,selected:payload.selected,positions:payload.positions},{signal:job.controller.signal}):await this.map({...payload,query:''},{signal:job.controller.signal,progress:emit});if(job.controller.signal.aborted)throw Error('已取消');job.value=result;if(!job.expanded)this.queueAuthorIdentity(result);return result;})().catch(e=>{if(this.graphJobs.get(key)===job)this.graphJobs.delete(key);throw e;});job.promise.catch(()=>{});
@@ -302,7 +302,9 @@ var CiteLensNetwork = {
       const snapshotKey=await this.cacheKey({version:this.revisions.snapshot,nodes,sources}),cachedSnapshot=await this.readCache('snapshot',snapshotKey),graph=cachedSnapshot||await this.compute('snapshot',{nodes,sources});if(!cachedSnapshot)await this.writeCache('snapshot',snapshotKey,graph);
       if(this.dead||!this.isEnabled()||activity!==this.activityEpoch)throw Error('已关闭');this.records=records;this.attachmentParents=new Map(nodes.flatMap(n=>n.attachments.map(a=>[a.id,n.itemID])));
       if(this.generation===ticket){const valid=new Set(sources);let cleaned=false;for(const [key,value] of Object.entries(this.state.sources))if(!valid.has(value)){delete this.state.sources[key];cleaned=true;}if(cleaned){const text=JSON.stringify(this.state);this.write=(this.write||Promise.resolve()).catch(()=>{}).then(()=>IOUtils.writeUTF8(this.path,text,{tmpPath:this.path+'.tmp'}));await this.write.catch(e=>Zotero.logError(e));}}
-      this.snapshotScope=scopeSignature;this.data={...graph,libraries,collections,builtAt:Date.now(),incremental:{full,read:completed,reused:Math.max(0,nodes.length-completed)}};this.dirty=this.generation!==ticket;return this.data;
+      const authorInputKey=this.cacheRoot?await this.cacheKey(await this.compute('author-input',{nodes:graph.nodes,hierarchy:collections.map(c=>[c.id,c.parentID])})):null;
+      if(this.dead||!this.isEnabled()||activity!==this.activityEpoch)throw Error('已关闭');
+      this.snapshotScope=scopeSignature;this.data={...graph,authorInputKey,libraries,collections,builtAt:Date.now(),incremental:{full,read:completed,reused:Math.max(0,nodes.length-completed)}};this.dirty=this.generation!==ticket;return this.data;
     })();this.snapshotFlight=work;try{return await work;}catch(error){this.dirty=true;this.fullDirty ||= full;for(const id of pending)this.dirtyItems.add(id);throw error;}finally{this.snapshotFlight=null;}
   },
   scope(data,libraryID,collectionID){

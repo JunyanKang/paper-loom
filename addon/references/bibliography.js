@@ -5,7 +5,7 @@ var CiteLensBibliography = {
     for(const [index,page] of Object.entries(pages||{})){
       const top=page.viewBox?.[3]||800,rows=new Map();
       for(const c of page.chars||[]){if(!c.rect||c.rect[1]<top-80&&c.rect[1]>40)continue;const y=Math.round(c.rect[1]/3)*3;if(!rows.has(y))rows.set(y,[]);rows.get(y).push(c);}
-      for(const chars of rows.values()){const text=C.charsText({chars}),doi=C.doi(text),key=doi||C.norm(text);if(key.length<12&&!/^(?:article|research|review)$/i.test(key))continue;lines.push({chars,key,index});if(!seen.has(key))seen.set(key,new Set());seen.get(key).add(index);}
+      for(const chars of rows.values()){const text=C.charsText({chars}),doi=C.doi(text),key=doi||C.norm(text);if(key.length<12&&!/^(?:article|research|review|open access)$/i.test(key))continue;lines.push({chars,key,index});if(!seen.has(key))seen.set(key,new Set());seen.get(key).add(index);}
     }
     const repeated=lines.filter(x=>seen.get(x.key).size>=2),result=new Set(repeated.flatMap(x=>x.chars.map(c=>x.index+':'+c.offset)));result.lines=new Set(repeated.map(x=>x.key));return result;
   },
@@ -34,7 +34,7 @@ var CiteLensBibliography = {
   parse(pages,headers=null) {
     const out=[],headerLines=new Set(headers?.lines||[]);let active=false,current=null;
     const flush=()=>{if(!current)return;const raw=current.lines.map(l=>l.text).join(' ').replace(/([\p{L}])[-‐]\s+([a-z])/gu,'$1$2');const r=CiteLensCore.parse(raw,{pageIndex:current.lines[0].pageIndex,rects:current.lines.filter(l=>l.pageIndex===current.lines[0].pageIndex).map(l=>l.rect)});if(r.year&&r.author&&r.title.length>=8){r.source='PDF 本地分栏解析（需核对）';r.number=current.number;out.push(r);}current=null;};
-    for(const page of pages){const items=page.items.filter(item=>{const text=CiteLensCore.clean(item.str),key=CiteLensCore.doi(text)||CiteLensCore.norm(text);return !(headerLines.has(key)&&(item.transform?.[5]>page.height-80||!!CiteLensCore.doi(text)));}),lines=this.lines(items,page.width,page.pageIndex),bases=new Map();
+    for(const page of pages){const items=page.items.filter(item=>{const text=CiteLensCore.clean(item.str),key=CiteLensCore.doi(text)||CiteLensCore.norm(text);return !(headerLines.has(key)&&(item.transform?.[5]>page.height-80||!!CiteLensCore.doi(text)));}),lines=this.lines(items,page.width,page.pageIndex),bases=new Map(),referenceBases=new Map();
       for(const l of lines)if(l.y>40&&l.y<page.height-20)bases.set(l.column,Math.min(bases.get(l.column)??Infinity,l.x));
       for(const l of lines){if(l.y<40||l.y>page.height-18)continue;if((l.y>page.height-80||l.y<40)&&headerLines.has(CiteLensCore.doi(l.text)||CiteLensCore.norm(l.text)))continue;
         if(/^(references|bibliography|literature cited|参考文献)\s*$/i.test(l.text)){active=true;continue;}
@@ -43,9 +43,9 @@ var CiteLensBibliography = {
         if(l.text.length<3||/^\d+$/.test(l.text)||/^(?:A\.|[A-Z]\.\s*)?\s*Bringmann et al\./.test(l.text)||/Prog(?:ress)?\.? (?:in )?Retin/i.test(l.text)&&/\(20\d\d\)/.test(l.text))continue;
         const numbered=l.text.match(/^\[?(\d{1,4})\]?[.)]?\s+(?=[\p{L}])/u);
         const authorStart=this.authorStart(l.text);
-        const atMargin=l.x<=(bases.get(l.column)||l.x)+3;
+        const atMargin=l.x<=(referenceBases.get(l.column)??bases.get(l.column)??l.x)+3;
         const unfinishedAuthors=current&&!/\b(?:1[6-9]|20)\d{2}[a-z]?\b/.test(current.lines.map(x=>x.text).join(' '));
-        if(atMargin&&(numbered||authorStart)&&!unfinishedAuthors){flush();current={lines:[l],number:numbered?Number(numbered[1]):undefined};}
+        if((numbered&&this.authorStart(l.text.slice(numbered[0].length))||atMargin&&(numbered||authorStart))&&!unfinishedAuthors){referenceBases.set(l.column,l.x);flush();current={lines:[l],number:numbered?Number(numbered[1]):undefined};}
         else if(current)current.lines.push(l);
       }
     }

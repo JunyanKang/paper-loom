@@ -34,7 +34,7 @@ var CiteLensCore = (() => {
   }
   function repairPDFAccents(text) {
     const marks={'´':'\u0301','`':'\u0300','¨':'\u0308','ˆ':'\u0302','˜':'\u0303'};
-    return String(text??'').replace(/([\p{L}])\s*([\p{M}´`¨ˆ˜])\s*(?=[\p{L}])/gu,(_,letter,mark)=>letter+(marks[mark]||mark)).normalize('NFC');
+    return String(text??'').replace(/ı(?=\s*[\p{M}´`])/gu,'i').replace(/([\p{L}])\s*([\p{M}´`¨ˆ˜])\s*(?=[\p{L}])/gu,(_,letter,mark)=>letter+(marks[mark]||mark)).normalize('NFC');
   }
   function parse(raw,position=null) {
     raw=clean(repairPDFAccents(raw)).replace(/(10\.\d{4,9}\/[^\s]*[-/])\s+(?=[a-z0-9])/gi,'$1');const yearMatch=raw.match(/\b(1[6-9]\d{2}|20\d{2})([a-z])?\)(?=[.\s]|$)/)||raw.match(/\b(1[6-9]\d{2}|20\d{2})(?:F(?=[a-z][.)]))?([a-z])?(?:[–-](?:(?:19|20)\d{2}|\d{2}))?\b/);
