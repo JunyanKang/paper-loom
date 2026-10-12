@@ -16,21 +16,43 @@ var CiteLensCitationLinks={
       const group=chars.slice(i,end),text=group.map(c=>c.c).join('').replace(/−/g,'–');if(!/^\d+(?:[-–,;]\d+)*$/.test(text))continue;
       runs.push({text,ratio,offsets:group.map(c=>c.offset),rects:group.map(c=>c.rect)});i=end-1;
     }
-    return runs;
+    // Repeated raised numbers after personal names are author affiliations, not references.
+    const affiliations=runs.filter(r=>{const at=chars.findIndex(c=>c.offset===r.offsets[0]);let start=at-1;while(start>0&&!chars[start-1].lineBreakAfter&&at-start<100)start--;const lead=chars.slice(start,at).map(c=>c.c+(c.spaceAfter?' ':'')).join('');return /(?:^|[,&]\s*)(?:[\p{Lu}][\p{L}'’.-]*\s+){1,4}[\p{Lu}][\p{L}'’.-]*$/u.test(lead);});
+    return runs.filter(r=>{const end=chars.findIndex(c=>c.offset===r.offsets.at(-1))+1,following=chars.slice(end,end+65).map(c=>c.c+(c.spaceAfter?' ':'')).join('');if(/^(?:Department|Institute|University|Centre|Center|Present address|These authors|European Molecular|Wellcome|Theory of)\b/.test(following))return false;return !affiliations.includes(r)||affiliations.filter(a=>Math.abs(a.rects[0][1]-r.rects[0][1])<3).length<2;});
   },
-  page(chars,overlays=[]){
-    let text='';const offsets=new Map();
-    for(const c of chars||[]){offsets.set(c.offset,text.length);if(!c.ignorable)text+=c.c+((c.spaceAfter||c.lineBreakAfter)?' ':'');}
+  readingOrder(chars,{width,headers=new Set(),pageIndex=0}={}){
+    const usable=(chars||[]).filter(c=>!headers.has(pageIndex+':'+c.offset)&&(!c.rotation||c.rotation===0)),runs=[];let run=[];
+    for(const c of usable){const last=run.at(-1);if(last&&(last.lineBreakAfter||c.rect&&last.rect&&(c.rect[0]<last.rect[0]-2||c.rect[0]-last.rect[2]>Math.max(c.fontSize,last.fontSize)*1.5||Math.abs(c.baseline-last.baseline)>Math.max(c.fontSize,last.fontSize)*.85))){runs.push(run);run=[];}run.push(c);}if(run.length)runs.push(run);
+    if(!width||typeof CiteLensBibliography==='undefined')return usable;
+    const boxes=runs.map(chars=>({chars,x:Math.min(...chars.map(c=>c.rect?.[0]??0)),y:Math.max(...chars.map(c=>c.rect?.[3]??0)),width:Math.max(...chars.map(c=>c.rect?.[2]??0))-Math.min(...chars.map(c=>c.rect?.[0]??0))}));let split=CiteLensBibliography.columnSplit(boxes,width);
+    if(split===null){const fonts=new Map();for(const b of boxes){const f=Math.round((b.chars[0]?.fontSize||0)*10),group=fonts.get(f)||[];group.push(b);fonts.set(f,group);}for(const group of [...fonts.values()].sort((a,b)=>b.reduce((n,x)=>n+x.chars.length,0)-a.reduce((n,x)=>n+x.chars.length,0))){if(group.length<10)continue;split=CiteLensBibliography.columnSplit(group,width);if(split!==null)break;}}
+    if(split===null)return usable;
+    return boxes.sort((a,b)=>(a.x>=split?1:0)-(b.x>=split?1:0)||b.y-a.y||a.x-b.x).flatMap(b=>b.chars);
+  },
+  page(chars,overlays=[],options={}){
+    chars=this.readingOrder(chars,options);let text='';const offsets=new Map(),scriptBoundaries=[];
+    let previous;for(const c of chars||[]){if(previous&&/[\p{Lu}]/u.test(c.c)&&previous.fontSize<c.fontSize*.85&&c.rect&&previous.rect&&c.rect[0]-previous.rect[2]>c.fontSize*.08&&Math.abs(c.baseline-previous.baseline)>c.fontSize*.1&&!/\s$/.test(text)){text+=' ';scriptBoundaries.push(text.length);}offsets.set(c.offset,text.length);previous=c;if(!c.ignorable)text+=c.c+((c.spaceAfter||c.lineBreakAfter)&&!(c.lineBreakAfter&&/[-‐]/.test(c.c))?' ':'');}
     const numericRuns=this.superscripts(chars),native=new Set(overlays.filter(o=>o.type==='citation').flatMap(o=>(o.word||[]).map(c=>c.offset))),ratios=numericRuns.filter(r=>r.offsets.some(o=>native.has(o))).map(r=>r.ratio);
     // Unlinked raised numbers need the page's established citation typography.
     // This excludes the differently scaled author-affiliation numbers on article page 1.
     const pointRuns=numericRuns.filter(r=>ratios.some(ratio=>Math.abs(ratio-r.ratio)<.025));
-    return {text,offsets,chars,overlays,mentions:CiteLensCore.citationMentions(text),numericRuns,pointRuns};
+    let mentions=CiteLensCore.citationMentions(text,{parenthesizedNumeric:options.parenthesizedNumeric??overlays.some(o=>o.type==='citation'&&/^[\s\d,;–−()\[\]-]+$/.test((o.word||[]).map(c=>c.c).join('')))});
+    // Captions inserted between two lines must not sever an author/year citation.
+    // Keep exact glyph fragments, so intervening text never becomes a hover target.
+    const fonts=new Map();for(const c of chars){if(c.ignorable||!c.fontSize)continue;const key=Math.round(c.fontSize*10),stream=fonts.get(key)||[];stream.push(c);fonts.set(key,stream);}
+    for(const stream of fonts.values()){let value='',map=[];for(const c of stream){map.push({at:value.length,offset:offsets.get(c.offset)});value+=c.c+((c.spaceAfter||c.lineBreakAfter)&&!(c.lineBreakAfter&&/[-‐]/.test(c.c))?' ':'');}
+      for(const m of CiteLensCore.citationMentions(value).filter(m=>m.keys[0]?.author)){const points=map.filter(p=>p.at>=m.start&&p.at<m.end);if(!points.length||points.at(-1).offset-points[0].offset<=m.text.length+2)continue;const fragments=[];for(const p of points){let f=fragments.at(-1);if(!f||p.offset-f.end>2){f={...m,start:p.offset,end:p.offset+1,textOffset:p.at-m.start};fragments.push(f);}else f.end=p.offset+1;}
+        if(fragments.some(f=>mentions.some(old=>old.start<=f.start&&old.end>=f.end&&old.text.length>=m.text.length)))continue;
+        for(const f of fragments){mentions=mentions.filter(old=>old.end<=f.start||old.start>=f.end);mentions.push(f);}
+      }
+    }
+    for(const start of scriptBoundaries){const m=CiteLensCore.citationMentions(text.slice(start,start+180)).find(m=>m.start===0&&m.keys[0]?.author);if(m){const end=start+m.end;mentions=mentions.filter(old=>old.end<=start||old.start>=end);mentions.push({...m,start,end});}}
+    mentions.sort((a,b)=>a.start-b.start);return {text,offsets,chars,overlays,mentions,numericRuns,pointRuns};
   },
   bridgePages(pages,headers=new Set()){
     for(const [id,left] of pages){const right=pages.get(id+1);if(!right)continue;
-      const tail=left.chars.filter(c=>!c.ignorable&&!headers.has(id+':'+c.offset)).slice(-180),head=right.chars.filter(c=>!c.ignorable&&!headers.has((id+1)+':'+c.offset)).slice(0,180);let text='',mapping=[];
-      for(const [page,chars] of [[left,tail],[right,head]])for(const c of chars){mapping.push({at:text.length,page,offset:page.offsets.get(c.offset)});text+=c.c+((c.spaceAfter||c.lineBreakAfter)?' ':'');}
+      const tail=left.chars.filter(c=>!c.ignorable&&!headers.has(id+':'+c.offset)).slice(-180),head=right.chars.filter(c=>!c.ignorable&&!headers.has((id+1)+':'+c.offset)&&(!tail.at(-1)?.fontSize||!c.fontSize||Math.abs(c.fontSize-tail.at(-1).fontSize)<.2)).slice(0,180);let text='',mapping=[];
+      for(const [page,chars] of [[left,tail],[right,head]])for(const c of chars){mapping.push({at:text.length,page,offset:page.offsets.get(c.offset)});text+=c.c+((c.spaceAfter||c.lineBreakAfter)&&!(c.lineBreakAfter&&/[-‐]/.test(c.c))?' ':'');}
       const boundary=mapping.find(m=>m.page===right)?.at;if(!boundary)continue;
       for(const mention of CiteLensCore.citationMentions(text)){if(mention.start>=boundary||mention.end<=boundary)continue;
         for(const page of [left,right]){const points=mapping.filter(m=>m.page===page&&m.at>=mention.start&&m.at<mention.end);if(!points.length)continue;const start=points[0].offset,end=points.at(-1).offset+1;

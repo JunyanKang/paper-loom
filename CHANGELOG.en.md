@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.21 · 2026-10-12
+
+Improve citation recognition for institutional authors, cross-page and mixed-column references, and undated preprints with a DOI. Keep publication months, page locators and wrapped DOI text out of article titles. Preserve distinct references by the same author in the same year instead of merging them.
+
+Reference cards have a bounded height and single-line titles, with collection paths scrolling separately. Abstract popovers show the complete, centered article title above the abstract. Original, translated and bilingual views apply to both.
+
+Reference and abstract popovers fade out when the PDF scrolls instead of moving with the page. Both use the same fade-and-retract dismissal.
+
 ## 1.0.20 · 2026-10-12
 
 Fixed missing bibliography entries when reference indentation differs from the surrounding page, including numbered citation ranges and entries continuing onto the next page. Superscript citations after a punctuated year, such as `1961,¹`, are no longer excluded as mathematical powers.

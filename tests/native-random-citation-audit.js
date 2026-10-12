@@ -1,0 +1,13 @@
+if(!/qa-profile-random\d+/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
+const profile=Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path,variant=PathUtils.filename(profile).replace('qa-profile-',''),root=PathUtils.parent(profile),out=PathUtils.join(root,'test-results-'+variant),sample=JSON.parse(await IOUtils.readUTF8('/tmp/loom-'+variant+'.json')),C=L.references,Q=L.referencesScope,wait=ms=>Zotero.Promise.delay(ms),summary=[];
+for(const [index,paper] of sample.papers.entries()){
+ let item=(await Zotero.Items.getAll(Zotero.Libraries.userLibraryID)).find(x=>x.isAttachment()&&x.getField('title')==='Random citation QA '+paper.key);
+ if(!item){item=await Zotero.Attachments.importFromFile({file:paper.path,libraryID:Zotero.Libraries.userLibraryID});item.setField('title','Random citation QA '+paper.key);await item.saveTx();}
+ const reader=await Zotero.Reader.open(item.id);await reader._initPromise;for(let n=0;n<600&&!C.readerReady(reader);n++)await wait(100);if(!C.readerReady(reader))throw Error("Reader not ready: "+paper.key);C.attach(reader);const pdf=reader._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfDocument;
+ const started=Date.now(),refs=await C.references(reader),raw=await C.processedData(reader,pdf),pages=[];
+ for(let n=0;n<pdf.numPages;n++){const p=Components.utils.waiveXrays(await pdf.getPage(n+1));pages.push({pageIndex:n,viewBox:Array.from(p.view),items:(await p.getTextContent()).items.map(x=>({str:x.str,transform:Array.from(x.transform),width:x.width,height:x.height})),width:p.view[2]-p.view[0],height:p.view[3]-p.view[1]});}
+ const data={key:paper.key,title:paper.title,itemID:item.id,refs,pages,processed:Object.fromEntries(Object.entries(raw.pages).map(([i,p])=>[i,{viewBox:p.viewBox,chars:(p.chars||[]).map(c=>({c:c.c,offset:c.offset,rect:Array.from(c.rect||[]),fontSize:c.fontSize,baseline:c.baseline,rotation:c.rotation,spaceAfter:c.spaceAfter,lineBreakAfter:c.lineBreakAfter,ignorable:c.ignorable})),overlays:(p.overlays||[]).map(o=>({type:o.type,position:o.position,word:o.word?.map(c=>({offset:c.offset,c:c.c})),references:o.references?.map(r=>({text:Q.CiteLensCore.charsText(r),position:r.position}))}))}]))};
+ await IOUtils.writeUTF8(PathUtils.join(out,paper.key+'.json'),JSON.stringify(data));summary.push({key:paper.key,title:paper.title,pages:pdf.numPages,refs:refs.length,ms:Date.now()-started});await IOUtils.writeUTF8(PathUtils.join(out,'extraction-progress.json'),JSON.stringify(summary,null,2));
+ C.dismissFloating(reader);await reader.close();await wait(100);
+}
+return {passed:true,summary};

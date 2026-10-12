@@ -19,6 +19,8 @@ var CiteLensCore = (() => {
   const norm = s => plainTitle(s).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
   function doi(s) {
     let text=clean(s).replace(/10\.\s+(?=\d{4,9}\/)/g,'10.');try{text=decodeURIComponent(text);}catch(_){}
+    // Some PDF producers split every DOI glyph. Rejoin only an explicit terminal DOI URL.
+    text=text.replace(/h\s+t\s*t\s*p\s*s?\s*:\s*\/\s*\/\s*d\s*o\s*i\s*\.\s*o\s*r\s*g\s*\/\s*(1\s*0\s*\.[a-z0-9\s./_();:+-]+)$/i,(_,tail)=>'https://doi.org/'+tail.replace(/\s/g,''));
     const m=text.match(/10\.\d{4,9}\/(?:[^\s<>"#]|<\d+::[a-z0-9._;:-]+>)+/i); if(!m)return '';
     let d=m[0].replace(/[.,;:]+$/,'');
     while(d.endsWith(')')&&(d.match(/\)/g)||[]).length>(d.match(/\(/g)||[]).length)d=d.slice(0,-1);
@@ -43,24 +45,35 @@ var CiteLensCore = (() => {
     let author=before.split(',')[0].replace(/\(\s*$/,'').trim();
     const tail=yearMatch?raw.slice(yearMatch.index+yearMatch[0].length).replace(/^[\s).,:;]+/,''):raw;
     const parts=tail.split(/\.\s+(?=[\p{Lu}\d])/u);
-    let title=parts[0]||raw,creatorText=before;
+    let title=parts[0]||raw,creatorText=before,vancouverJournal='';
     // Vancouver places the year after journal/title. Only split at initials-to-title boundary.
-    if (yearMatch && (title.length<12 || /^(?:\d|https?:\/\/)/.test(title))) {
+    if (yearMatch && (title.length<12 || /^(?:\d|https?:\/\/|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:[-–][A-Za-z]+)?[ ;])/i.test(title))) {
       const vm=raw.match(/^(?:\[?\d+\]?[.)]?\s*)?(.+?)\.\s+(.{12,}?)\.\s+(.+?)\s+(?:19|20)\d{2}/);
-      if(vm){title=vm[2];creatorText=vm[1];author=creatorText.split(',')[0].replace(/\s+[A-Z]{1,5}$/,'').trim();}else title=raw;
+      if(vm){title=vm[2];creatorText=vm[1];vancouverJournal=vm[3].replace(/[.\s]+$/,'');author=creatorText.split(',')[0].replace(/\s+[A-Z]{1,5}$/,'').trim();}else title=raw;
     }
+    const undotted=raw.replace(/^\[?\d+\]?[.)]?\s*/, '').match(/^((?=[\p{L}'’ -]+ [A-Z])[^.!?\d()]{2,600}\b[A-Z](?:[A-Z]|-[A-Z]){0,8}(?: (?:Jr|Sr))?)\.\s+([^\d].+)$/u);
+    if(undotted&&yearMatch&&!/(?:Consortium|Group|Team|Developers)\s*\(?$/.test(before)){creatorText=undotted[1];author=creatorText.split(',')[0].replace(/\s+[A-Z](?:[A-Z]|-[A-Z]){0,8}$/,'');if(title===raw){const boundary=undotted[2].match(/^(.{12,}?[.!?])\s+(?=[\p{Lu}])/u);if(boundary)title=boundary[1].replace(/\.$/,'');}}
     const chapter=/\bIn:\s*.+?\(Eds?\.?\)/i.test(tail);
     const book=/\b(?:University[^.]*Press|Press|Verlag|Publishers?|Publishing|Lippincott|Springer)\b/i.test(tail)&&!doi(raw);
-    let journal=!book&&!chapter && parts.length>1?parts.slice(1).join('. ').replace(/\s+\d.*$/,'').replace(/[.,]+$/,''):'';
+    let journal=vancouverJournal||(!book&&!chapter && parts.length>1?parts.slice(1).join('. ').replace(/\s+\d.*$/,'').replace(/[.,]+$/,''):'');
     // A question/exclamation mark can terminate a title without a following period.
     // Require a journal + volume + page tail, so internal questions stay in the title.
     if(!book&&!chapter){const end=tail.match(/^(.{12,}[?!])\s+([\p{Lu}][\p{L}\s.&’'–-]{1,100}?)\s+(\d+)(?:\s*\([^)]*\))?[,;:]\s*\d+(?:[-–]\d+)?[.]?$/u);if(end&&(!journal||/^(?:[A-Z][a-z]{0,5}\.\s*){1,8}$/.test(end[2]))){title=end[1];journal=clean(end[2]).replace(/[.,]+$/,'');}}
+    // Yearless numbered preprints still carry a usable author/title boundary and DOI.
+    if(!year&&doi(raw)){const prefix=raw.match(/^(?:\d+[.)]\s*)?((?:[\p{L}'’ -]+,\s*(?:[A-Z]\.\s*){1,5})(?:et al\.)?)\s+(.+)$/u);if(prefix){creatorText=prefix[1];const split=prefix[2].match(/^(.+?)\.\s+((?:bioRxiv|medRxiv|arXiv)\b[^.]*|[\p{Lu}][^.]*)\.?(?:\s+https?:|$)/u);if(split){title=split[1];journal=split[2];}else title=prefix[2].replace(/\s+https?:\/\/\S+$/, '').replace(/\.$/,'');}}
+    const corporate=creatorText.replace(/[\s(.]+$/,'');
+    const institution=/^(?:The )?[\p{Lu}][\p{L}\d .&’'–-]{3,140}(?:Consortium|Group|Team|Developers)$/u.test(corporate);
+    // An ellipsis inside a title is not its journal separator. Use the volume/page tail.
+    const ellipsis=tail.match(/^(.{12,}?\.{3})\s+((?:\p{Lu}[\p{L}]*\.?\s+){1,8})\d+[,;:]\s*\d/u);
+    if(ellipsis){title=ellipsis[1];journal=ellipsis[2].trim().replace(/\.$/,'');}
     const creators=[];
     const rx=/([\p{L}][\p{L}'’\- ]+(?:\s+(?:Jr|Sr)\.)?),\s*((?:[A-Z]\.\s*){1,5})/gu;
     const authorMatches=[...creatorText.matchAll(rx)];
-    for(const m of authorMatches)creators.push({lastName:m[1].trim().replace(/^(?:and|&)\s+/i,''),firstName:m[2].replace(/\s+/g,''),creatorType:'author'});
+    for(const m of institution?[]:authorMatches)creators.push({lastName:m[1].trim().replace(/^(?:(?:Jr|Sr)\.?\s+)?(?:and|&)\s+/i,''),firstName:m[2].replace(/\s+/g,''),creatorType:'author'});
     if(title===raw&&authorMatches.length){const last=authorMatches.at(-1),rest=creatorText.slice(last.index+last[0].length).replace(/^[\s,&]+/,'').replace(/^et al\.\s*/,'');const split=rest.match(/^(.{12,}?)\.\s+(.+)$/);if(split){title=split[1];journal=split[2].replace(/\s+\d.*$/,'').replace(/[.,(\s]+$/,'');}}
-    if(!creators.length){for(const part of creatorText.replace(/et al\.?/g,'').split(',')){const m=part.trim().replace(/[\s(.]+$/,'').match(/^([\p{L}][\p{L}'’\- ]+?)\s+([A-Z]{1,5})$/u);if(m)creators.push({lastName:m[1],firstName:m[2],creatorType:'author'});}}
+    if(!creators.length&&!institution){for(const part of creatorText.replace(/et al\.?/g,'').split(',')){const m=part.trim().replace(/\s+(?:Jr|Sr)\.?$/,'').replace(/[\s(.]+$/,'').match(/^([\p{L}][\p{L}'’\- ]+?)\s+([A-Z](?:[A-Z]|-[A-Z]){0,8})$/u);if(m)creators.push({lastName:m[1],firstName:m[2],creatorType:'author'});}}
+    if(!creators.length&&(title===raw||!year)){const institutional=raw.replace(/^\[?\d+\]?[.)]?\s*/, '').match(/^(.{8,140}?(?:Consortium|Group|Team|Developers))\.\s+(.+?)(?:\.\s+| https?:)/);if(institutional){author=institutional[1];title=institutional[2];}}
+    if(institution)author=corporate;
     if(!creators.length&&author)creators.push({lastName:author,firstName:'',creatorType:'author'});
     if(creators.length)author=creators[0].lastName;
     const publisher=book?clean(parts.slice(1).join('. ').match(/^(.+?(?:Press|Verlag|Publishing|Publishers)|Springer|Lippincott)(?:[,.;]|$)/i)?.[1]):chapter?clean(tail.match(/\b(Elsevier|Springer|Academic Press|Morgan & Claypool Life Sciences)[,.;]/)?.[1]):'';
@@ -165,26 +178,30 @@ var CiteLensCore = (() => {
     if(same.length>1)return {status:'ambiguous',label:'期刊指标匹配不唯一'};
     return {status:'available',match:ids.length?'ISSN':'完整期刊名',...hits[0]};
   }
-  function citationMentions(text,{nativeNumeric=false}={}) {
-    const out=[],numeric=/\[(\d+(?:\s*[-–,;]\s*\d+)*)\]/g;
-    const numbers=value=>{const nums=[];for(const part of value.split(/[,;]/)){const [a,b]=part.trim().split(/[-–]/).map(Number);if(!a||a>9999||b!==undefined&&(b<a||b-a>100))return [];for(let n=a;n<=(b??a);n++)nums.push({number:n});}return nums;};
-    for(const m of text.matchAll(numeric))out.push({start:m.index,end:m.index+m[0].length,text:m[0],keys:numbers(m[1])});
+  function citationMentions(text,{nativeNumeric=false,parenthesizedNumeric=false}={}) {
+    const out=[],numeric=/[[(]\s*(\d+(?:\s*[-–,;]\s*\d+)*)\s*[\])]/g;
+    const numbers=value=>{const nums=[];for(const part of value.split(/[,;]/)){const [a,b]=part.trim().split(/[-–]/).map(Number);if(!a||a>=1600||b!==undefined&&(b<a||b-a>100))return [];for(let n=a;n<=(b??a);n++)nums.push({number:n});}return nums;};
+    for(const m of text.matchAll(numeric)){if(m[0][0]==='('&&(!parenthesizedNumeric||/^\d{1,3}(?:,\d{3})+$/.test(m[1])))continue;out.push({start:m.index,end:m.index+m[0].length,text:m[0],keys:numbers(m[1])});}
     if(nativeNumeric&&/^\s*\d+(?:\s*[-–,;]\s*\d+)*\s*$/.test(text))out.push({start:0,end:text.length,text,keys:numbers(text)});
-    const surname="(?:(?:[Vv]an|[Vv]on|[Dd]e|[Dd]el|[Dd]er|[Dd]en|[Dd]a|[Dd]i|[Ll]a|[Ll]e) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+(?: +(?:y +)?[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+){0,2}";
+    const surname="(?:(?:[Vv]an|[Vv]on|[Dd]e|[Dd]el|[Dd]er|[Dd]en|[Dd]a|[Dd]i|[Ll]a|[Ll]e|tom) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+(?: +(?:(?:y|de|del|da|van|von) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+){0,2}";
     const authors="("+surname+")(?:(?:,? +et +al\\.?)|(?: +(?:and|&) +("+surname+")))?";
-    const years="((?:1[6-9]|20)\\d{2}[a-z]?(?:\\s*,\\s*(?:(?:1[6-9]|20)\\d{2}[a-z]?|[a-z](?![\\p{L}\\p{N}])))*)(?![\\d])";
-    const rx=new RegExp(authors+"\\s*[,（(\\[]?\\s*"+years,'gu');
+    const years="((?:1[6-9]|20)\\d{2}[a-z]?(?:\\s*,\\s*(?:(?:1[6-9]|20)\\d{2}[a-z]?|[a-z](?![.\\p{L}\\p{N}])))*)(?![\\d])";
+    const rx=new RegExp(authors+"(?:\\s*[,（(\\[]\\s*|\\s+)"+years,'gu');
     for(const m of text.matchAll(rx)){
       if(/^(?:January|February|March|April|May|June|July|August|September|October|November|December)$/.test(m[1]))continue;
       const keys=[];let year='';for(const token of m[3].split(/\s*,\s*/)){const y=token.match(/^(\d{4})([a-z])?$/);if(y)year=y[1];keys.push({author:repairPDFAccents(m[1]),second:repairPDFAccents(m[2]||''),etal:/et\s+al/.test(m[0]),year,suffix:y?y[2]||'':token});}
       out.push({start:m.index,end:m.index+m[0].length,text:m[0],keys});
     }
+    // Institutional citations need the full name; 'and' is not a second personal author.
+    const organization=/(?:The +)?(?:[A-Z]\. +[a-z]+|[\p{Lu}][\p{L}\d'’.-]*|\d+)(?: +(?:[A-Z]\. +[a-z]+|[\p{Lu}][\p{L}\d'’.-]*|\d+|and|of|for)){0,12} +(?:Consortium|Group|Team|Developers)(?=\s*[,（(\[]?\s*(?:1[6-9]|20)\d{2})/gu;
+    for(const m of text.matchAll(organization)){const tail=text.slice(m.index+m[0].length).match(/^\s*[,（(\[]?\s*((?:1[6-9]|20)\d{2})([a-z])?/);if(!tail)continue;const start=m.index,end=start+m[0].length+tail[0].length;for(let i=out.length-1;i>=0;i--)if(out[i].start>=start&&out[i].end<=end)out.splice(i,1);out.push({start,end,text:text.slice(start,end),keys:[{author:m[0],year:tail[1],suffix:tail[2]||''}]});}
     return out.filter(m=>m.keys[0]?.number===undefined||!out.some(a=>a.keys[0]?.author&&a.start<=m.start&&a.end>=m.end-1)).sort((a,b)=>a.start-b.start);
   }
   function resolveMention(mention,refs) {
-    const records=[],unresolved=[];
+    const records=[],unresolved=[],authorKey=value=>norm(value).replace(/^(?:the )(?=.*(?:consortium|group|team|developers)$)/,'').replace(/ /g,'');
     for(const key of mention?.keys||[]){
-      let hits=refs.filter(r=>key.number!==undefined?Number(r.number)===key.number:norm(r.author).replace(/ /g,'')===norm(key.author).replace(/ /g,'')&&String(r.year)===key.year&&(!key.suffix||r.suffix===key.suffix)&&(!key.second||norm(r.creators?.[1]?.lastName).replace(/ /g,'')===norm(key.second).replace(/ /g,''))&&(!key.etal||r.creators?.length>=3||/et\s+al/.test(r.raw||'')||!r.creators?.length));
+      let hits=refs.filter(r=>key.number!==undefined?Number(r.number)===key.number:authorKey(r.author)===authorKey(key.author)&&String(r.year)===key.year&&(!key.suffix||r.suffix===key.suffix)&&(!key.second||norm(r.creators?.[1]?.lastName).replace(/ /g,'')===norm(key.second).replace(/ /g,''))&&(!key.etal||r.creators?.length>=3||/et\s+al/.test(r.raw||'')||!r.creators?.length));
+      if(hits.length>1&&key.second){const two=hits.filter(r=>r.creators?.length===2);if(two.length===1)hits=two;}
       if(hits.length>1&&key.author&&!key.etal&&!key.second){const single=hits.filter(r=>r.creators?.length===1);if(single.length===1)hits=single;}
       const unique=[...new Map(hits.map(r=>[identity(r),r])).values()];
       if(unique.length===1)records.push(unique[0]);else unresolved.push({...key,reason:unique.length?'ambiguous':'missing'});
