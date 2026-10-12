@@ -11,7 +11,7 @@
 ## 从这一段开始
 
 <p align="center">
-  <a href="docs/images/caption-controls-zh.png"><img src="docs/images/caption-controls-zh.png" alt="译文与两行听读控制栏" width="516"></a>
+  <a href="docs/images/caption-controls-zh.png"><img src="docs/images/caption-controls-zh.png" alt="译文与两行听读控制栏" width="493"></a>
 </p>
 
 选择单句、划选、段落或全文，按自己的节奏听。默认读一遍，难句可以重复，语速从 0.5× 到 2×。鼠标移入当前原文、译文或控制栏，读完这一句后暂停；移开后继续。
@@ -21,7 +21,7 @@
 ## 顺着引文，把问题追下去
 
 <p align="center">
-  <a href="docs/images/references-zh.png"><img src="docs/images/references-zh.png" alt="引文详情与摘要" width="884"></a>
+  <a href="docs/images/references-zh.png"><img src="docs/images/references-zh.png" alt="引文详情与摘要" width="876"></a>
 </p>
 
 悬停可识别的正文引文，查看论文信息和摘要。打开本地附件或 DOI，复制指定格式的引用，把值得细读的论文放进稍后读。摘要支持原文、译文和双语对照，翻译语种与正文共用。
@@ -31,7 +31,7 @@
 ## 看见文献背后的作者
 
 <p align="center">
-  <a href="docs/images/network-zh.png"><img src="docs/images/network-zh.png" alt="从本地文献建立的作者网络" width="808"></a>
+  <a href="docs/images/network-zh.png"><img src="docs/images/network-zh.png" alt="从本地文献建立的作者网络" width="784"></a>
 </p>
 
 从自己的 Zotero 文献库出发，查看谁与谁共同署名、合作过哪些论文。聚焦一个作者，再打开其公开 ORCID 履历，继续了解教育、任职和作品。
@@ -60,7 +60,7 @@
 ## 留下适合你的阅读界面
 
 <p align="center">
-  <a href="docs/images/appearance-zh.png"><img src="docs/images/appearance-zh.png" alt="统一设置页" width="396"></a>
+  <a href="docs/images/appearance-zh.png"><img src="docs/images/appearance-zh.png" alt="统一设置页" width="384"></a>
 </p>
 
 主题、透明度、界面语言、快捷键、译文字体与引用格式集中在一页。支持自定义背景和自己的模型翻译服务。更新、指南、隐私与反馈固定在窗口底部。

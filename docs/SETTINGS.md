@@ -3,7 +3,7 @@
 <p align="center"><a href="../README.md">首页</a> · <a href="SETTINGS.en.md">English</a></p>
 
 <p align="center">
-  <a href="images/appearance-zh.png"><img src="images/appearance-zh.png" alt="完整设置页" width="396"></a>
+  <a href="images/appearance-zh.png"><img src="images/appearance-zh.png" alt="完整设置页" width="384"></a>
 </p>
 
 ## 外观与界面语言

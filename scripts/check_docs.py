@@ -17,6 +17,7 @@ for name in names:
  for src,width in re.findall(r'<img src="([^"]+)"[^>]*width="(\d+)"',s):
   if 'hero-' not in src:
    raw=(p.parent/src).read_bytes();assert raw[:8]==b'\x89PNG\r\n\x1a\n';pixels=struct.unpack('>I',raw[16:20])[0]
+   assert raw[25]==6,(name,src,'UI screenshot must have an alpha channel')
    assert abs(int(width)-pixels/2)<=1,(name,src,'screenshot must display at native UI scale')
  for pair in re.findall(r'\]\(([^)]+)\)|(?:href|src)="([^"]+)"',s):
   ref=next(x for x in pair if x)

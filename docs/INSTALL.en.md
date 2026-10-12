@@ -13,7 +13,7 @@ Declared compatibility covers Zotero 10.x from 10.0.5-beta.1 and 11.x. Beta rele
 ## Install offline voices
 
 <p align="center">
-  <a href="images/appearance-en.png"><img src="images/appearance-en.png" alt="Settings and speech installation" width="396"></a>
+  <a href="images/appearance-en.png"><img src="images/appearance-en.png" alt="Settings and speech installation" width="384"></a>
 </p>
 
 Find **Speech environment** near the bottom of Settings and click the wrench. Paper Loom selects a package for your system, verifies it, and generates a sample before activating the new engine. You can cancel. Retrying reuses completed, verified parts.

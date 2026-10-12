@@ -3,7 +3,7 @@
 <p align="center"><a href="../README.en.md">Home</a> · <a href="SETTINGS.md">简体中文</a></p>
 
 <p align="center">
-  <a href="images/appearance-en.png"><img src="images/appearance-en.png" alt="Complete settings page" width="396"></a>
+  <a href="images/appearance-en.png"><img src="images/appearance-en.png" alt="Complete settings page" width="384"></a>
 </p>
 
 ## Appearance and interface language

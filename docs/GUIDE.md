@@ -22,7 +22,7 @@
 ## 在原文旁控制播放
 
 <p align="center">
-  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="听读控制栏" width="516"></a>
+  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="听读控制栏" width="493"></a>
 </p>
 
 把鼠标移到正在读的原文、译文或其下方，出现两行按钮。上行控制句子、段落、暂停和停止；下行切换模式、语速、语种与译文显示。
@@ -45,7 +45,7 @@
 ## 跟进一条引文
 
 <p align="center">
-  <a href="images/references-zh.png"><img src="images/references-zh.png" alt="文献信息和摘要" width="884"></a>
+  <a href="images/references-zh.png"><img src="images/references-zh.png" alt="文献信息和摘要" width="876"></a>
 </p>
 
 悬停正文中可识别的数字或作者年份引文，打开文献卡片。可定位引用、打开本地附件或 DOI、复制格式化引用。标题下的摘要支持原文、译文和双语，不提供朗读入口。

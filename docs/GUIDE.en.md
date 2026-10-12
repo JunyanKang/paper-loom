@@ -22,7 +22,7 @@ When audio starts, the launch popup and its original selection clear. A newer se
 ## Keep the controls beside the text
 
 <p align="center">
-  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Listening controls" width="516"></a>
+  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Listening controls" width="493"></a>
 </p>
 
 Hover over the current source passage, its translation, or the area below it. The first row controls sentences, paragraphs, pause, and stop. The second holds modes, speed, language, and translation visibility.
@@ -45,7 +45,7 @@ Source and translated voice preferences are retained separately. Interface langu
 ## Follow a citation
 
 <p align="center">
-  <a href="images/references-en.png"><img src="images/references-en.png" alt="Paper details and abstract" width="884"></a>
+  <a href="images/references-en.png"><img src="images/references-en.png" alt="Paper details and abstract" width="876"></a>
 </p>
 
 Hover over a recognized numeric or author–year citation. Locate its occurrences, open a local attachment or DOI, or copy a formatted citation. Abstracts offer original, translated, and bilingual views without a listening action.
