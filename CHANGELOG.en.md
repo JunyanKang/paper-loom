@@ -6,7 +6,7 @@
 
 Use a consistent English interface on a fresh installation. Translate caption placement options as complete phrases in English, Japanese, French and German. Retain the bottom-right anchored workspace backgrounds from 1.0.14.
 
-The model settings button appears only when LLM translation is selected. Switching to another service also closes the model settings popover across open windows. Model settings use the available space in shorter windows without covering the footer. Documentation screenshots now display at their actual interface scale, with consistent headings and spacing across both languages.
+Model settings now use a compact layout, with a two-row provider logo menu above and model choices below. Refresh, save, save-and-test, and close are icon buttons along the bottom. A brain-shaped AI symbol identifies unconfigured LLM translation. The model settings button appears only when LLM translation is selected. Switching to another service also closes the model settings popover across open windows. Model settings use the available space in shorter windows without covering the footer. Documentation screenshots now display at their actual interface scale, with consistent headings and spacing across both languages.
 
 ## 1.0.14 · 2026-10-12
 

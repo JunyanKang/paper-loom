@@ -9,9 +9,9 @@ const inspect=async(button,menuSelector,name)=>{
  check(name+' icon-only trigger',!!icon&&!button.textContent.trim());
  if(icon.classList.contains('pl-flag'))check(name+' flags have no hover text',!button.hasAttribute('title')&&!button.dataset.pvTooltip&&!button.dataset.clTooltip&&[...menu.querySelectorAll('[role=option]')].every(row=>!row.hasAttribute('title')&&!row.dataset.pvTooltip&&!row.dataset.clTooltip));
  check(name+' unmasked edges and transparent expanded trigger',menu.ownerDocument.defaultView.getComputedStyle(menu).maskImage==='none'&&win.getComputedStyle(button).backgroundColor==='rgba(0, 0, 0, 0)');
- check(name+' compact menu',menu.getBoundingClientRect().width<=52,menu.getBoundingClientRect().width);
+ const grid=menu.classList.contains('pl-provider-grid');check(name+' compact menu',menu.getBoundingClientRect().width<=(grid?240:52),menu.getBoundingClientRect().width);
  const rows=[...menu.querySelectorAll('[role=option]')];
- check(name+' icon-only aligned options',rows.length>0&&rows.every(row=>{const img=row.querySelector('img'),mark=row.querySelector('.cl-select-check,.pv-select-check');return img&&img.complete&&img.naturalWidth>0&&Math.abs(centre(img)-centre(icon))<1&&(!mark||win.getComputedStyle(mark).display==='none')&&!!row.getAttribute('aria-label');}),rows.map(row=>({label:row.getAttribute('aria-label'),offset:row.querySelector('img')?centre(row.querySelector('img'))-centre(icon):null})));
+ check(name+' icon-only aligned options',rows.length>0&&rows.every(row=>{const img=row.querySelector('img'),mark=row.querySelector('.cl-select-check,.pv-select-check');return img&&img.complete&&img.naturalWidth>0&&(grid?Math.abs(centre(img)-centre(row))<1:Math.abs(centre(img)-centre(icon))<1)&&(!mark||win.getComputedStyle(mark).display==='none')&&!!row.getAttribute('aria-label');}),rows.map(row=>({label:row.getAttribute('aria-label'),offset:row.querySelector('img')?centre(row.querySelector('img'))-centre(icon):null})));
  button.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(180);
 };
 try{

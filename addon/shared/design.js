@@ -182,11 +182,15 @@ var LoomDesignStyle = `
 .cl-settings .cl-llm-popover{position:absolute;z-index:20;left:16px;right:16px;margin:0;padding:0;isolation:isolate}
 .cl-settings .cl-llm-content{max-height:inherit;overflow:auto;scrollbar-width:none;padding:12px;border-radius:12px;background:var(--cl-bg);box-shadow:0 8px 28px #172c3d26,inset 0 0 0 1px var(--pl-tab-line)}
 .cl-settings .cl-llm-popover::before{content:'';position:absolute;left:clamp(18px,calc(var(--pl-model-anchor) - 7px),calc(100% - 30px));top:-7px;width:14px;height:14px;background:var(--cl-bg);transform:rotate(45deg);box-shadow:-1px -1px var(--pl-tab-line);z-index:1;pointer-events:none}
-.cl-settings .cl-llm-heading{display:flex;align-items:center;gap:8px;margin:0 0 8px}
-.cl-settings .cl-llm-heading strong{flex:1}.cl-settings .cl-llm-heading>.cl-icon-button{width:28px;min-width:28px;height:28px;min-height:28px;padding:5px}
-.cl-settings .cl-llm-content .cl-setting-row{grid-template-columns:80px minmax(0,1fr) auto;min-height:38px;gap:8px}
-.cl-settings .cl-llm-content .cl-llm-actions{display:flex;gap:8px;margin-top:12px}.cl-settings .cl-llm-content .cl-llm-actions>button{flex:1;min-height:32px}
-.cl-settings .cl-llm-content .cl-translation-status{font-size:12px;line-height:1.5;margin-top:8px;overflow-wrap:anywhere}.cl-settings .cl-llm-content .cl-translation-status:empty{display:none}
+.cl-settings .cl-llm-provider{display:flex;justify-content:center;align-items:center;height:28px;margin:0 0 4px}
+.cl-select-popover.pl-language-menu.pl-provider-grid{display:grid;grid-template-rows:repeat(2,32px);grid-auto-flow:column;grid-auto-columns:36px;gap:2px;width:max-content!important;min-width:0!important;max-width:calc(100vw - 16px);overflow:auto}
+.pl-provider-grid .cl-select-option{padding:4px;min-height:0;justify-content:center}
+.cl-settings .cl-llm-provider .cl-select-trigger{height:28px;min-height:28px;background:transparent!important;box-shadow:none}.cl-settings .cl-llm-provider .cl-select-trigger::before{background:transparent!important}
+.cl-settings .cl-llm-content .cl-setting-row{grid-template-columns:56px minmax(0,1fr) auto;min-height:28px;gap:8px}
+.cl-settings .cl-llm-content .cl-setting-row>div{min-width:0}
+.cl-settings .cl-llm-content .cl-setting-row input{min-width:0}
+.cl-settings .cl-llm-content .cl-llm-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding-top:6px;border-top:1px solid var(--pl-tab-line)}.cl-settings .cl-llm-content .cl-llm-actions>button{flex:none;width:30px;min-width:30px;height:28px;min-height:28px;padding:5px;background:transparent;box-shadow:none}.cl-settings .cl-llm-content .cl-llm-actions .cl-icon{width:18px;height:18px}
+.cl-settings .cl-llm-content .cl-translation-status{font-size:12px;line-height:1.5;margin-top:6px;white-space:normal;overflow-wrap:anywhere}.cl-settings .cl-llm-content .cl-translation-status:empty{display:none}
 .pl-provider-settings[aria-expanded=true]{background:var(--cl-bg)!important;box-shadow:inset 0 0 0 1px var(--pl-tab-line);border-radius:8px}
 .cl-model-toggle::after{clip-path:none;background:linear-gradient(currentColor,currentColor) 0 2px/3px 2px no-repeat,linear-gradient(currentColor,currentColor) 6px 2px/9px 2px no-repeat,linear-gradient(currentColor,currentColor) 0 7px/3px 2px no-repeat,linear-gradient(currentColor,currentColor) 6px 7px/9px 2px no-repeat,linear-gradient(currentColor,currentColor) 0 12px/3px 2px no-repeat,linear-gradient(currentColor,currentColor) 6px 12px/9px 2px no-repeat}
 /* Embedded settings inherit the parent surface without glass tint or saturation. */
