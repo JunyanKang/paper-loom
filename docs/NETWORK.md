@@ -1,12 +1,14 @@
-# 从论文找到作者
+<h1 align="center">从论文找到作者</h1>
 
-[首页](../README.md) · [English](NETWORK.en.md)
+<p align="center"><a href="../README.md">首页</a> · <a href="NETWORK.en.md">English</a></p>
 
 ## 从自己的文献库出发
 
 点底部的作者图标，选择文献库或文献夹。网络根据 Zotero 条目的作者和共同论文建立；首次打开需要整理数据，之后复用已有结果。
 
-![作者网络：演示文献库](images/network-zh.png)
+<p align="center">
+  <a href="images/network-zh.png"><img src="images/network-zh.png" alt="作者网络：演示文献库" width="808"></a>
+</p>
 
 搜索作者或论文，点击节点查看关联内容。聚焦作者可浏览合作者与共同论文；拖动、缩放或使用全景按钮调整视野。打开详情再返回时，保留原来的位置。
 
@@ -16,7 +18,9 @@
 
 从作者详情打开履历，或输入有效 ORCID。时间线按资料展示教育、任职和作品，可筛选类别、查看来源、打开论文。关闭履历后回到原来的网络。
 
-![履历界面：虚构演示资料](images/career-zh.png)
+<p align="center">
+  <a href="images/career-zh.png"><img src="images/career-zh.png" alt="履历界面：虚构演示资料" width="808"></a>
+</p>
 
 截图中的姓名、机构、经历和论文均为虚构演示资料，不对应真实人物。实际使用时，资料来自 ORCID 记录维护者，可能缺少经历或日期；缺失不代表该经历不存在。已查询内容缓存在本地，刷新可获取新的公开记录。
 

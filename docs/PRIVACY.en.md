@@ -1,6 +1,6 @@
-# Privacy & data
+<h1 align="center">Privacy &amp; data</h1>
 
-[Home](../README.en.md) · [简体中文](PRIVACY.md)
+<p align="center"><a href="../README.en.md">Home</a> · <a href="PRIVACY.md">简体中文</a></p>
 
 Listening runs on your computer. Translation and information lookups contact external services when those features are used. Paper Loom requires no account and adds no telemetry or usage analytics.
 

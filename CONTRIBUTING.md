@@ -1,6 +1,6 @@
-# 参与开发
+<h1 align="center">参与开发</h1>
 
-[首页](README.md) · [English](CONTRIBUTING.en.md)
+<p align="center"><a href="README.md">首页</a> · <a href="CONTRIBUTING.en.md">English</a></p>
 
 欢迎提交可复现的问题、界面改进和代码。请先在 [Issues](https://github.com/JunyanKang/paper-loom/issues) 说明使用场景、系统与完整版本；样例应能公开分享，不含密钥或私人全文。
 

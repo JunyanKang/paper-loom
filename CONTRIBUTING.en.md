@@ -1,6 +1,6 @@
-# Contributing
+<h1 align="center">Contributing</h1>
 
-[Home](README.en.md) · [简体中文](CONTRIBUTING.md)
+<p align="center"><a href="README.en.md">Home</a> · <a href="CONTRIBUTING.md">简体中文</a></p>
 
 Contributions can start with a reproducible problem, a design improvement, or code. Describe the use case, OS, and full versions in [Issues](https://github.com/JunyanKang/paper-loom/issues). Use public samples without credentials or private full text.
 

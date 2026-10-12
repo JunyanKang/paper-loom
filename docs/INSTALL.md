@@ -1,6 +1,6 @@
-# 安装与更新
+<h1 align="center">安装与更新</h1>
 
-[首页](../README.md) · [English](INSTALL.en.md)
+<p align="center"><a href="../README.md">首页</a> · <a href="INSTALL.en.md">English</a></p>
 
 ## 安装一个 XPI
 
@@ -12,7 +12,9 @@
 
 ## 安装离线声音
 
-![声音安装与设置所在页面](images/appearance-zh.png)
+<p align="center">
+  <a href="images/appearance-zh.png"><img src="images/appearance-zh.png" alt="声音安装与设置所在页面" width="396"></a>
+</p>
 
 在设置下方找到 **发音环境**，点击扳手。插件按系统选择声音包，下载后进行校验和一次实际合成，再启用新引擎。过程中可以取消；重试会复用已完成且校验通过的分片。
 

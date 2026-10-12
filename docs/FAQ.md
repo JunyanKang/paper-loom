@@ -1,6 +1,6 @@
-# 常见问题
+<h1 align="center">常见问题</h1>
 
-[首页](../README.md) · [English](FAQ.en.md)
+<p align="center"><a href="../README.md">首页</a> · <a href="FAQ.en.md">English</a></p>
 
 ## 小书没有出现
 

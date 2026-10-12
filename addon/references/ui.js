@@ -827,7 +827,13 @@ var CiteLensUI = {
       };
       const actions=this.el(doc,'div',null,'cl-llm-actions');actions.append(this.button(doc,'保存',()=>save(false)),this.button(doc,'保存并测试',()=>save(true),true));llm.append(actions,status);
       const content=this.el(doc,'div',null,'cl-llm-content');while(llm.firstChild)content.append(llm.firstChild);llm.append(content);
-      const place=()=>{const f=frame.getBoundingClientRect(),a=origin.getBoundingClientRect(),nav=frame.querySelector(':scope>.pl-main-actions')?.getBoundingClientRect(),top=a.bottom-f.top+8;llm.style.top=top+'px';llm.style.maxHeight=Math.max(80,(nav?.top||f.bottom-12)-f.top-top-12)+'px';llm.style.setProperty('--pl-model-anchor',(a.left+a.width/2-f.left-16)+'px');};
+      const place=()=>{
+        const f=frame.getBoundingClientRect(),a=origin.getBoundingClientRect(),nav=frame.querySelector(':scope>.pl-main-actions')?.getBoundingClientRect();
+        const below=(nav?.top||f.bottom-12)-a.bottom-20,above=a.top-f.top-24,up=below<160&&above>below;
+        llm.dataset.side=up?'above':'below';llm.style.maxHeight=Math.max(24,up?above:below)+'px';
+        llm.style.top=(up?a.top-f.top-8-llm.getBoundingClientRect().height:a.bottom-f.top+8)+'px';
+        llm.style.setProperty('--pl-model-anchor',(a.left+a.width/2-f.left-16)+'px');
+      };
       const outside=e=>{if(!llm.hidden&&!llm.contains(e.target)&&!origin.contains(e.target)&&!e.target.closest?.('.cl-select-popover,.pv-select-popover,.cl-tooltip'))hide();};
       const bindDocument=surface=>{surface.addEventListener('pointerdown',outside,true);cleanups.push(()=>surface.removeEventListener('pointerdown',outside,true));};bindDocument(doc);
       const escape=e=>{if(e.key==='Escape'&&!llm.hidden){e.preventDefault();e.stopImmediatePropagation();hide(true);}};

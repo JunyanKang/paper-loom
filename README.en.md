@@ -1,4 +1,6 @@
-![Paper Loom: stay with the paper](docs/images/hero-en.png)
+<p align="center">
+  <a href="docs/images/hero-en.png"><img src="docs/images/hero-en.png" alt="Paper Loom: stay with the paper" width="768"></a>
+</p>
 
 <p align="center"><a href="https://github.com/JunyanKang/paper-loom/releases/latest"><strong>Download Paper Loom</strong></a> · <a href="docs/INSTALL.en.md">Installation</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/JunyanKang/paper-loom/issues">Feedback</a></p>
 
@@ -8,7 +10,9 @@ Listen to a difficult passage. Inspect the paper behind a citation. Save the nex
 
 ## Start with this passage
 
-![Translation and listening controls](docs/images/caption-controls-en.png)
+<p align="center">
+  <a href="docs/images/caption-controls-en.png"><img src="docs/images/caption-controls-en.png" alt="Translation and listening controls" width="516"></a>
+</p>
 
 Read a sentence, a selection, a paragraph, or the full text. Listen once, repeat a difficult passage, or choose a speed from 0.5× to 2×. Hover over the current source passage, translation, or controls to pause at the end of the sentence. Move away to continue.
 
@@ -16,7 +20,9 @@ Speech runs locally. After installing the voice package, listen offline in Engli
 
 ## Follow the reference
 
-![Reference details and abstract](docs/images/references-en.png)
+<p align="center">
+  <a href="docs/images/references-en.png"><img src="docs/images/references-en.png" alt="Reference details and abstract" width="884"></a>
+</p>
 
 Hover over a recognized citation to inspect its paper and abstract. Open a local attachment or DOI, copy a formatted citation, or add the paper to Read later. Abstracts offer original, translated, and bilingual views, with the same target language as passage translation.
 
@@ -24,7 +30,9 @@ Recognition depends on the PDF’s text structure. Scans and complex layouts may
 
 ## Find the people behind the papers
 
-![Author network from a demonstration library](docs/images/network-en.png)
+<p align="center">
+  <a href="docs/images/network-en.png"><img src="docs/images/network-en.png" alt="Author network from a demonstration library" width="808"></a>
+</p>
 
 Explore co-authors and their shared papers in your Zotero library. Focus on an author, then open their public ORCID career to browse education, employment, and works.
 
@@ -51,7 +59,9 @@ References, translation, and author tools work without the voice package. The pa
 
 ## Make room for your way of reading
 
-![Unified settings](docs/images/appearance-en.png)
+<p align="center">
+  <a href="docs/images/appearance-en.png"><img src="docs/images/appearance-en.png" alt="Unified settings" width="396"></a>
+</p>
 
 Themes, transparency, interface language, shortcuts, translation fonts, and citation styles share one page. Add a background image or configure your own model provider. Update, Guide, Privacy, and Feedback stay at the bottom.
 

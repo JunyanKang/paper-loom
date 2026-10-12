@@ -1,6 +1,6 @@
-# 隐私与数据
+<h1 align="center">隐私与数据</h1>
 
-[首页](../README.md) · [English](PRIVACY.en.md)
+<p align="center"><a href="../README.md">首页</a> · <a href="PRIVACY.en.md">English</a></p>
 
 听读在本机完成，翻译和资料查询按功能连接外部服务。Paper Loom 无需注册账号，不添加遥测或使用统计。
 

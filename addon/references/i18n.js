@@ -1953,3 +1953,9 @@ for(const [source,values] of Object.entries({"当前范围暂无可关联作者�
 
 // Compact controls keep their row geometry when the interface language changes.
 for(const [source,values] of Object.entries({"暂停／继续": ["Pause / play", "一時停止／再開", "Pause / lire", "Pause / weiter"], "停止朗读": ["Stop", "停止", "Arrêter", "Stopp"], "显示／隐藏译文": ["Translation", "訳文表示", "Traduction", "Übersetzung"], "原文／译文朗读": ["Read translation", "訳文朗読", "Lire trad.", "Übers. lesen"], "上一句": ["Prev. sentence", "前の文", "Phrase préc.", "Satz zurück"], "下一句": ["Next sentence", "次の文", "Phrase suiv.", "Satz weiter"], "重读当前句": ["Replay sentence", "文を再読", "Relire phrase", "Satz erneut"], "上一段": ["Prev. paragraph", "前の段落", "Paragr. préc.", "Absatz zurück"], "下一段": ["Next paragraph", "次の段落", "Paragr. suiv.", "Absatz weiter"], "重读当前段": ["Replay paragraph", "段落を再読", "Relire paragr.", "Absatz erneut"], "译文字体": ["Caption font", "訳文字体", "Police", "Schrift"], "译文位置": ["Caption position", "訳文位置", "Position", "Position"], "指南": ["Guide", "ガイド", "Guide", "Hilfe"], "隐私": ["Privacy", "プライバシー", "Vie privée", "Datenschutz"], "反馈": ["Feedback", "意見", "Retour", "Feedback"], "更新": ["Update", "更新", "Màj", "Update"]}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
+
+// Translate complete caption placement options before shorter word replacements.
+for (const [source, values] of Object.entries({
+  "原文下方": ["Below text", "原文の下", "Sous le texte", "Unter dem Text"],
+  "原文上方": ["Above text", "原文の上", "Au-dessus", "Über dem Text"]
+})) for (const [i, lang] of ["en", "ja", "fr", "de"].entries()) CiteLensI18n.catalogs[lang][source] = values[i];

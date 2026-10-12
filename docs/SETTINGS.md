@@ -1,8 +1,10 @@
-# 按自己的习惯设置
+<h1 align="center">按自己的习惯设置</h1>
 
-[首页](../README.md) · [English](SETTINGS.en.md)
+<p align="center"><a href="../README.md">首页</a> · <a href="SETTINGS.en.md">English</a></p>
 
-![完整设置页](images/appearance-zh.png)
+<p align="center">
+  <a href="images/appearance-zh.png"><img src="images/appearance-zh.png" alt="完整设置页" width="396"></a>
+</p>
 
 ## 外观与界面语言
 

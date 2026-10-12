@@ -1,6 +1,6 @@
-# Frequently asked questions
+<h1 align="center">Frequently asked questions</h1>
 
-[Home](../README.en.md) · [简体中文](FAQ.md)
+<p align="center"><a href="../README.en.md">Home</a> · <a href="FAQ.md">简体中文</a></p>
 
 ## The book is missing
 

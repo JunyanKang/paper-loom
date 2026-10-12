@@ -1,4 +1,4 @@
-# Third-party notices / 第三方声明
+<h1 align="center">Third-party notices / 第三方声明</h1>
 
 Paper Loom source is distributed under the [MIT license](LICENSE). Copyright and license notices for reused source are retained in [LICENSE-voice](docs/LICENSE-voice.txt) and [LICENSE-references](docs/LICENSE-references.txt).
 
