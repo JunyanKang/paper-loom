@@ -181,7 +181,7 @@ var PaperVoiceI18n = (() => {
     "请先在这篇 PDF 中划选字母、单词或句子，再从选定位置开始": "Select a letter, word or sentence in this PDF first.",
     "未能准确定位选区，请在 PDF 中重新划选后再开始": "Unable to locate the selection. Select it again in the PDF.",
     "PDF 没有可提取文字，请先进行 OCR 文字识别": "This PDF has no extractable text. Please run OCR first.",
-    "尚未安装离线声音。请在「设置 → 声音与引擎」中下载后重试。": "Offline voices are not installed. Download them in Settings → Voices & engine and try again.",
+    "尚未安装离线声音。请在「设置 → 阅读与翻译 → 发音环境」中下载后重试。": "Offline voices are not installed. Download them in Settings → Reading & translation → Speech environment and try again.",
     "语音引擎启动超时，请重试": "Voice engine startup timed out. Please try again.",
     "Paper Loom 已停用": "Paper Loom is disabled.",
     "语音引擎已退出，请点击重读重新启动": "The voice engine stopped. Start reading again to restart it.",
@@ -316,7 +316,7 @@ var PaperVoiceI18n = (() => {
     "无法确定受支持的朗读语言，请在设置中手动选择英语、中文、日语或法语。": "言語を判定できません。設定で英語、中国語、日本語、フランス語を選んでください。",
     "朗读语言": "読み上げ言語",
     "中文（普通话）": "中国語（標準語）",
-    "请在「声音与引擎」中重新下载声音，以启用多语言朗读。": "設定の「音声とエンジン」で音声を更新してください。",
+    "请在「声音与引擎」中重新下载声音，以启用多语言朗读。": "設定の「読み上げと翻訳」の音声環境で音声を更新してください。",
     "普通话 · 女声 Xiaobei": "中国語・女性 Xiaobei",
     "普通话 · 女声 Xiaoxiao": "中国語・女性 Xiaoxiao",
     "普通话 · 男声 Yunxi": "中国語・男性 Yunxi",
@@ -418,7 +418,7 @@ var PaperVoiceI18n = (() => {
     "请先在这篇 PDF 中划选字母、单词或句子，再从选定位置开始": "先に PDF 内の文字、単語、文を選んでください",
     "未能准确定位选区，请在 PDF 中重新划选后再开始": "選択位置を特定できません。もう一度選んでください",
     "PDF 没有可提取文字，请先进行 OCR 文字识别": "抽出できる文字がありません。先に OCR を実行してください",
-    "尚未安装离线声音。请在「设置 → 声音与引擎」中下载后重试。": "設定の「音声とエンジン」で音声をダウンロードしてください。",
+    "尚未安装离线声音。请在「设置 → 阅读与翻译 → 发音环境」中下载后重试。": "設定の「読み上げと翻訳」の音声環境で音声をダウンロードしてください。",
     "语音引擎启动超时，请重试": "音声エンジンの起動がタイムアウトしました。再試行してください",
     "Paper Loom 已停用": "Paper Loom は無効です",
     "语音引擎已退出，请点击重读重新启动": "音声エンジンが停止しました。もう一度再生してください",
@@ -553,7 +553,7 @@ var PaperVoiceI18n = (() => {
     "无法确定受支持的朗读语言，请在设置中手动选择英语、中文、日语或法语。": "Langue non reconnue. Choisissez anglais, chinois, japonais ou français dans les réglages.",
     "朗读语言": "Langue du texte",
     "中文（普通话）": "Mandarin",
-    "请在「声音与引擎」中重新下载声音，以启用多语言朗读。": "Mettez les voix à jour dans les réglages Voix et moteur.",
+    "请在「声音与引擎」中重新下载声音，以启用多语言朗读。": "Mettez les voix à jour dans les réglages Lecture et traduction.",
     "普通话 · 女声 Xiaobei": "Mandarin · Femme Xiaobei",
     "普通话 · 女声 Xiaoxiao": "Mandarin · Femme Xiaoxiao",
     "普通话 · 男声 Yunxi": "Mandarin · Homme Yunxi",
@@ -655,7 +655,7 @@ var PaperVoiceI18n = (() => {
     "请先在这篇 PDF 中划选字母、单词或句子，再从选定位置开始": "Sélectionnez d’abord une lettre, un mot ou une phrase.",
     "未能准确定位选区，请在 PDF 中重新划选后再开始": "Sélection introuvable. Sélectionnez à nouveau le texte.",
     "PDF 没有可提取文字，请先进行 OCR 文字识别": "Aucun texte extractible. Effectuez d’abord une reconnaissance OCR.",
-    "尚未安装离线声音。请在「设置 → 声音与引擎」中下载后重试。": "Téléchargez les voix dans les réglages Voix et moteur.",
+    "尚未安装离线声音。请在「设置 → 阅读与翻译 → 发音环境」中下载后重试。": "Téléchargez les voix dans les réglages Lecture et traduction.",
     "语音引擎启动超时，请重试": "Délai de démarrage des voix dépassé. Réessayez.",
     "Paper Loom 已停用": "Paper Loom est désactivé.",
     "语音引擎已退出，请点击重读重新启动": "Le moteur vocal s’est arrêté. Relancez la lecture.",
@@ -790,7 +790,7 @@ var PaperVoiceI18n = (() => {
     "无法确定受支持的朗读语言，请在设置中手动选择英语、中文、日语或法语。": "Sprache nicht erkannt. Englisch, Chinesisch, Japanisch oder Französisch in den Einstellungen wählen.",
     "朗读语言": "Textsprache",
     "中文（普通话）": "Mandarin",
-    "请在「声音与引擎」中重新下载声音，以启用多语言朗读。": "Stimmen unter Einstellungen → Stimmen und Engine aktualisieren.",
+    "请在「声音与引擎」中重新下载声音，以启用多语言朗读。": "Stimmen unter Einstellungen → Lesen und Übersetzen aktualisieren.",
     "普通话 · 女声 Xiaobei": "Mandarin · Weiblich Xiaobei",
     "普通话 · 女声 Xiaoxiao": "Mandarin · Weiblich Xiaoxiao",
     "普通话 · 男声 Yunxi": "Mandarin · Männlich Yunxi",
@@ -892,7 +892,7 @@ var PaperVoiceI18n = (() => {
     "请先在这篇 PDF 中划选字母、单词或句子，再从选定位置开始": "Zuerst einen Buchstaben, ein Wort oder einen Satz auswählen.",
     "未能准确定位选区，请在 PDF 中重新划选后再开始": "Auswahl nicht gefunden. Text bitte erneut auswählen.",
     "PDF 没有可提取文字，请先进行 OCR 文字识别": "Kein auslesbarer Text. Bitte zuerst OCR durchführen.",
-    "尚未安装离线声音。请在「设置 → 声音与引擎」中下载后重试。": "Offline-Stimmen unter Einstellungen → Stimmen und Engine herunterladen.",
+    "尚未安装离线声音。请在「设置 → 阅读与翻译 → 发音环境」中下载后重试。": "Offline-Stimmen unter Einstellungen → Lesen und Übersetzen herunterladen.",
     "语音引擎启动超时，请重试": "Start der Sprachengine dauerte zu lange. Erneut versuchen.",
     "Paper Loom 已停用": "Paper Loom ist deaktiviert.",
     "语音引擎已退出，请点击重读重新启动": "Die Sprachengine wurde beendet. Vorlesen erneut starten.",
@@ -975,7 +975,7 @@ var PaperVoiceI18n = (() => {
 
  const themeNames={en:['Sakura','Inkstone','Silver','Aurora','Velvet'],ja:['桜霞','墨竹','銀翼','オーロラ','酒紅'],fr:['Sakura','Encre','Argent','Aurore','Velours'],de:['Sakura','Tusche','Silber','Aurora','Samt']};
  for(const [lang,names] of Object.entries(themeNames))['樱雾','墨竹','银翼','极光','酒绒'].forEach((name,i)=>catalogs[lang][name]=names[i]);
- for(const [lang,label] of Object.entries({en:'Original / translated audio',ja:'原文／訳文の音声',fr:'Audio original / traduit',de:'Original / Übersetzung lesen'}))catalogs[lang]['原文／译文朗读']=label;
+ for(const [lang,label] of Object.entries({en:'Original / translation',ja:'原文／訳文',fr:'Original / traduction',de:'Original / Übersetzung'}))catalogs[lang]['原文／译文朗读']=label;
  Object.assign(catalogs.en,{"声音不可用，请重选":"Choose another folder"});
  Object.assign(catalogs.ja,{"声音不可用，请重选":"音声を再選択してください"});
  Object.assign(catalogs.fr,{"声音不可用，请重选":"Choisir un autre dossier"});
@@ -1051,6 +1051,7 @@ var PaperVoiceI18n = (() => {
  for(const [lang,values] of Object.entries({en:['Hover to choose reading mode','Hover for languages · Click for translated audio · Double-click to toggle translation'],ja:['ホバーで読み上げモードを選択','ホバーで言語選択・クリックで訳文読み上げ・ダブルクリックで翻訳切替'],fr:['Survoler pour choisir le mode','Survoler pour les langues · Cliquer pour lire la traduction · Double-cliquer pour activer la traduction'],de:['Lesemodus beim Zeigen wählen','Sprachen beim Zeigen · Klick: Übersetzung vorlesen · Doppelklick: Übersetzung umschalten']})){catalogs[lang]['悬停选择朗读模式']=values[0];catalogs[lang]['悬停选择语言 · 单击朗读译文 · 双击开关翻译']=values[1];}
  for(const [lang,values] of Object.entries({en:['End this reading','Hover for navigation and stop'],ja:['読み上げを終了','ホバーで移動と停止'],fr:['Terminer la lecture','Survoler pour naviguer ou arrêter'],de:['Vorlesen beenden','Navigation und Stopp beim Zeigen']})){catalogs[lang]['结束本次朗读']=values[0];catalogs[lang]['悬停展开导航与停止']=values[1];}
  for(const [source,values] of Object.entries({'重读句子':['Replay sentence','文を再生','Répéter la phrase','Satz wiederholen'],'重读段落':['Replay paragraph','段落を再生','Répéter le paragraphe','Absatz wiederholen'],'暂无声音':['No voice','音声なし','Voix indisponible','Keine Stimme'],'朗读':['Listen','読み上げ','Écouter','Vorlesen']}))for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][source]=values[i];
+ for(const [source,values] of Object.entries({"暂停／继续": ["Pause / play", "一時停止／再開", "Pause / lire", "Pause / weiter"], "停止朗读": ["Stop", "停止", "Arrêter", "Stopp"], "显示／隐藏译文": ["Translation", "訳文表示", "Traduction", "Übersetzung"], "原文／译文朗读": ["Read translation", "訳文朗読", "Lire trad.", "Übers. lesen"], "上一句": ["Prev. sentence", "前の文", "Phrase préc.", "Satz zurück"], "下一句": ["Next sentence", "次の文", "Phrase suiv.", "Satz weiter"], "重读当前句": ["Replay sentence", "文を再読", "Relire phrase", "Satz erneut"], "上一段": ["Prev. paragraph", "前の段落", "Paragr. préc.", "Absatz zurück"], "下一段": ["Next paragraph", "次の段落", "Paragr. suiv.", "Absatz weiter"], "重读当前段": ["Replay paragraph", "段落を再読", "Relire paragr.", "Absatz erneut"], "译文字体": ["Caption font", "訳文字体", "Police", "Schrift"], "译文位置": ["Caption position", "訳文位置", "Position", "Position"], "指南": ["Guide", "ガイド", "Guide", "Hilfe"], "隐私": ["Privacy", "プライバシー", "Vie privée", "Datenschutz"], "反馈": ["Feedback", "意見", "Retour", "Feedback"], "更新": ["Update", "更新", "Màj", "Update"]}))for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang][source]=values[i];
  function translate(value,language){
   if(!value)return value;
   language=resolveLanguage(language);

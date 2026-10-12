@@ -2,36 +2,40 @@
 
 [Home](../README.en.md) · [简体中文](INSTALL.md)
 
-## Install the plugin
+## Install one XPI
 
-Download the `.xpi` from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest). Do not unzip it or use the Source code archive as the plugin. In Zotero, open **Tools → Plugins → gear → Install Plugin From File…**. After installation, use the small book in the left toolbar or the Tools menu.
+Download the `.xpi` from [the latest release](https://github.com/JunyanKang/paper-loom/releases/latest). Keep it zipped. The Source code archive is for development.
 
-Requires Zotero 10.0.5-beta.1 or newer 10.x, or 11.x. Upgrade older Zotero installations first. Your existing papers, attachments, and unrelated plugins remain in place.
+In Zotero, open **Tools → Plugins**, choose the gear, then **Install Plugin From File**. A small book appears in the library toolbar and PDF reader. **Tools → Paper Loom** also opens Settings.
 
-![The book in the left toolbar](images/library-toolbar.png)
+Declared compatibility covers Zotero 10.x from 10.0.5-beta.1 and 11.x. Beta releases may change host interfaces; include your full Zotero version in a bug report.
 
-## Download offline voices
+## Install offline voices
 
-Open **Settings → Voices & engine** and select **Download engine & voices**. Paper Loom detects the system and processor: Apple Silicon Mac with macOS 14+ uses the Mac engine; Intel/AMD x64 Windows uses the Windows engine. The download includes all English, Mandarin Chinese, Japanese, and French voices.
+![Settings and speech installation](images/appearance-en.png)
 
-![Voice settings](images/voices-en.png)
+Find **Speech environment** near the bottom of Settings and click the wrench. Paper Loom selects a package for your system, verifies it, and generates a sample before activating the new engine. You can cancel. Retrying reuses completed, verified parts.
 
-The download is about 494 MiB on Mac or 482 MiB on Windows. Allow at least 3 GB free. You can cancel, resume, or retry from this page. Paper Loom generates a sample to check the new engine before activating it. Use **Preview** to hear the selected language and voice.
+| Computer | Voice package |
+| --- | --- |
+| Apple Silicon Mac, macOS 14+ | About 494 MiB |
+| Intel / AMD x64 Windows | About 482 MiB |
+| Intel Mac, native Windows ARM, Linux | No automatic package yet |
 
-Intel Mac, native Windows ARM, and Linux do not currently have matching automatic voice packages. References, translation, and author tools remain available. x64 emulation on Windows ARM is not a promise of native ARM support.
+Allow at least 3 GB free. The package includes the runtime and voices for English, Mandarin Chinese, Japanese, and French. No separate Python installation is needed. Translation, reference, and author features do not require voices.
 
-## Import an existing engine
+## Check or repair voices
 
-Use the folder button on the voice page and select a compatible engine folder containing `worker.py`, `python`, and `models`. Follow the engine check. An MP3, WAV, or standalone model file is not an engine folder. Importing avoids another full download.
+Click the shield to check the engine. It turns green on success, and the success message clears shortly afterward. If the check fails, the message remains; use the wrench to repair. The existing engine stays in place until its replacement passes the check.
 
-## Update or repair
+## Update the plugin
 
-Check for updates manually at the bottom of Settings, or schedule daily, weekly, or monthly checks. Zotero’s plugin settings control automatic installation. A plugin update does not require downloading unchanged voices again.
+Choose **Update** at the bottom of Settings, then follow the installation prompt. This version does not schedule checks or install updates automatically. You can also install a newer XPI from Releases. Unchanged voice assets are reused.
 
-If audio fails, run **Check installed voices** first. Use **Resume / retry** for an interrupted download or **Download again / repair** for a repair. The current engine path changes only after the new engine passes its check.
+## Move from the earlier plugins
 
-## Existing settings and removal
+Paper Loom can inherit settings from Paper Voice and Paper Nexus. If either remains active, follow the prompt to import settings and disable it. Existing papers and original settings are retained.
 
-If Paper Voice or Paper Nexus is still active, Paper Loom offers to import settings and disable the earlier plugin to avoid duplicate controls and audio. Original settings and papers are retained.
+## Disable or remove
 
-Disable or remove Paper Loom in Zotero’s plugin manager. Removing the plugin does not automatically delete its downloaded engines or local records. See [Privacy & data](PRIVACY.en.md) for cleanup locations.
+Use Zotero’s plugin manager. Downloaded voices and local reading records remain after removal. Back them up before following the cleanup steps in [Privacy](PRIVACY.en.md).

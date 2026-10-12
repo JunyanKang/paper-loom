@@ -2,6 +2,27 @@
 
 [Home](README.en.md) · [简体中文](CHANGELOG.md)
 
+## 1.0.13 · 2026-10-12
+
+- Merged settings into one page with themes, shortcuts, translation, citations, and service maintenance. Update, Guide, Privacy, and Feedback stay at the bottom.
+- Kept shortcut labels on one line across five languages and aligned font and size controls.
+- Brought playback controls beside the source and translation, with speed choices, shared language and voice state, and prompt hover dismissal.
+- Removed the separate listening workspace and abstract listening action. Paragraph playback defaults to one pass; selection requires a headphones click.
+- Fixed citation hover, selection cleanup, overlap recovery, and multi-window shortcuts.
+- Reduced repeated localization, dropdown synchronization, and layout reads. Coalesced search input and avoided rebuilding during IME composition.
+- Added cleanup for timed-out network searches and bounded paint waits for background windows.
+- Added green E-utilities success feedback and consistent voice check, repair, and cancellation states.
+- Made updates manual and refreshed Chinese and English documentation with dark-theme illustrations.
+
+Versions 1.0.7–1.0.12 were local iterations. Their changes are included here.
+
+## 1.0.6 · 2026-10-12
+
+- Synchronized translation and speech languages and improved hover controls, modes, and window state.
+- Corrected popup dismissal and selection handling after playback starts.
+
+Earlier entries below describe the interface at the time; later releases changed some controls.
+
 ## 1.0.4 · 2026-10-11
 
 - Hover over a translation caption for an attached control row with sentence/paragraph navigation, pause/stop, all four modes, and the current flag. Other languages expand upward on hover.

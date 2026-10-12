@@ -17,9 +17,9 @@ var CiteLensUI = {
     const snap=visible=>{releaseBackdrop(!visible);wanted=visible;if(!visible)frame.ownerDocument._clAbstract?.close(true);if(visible){U.fitPage?.(doc);if(container!==frame)container.hidden=false;}if(motion)motion.snap(visible);else{frame.hidden=!visible;frame.inert=!visible;settle(visible);}};
     const animate=visible=>{if(dead||!frame.isConnected)return Promise.resolve();if(pending&&wanted===visible)return pending;if(pending)motion?.finish();if(frame.hidden===!visible&&!frame.dataset.dockMotion)return Promise.resolve();wanted=visible;releaseBackdrop(!visible);const promise=new Promise(resolve=>resolveMotion=resolve);pending=promise;if(visible&&container!==frame)container.hidden=false;else if(!visible)frame.ownerDocument._clAbstract?.close(true);if(motion)motion.show(visible);else snap(visible);return promise;};
     const view={frame,container,reader,finish(){transition?.finish();motion?.finish();},activate(){if(dead)return;const before=U.onPageActivate?.(doc);for(const existing of U.livePages(doc))existing.finish();const ticket=++scope.serial;scope.queue=scope.queue.catch(e=>Zotero.logError(e)).then(async()=>{
-      await before;if(frame._plReady)await frame._plReady;if(ticket!==scope.serial||dead)return;await new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));if(ticket!==scope.serial||dead)return;U.fitPage?.(doc);const other=[...U.livePages(doc)].find(x=>x!==view&&!x.container.hidden);
+      await before;if(frame._plReady)await frame._plReady;if(ticket!==scope.serial||dead)return;await U.afterPaint(doc);if(ticket!==scope.serial||dead)return;U.fitPage?.(doc);const other=[...U.livePages(doc)].find(x=>x!==view&&!x.container.hidden);
       if(other){const r=other.frame.getBoundingClientRect(),ow=other.frame.ownerDocument.defaultView,source={x:r.x+ow.mozInnerScreenX-win.mozInnerScreenX,y:r.y+ow.mozInnerScreenY-win.mozInnerScreenY,width:r.width,height:r.height};other.snap(false);frame.ownerDocument._clAbstract?.close(true);container.hidden=false;snap(true);const dest=frame.getBoundingClientRect();
-        if(!win.matchMedia('(prefers-reduced-motion: reduce)').matches&&source.width&&dest.width&&frame.animate){frame.inert=true;frame.dataset.workspaceMotion='switching';transition=frame.animate([{width:source.width+'px',height:source.height+'px',opacity:1},{width:dest.width+'px',height:dest.height+'px',opacity:1}],{duration:220,easing:'cubic-bezier(.22,.8,.25,1)'});try{await transition.finished;}catch(_){}transition=null;delete frame.dataset.workspaceMotion;if(!dead){frame.inert=false;frame.dispatchEvent(new win.Event('cl-page-switched'));}}
+        if(!win.matchMedia('(prefers-reduced-motion: reduce)').matches&&source.width&&dest.width&&(Math.abs(source.width-dest.width)>.5||Math.abs(source.height-dest.height)>.5)&&frame.animate){frame.inert=true;frame.dataset.workspaceMotion='switching';transition=frame.animate([{width:source.width+'px',height:source.height+'px',opacity:1},{width:dest.width+'px',height:dest.height+'px',opacity:1}],{duration:220,easing:'cubic-bezier(.22,.8,.25,1)'});try{await transition.finished;}catch(_){}transition=null;delete frame.dataset.workspaceMotion;if(!dead){frame.inert=false;frame.dispatchEvent(new win.Event('cl-page-switched'));}}else if(!dead)frame.dispatchEvent(new win.Event('cl-page-switched'));
       }else{await animate(true);}
     });U.pageQueue=scope.queue;return scope.queue;},snap,hide(keep=true){if(dead)return Promise.resolve();transition?.cancel();return animate(false).then(()=>{if(!keep)view.destroy();});},dismiss(){++scope.serial;return view.hide(retain);},destroy(){if(dead)return;dead=true;try{transition?.cancel();motion?.dispose();}catch(_){}const done=resolveMotion;resolveMotion=null;done?.();U.pageViews.delete(view);dispose();}};
     frame.hidden=true;container.hidden=true;frame._clPage=view;this.pageViews.add(view);if(autoOpen)view.activate();return view;
@@ -66,6 +66,11 @@ var CiteLensUI = {
     const cleanup=()=>{if(disposed)return;disposed=true;root.dataset.play='false';win.clearTimeout(mountCheck);io.disconnect();mo.disconnect();doc.removeEventListener('visibilitychange',sync);};
     const mo=new win.MutationObserver(()=>{if(root.isConnected)connected=true;else if(connected)cleanup();});mo.observe(doc.body||doc.documentElement,{childList:true,subtree:true});doc.addEventListener('visibilitychange',sync);root._pnDispose=cleanup;mountCheck=win.setTimeout(()=>{connected=root.isConnected;if(!connected)cleanup();},0);
     return root;
+  },
+  afterPaint(doc){
+    if(doc.hidden)return Promise.resolve();
+    const win=doc.defaultView;
+    return new Promise(resolve=>{let frame=0,done=false;const finish=()=>{if(done)return;done=true;win.clearTimeout(timer);win.cancelAnimationFrame(frame);resolve();},timer=win.setTimeout(finish,80);frame=win.requestAnimationFrame(()=>{frame=win.requestAnimationFrame(finish);});});
   },
   waitFor(task,win,ms,message){return new Promise((resolve,reject)=>{const timer=win.setTimeout(()=>reject(Error(message)),ms);Promise.resolve(task).then(resolve,reject).finally(()=>win.clearTimeout(timer));});},
   logo(doc,size=26) {CiteLens.ensureAssets();const img=this.el(doc,'img',null,'pn-logo');img.src=CiteLens.assetURI+'nexus.png';img.alt='';img.width=size;img.height=size;return img;},
@@ -196,7 +201,7 @@ var CiteLensUI = {
     for(const [type,fn] of [['pointermove',resizeMove],['pointerup',resizeStop],['pointercancel',resizeStop],['keydown',resizeEscape]]){doc.addEventListener(type,fn,true);cleanups.push(()=>doc.removeEventListener(type,fn,true));}win.addEventListener('blur',resizeBlur);cleanups.push(()=>win.removeEventListener('blur',resizeBlur));
     cleanups.push(()=>{drag=null;resizing=null;hideDock();});
     // Delay dismissal so the pointer can cross from the title into the docked panel.
-    let leaveTimer,keyboardInside=false;const keep=()=>{win.clearTimeout(leaveTimer);leaveTimer=0;},defer=()=>{keep();leaveTimer=win.setTimeout(()=>{leaveTimer=0;if(drag||resizing||panel.matches(':hover')||title.matches(':hover'))return;if(keyboardInside&&panel.contains(doc.activeElement))return;close();},700);};
+    let leaveTimer,keyboardInside=false;const keep=()=>{win.clearTimeout(leaveTimer);leaveTimer=0;},defer=()=>{keep();leaveTimer=win.setTimeout(()=>{leaveTimer=0;if(drag||resizing||panel.matches(':hover')||title.matches(':hover'))return;if(keyboardInside&&panel.contains(doc.activeElement))return;close();},Zotero.PaperLoom?.hoverDismissDelay??180);};
     panel.addEventListener('keydown',()=>{keyboardInside=true;});panel.addEventListener('pointerdown',()=>{keyboardInside=false;keep();});
     for(const target of [title,panel]){target.addEventListener('pointerenter',keep);target.addEventListener('pointerleave',defer);target.addEventListener('focusin',keep);target.addEventListener('focusout',defer);cleanups.push(()=>{target.removeEventListener('pointerenter',keep);target.removeEventListener('pointerleave',defer);target.removeEventListener('focusin',keep);target.removeEventListener('focusout',defer);});}cleanups.push(keep);
     for(const type of ['pointerdown','mousedown'])panel.addEventListener(type,e=>e.stopPropagation());
@@ -339,7 +344,7 @@ var CiteLensUI = {
   citationControl(doc,owner,reader,record,{context=null,onJump=null}={}) {
     const win=doc.defaultView;let locations=null,popover=null,leaveTimer,watch,locating=false;
     const remove=()=>{win.clearTimeout(leaveTimer);doc.removeEventListener('scroll',onScroll,true);doc.removeEventListener('pointerdown',outside,true);win.removeEventListener('resize',remove);watch?.disconnect();popover?.remove();popover=null;cite.setAttribute('aria-expanded','false');};
-    const outside=e=>{if(!cite.contains(e.target)&&!popover?.contains(e.target))remove();},onScroll=e=>{if(!popover?.contains(e.target))remove();},keep=()=>win.clearTimeout(leaveTimer),defer=()=>{keep();leaveTimer=win.setTimeout(remove,180);};
+    const outside=e=>{if(!cite.contains(e.target)&&!popover?.contains(e.target))remove();},onScroll=e=>{if(!popover?.contains(e.target))remove();},keep=()=>win.clearTimeout(leaveTimer),defer=()=>{keep();leaveTimer=win.setTimeout(remove,Zotero.PaperLoom?.hoverDismissDelay??180);};
     const jump=async location=>{await CiteLens.jumpToCitation(reader,location);remove();onJump?.();};
     const show=()=>{
       if(!locations?.length||locations.length===1||!cite.isConnected)return;keep();if(popover)return;
@@ -635,9 +640,9 @@ var CiteLensUI = {
     this.style(doc);
     const root=this.el(doc,'section',null,'cl-root');root.dataset.citeLens='panel';root.setAttribute('aria-label','Paper Loom 文献工作台');
     const previous=doc.activeElement,head=this.el(doc,'header',null,'cl-header'),row=this.el(doc,'div',null,'cl-row'),body=this.el(doc,'div',null,'cl-body'),search=this.el(doc,'input',null,'cl-search'),footer=this.el(doc,'footer',null,'cl-panel-footer');
-    const cleanups=[],win=doc.defaultView,anchor=doc.querySelector('[data-cite-lens=toolbar]');let disposed=false,motion=null,openingFrame=0,restoreOnClose=false,page=null;
+    const cleanups=[],win=doc.defaultView,anchor=doc.querySelector('[data-cite-lens=toolbar]');let disposed=false,motion=null,openingFrame=0,searchTimer=0,restoreOnClose=false,page=null;
     const toolbarState=visible=>{anchor?.setAttribute('aria-expanded',String(visible));};
-    const dispose=()=>{if(disposed)return;disposed=true;page?.destroy();win.cancelAnimationFrame(openingFrame);motion?.dispose();for(const clean of cleanups.splice(0))clean();root.remove();if(CiteLens.panels.get(reader)===root)CiteLens.panels.delete(reader);toolbarState(false);if(restoreOnClose&&previous?.isConnected)previous.focus();};
+    const dispose=()=>{if(disposed)return;disposed=true;page?.destroy();win.clearTimeout(searchTimer);win.cancelAnimationFrame(openingFrame);motion?.dispose();for(const clean of cleanups.splice(0))clean();root.remove();if(CiteLens.panels.get(reader)===root)CiteLens.panels.delete(reader);toolbarState(false);if(restoreOnClose&&previous?.isConnected)previous.focus();};
     root._clOpen=true;root._clSetOpen=visible=>{if(disposed)return;root._clOpen=visible;return visible?page?.activate():page?.dismiss();};
     const close=(restoreFocus=true)=>{restoreOnClose=restoreFocus;root._clSetOpen(false);};root._clClose=close;
     root._clSuspend=()=>page?.hide(true);
@@ -661,7 +666,7 @@ var CiteLensUI = {
     cleanups.push(()=>{presenceObserver.disconnect();presenceQueue.length=0;});
 
     const render=async()=>{
-      const ticket=++generation;presenceObserver.disconnect();presenceQueue.length=0;body.replaceChildren();footer.replaceChildren();body.setAttribute('aria-busy','true');
+      if(disposed)return;win.clearTimeout(searchTimer);const ticket=++generation;presenceObserver.disconnect();presenceQueue.length=0;body.replaceChildren();footer.replaceChildren();body.setAttribute('aria-busy','true');
       const queueCount=CiteLensServices.state.queue.filter(x=>x.status!=='saved').length;
       for(const b of tabs.children){const active=b.dataset.view===view;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;if(active)body.setAttribute('aria-labelledby',b.id);if(b.dataset.view==='queue'){const count=b.querySelector('.cl-tab-count');count.textContent=String(queueCount);count.hidden=!queueCount;}}
       root.classList.toggle('cl-selected',!!selected);search.hidden=!!selected;tabs.hidden=!!selected;subtitle.textContent=selected?'文献详情':'本篇引用与本地阅读清单';
@@ -739,7 +744,8 @@ var CiteLensUI = {
     }
     tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const list=[...tabs.children],index=list.indexOf(e.target);const next=e.key==='Home'?0:e.key==='End'?list.length-1:(index+(e.key==='ArrowRight'?1:-1)+list.length)%list.length;list[next].click();list[next].focus();});
     root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();const detail=root.querySelector('.cl-inline-detail');if(detail){const button=detail.parentElement.querySelector('.cl-row-title');detail.remove();button.setAttribute('aria-expanded','false');button.focus();}else if(selected){selected=null;render();}else close();}else this.tab(root,e,false);});
-    search.addEventListener('input',()=>{queries[view]=search.value;scroll=0;render();});
+    const scheduleSearch=()=>{queries[view]=search.value;scroll=0;win.clearTimeout(searchTimer);searchTimer=win.setTimeout(()=>render().catch(e=>Zotero.logError(e)),120);};
+    search.addEventListener('input',e=>{if(!e.isComposing)scheduleSearch();});search.addEventListener('compositionend',scheduleSearch);
     root.addEventListener('cl-metrics-changed',render);render();page=this.page(root,{reader,dispose,retain:true,visibility:visible=>{root._clOpen=visible;toolbarState(visible);}});return root;
   },
   manualDialog(doc,reader) {

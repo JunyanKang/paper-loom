@@ -15,7 +15,8 @@ var PaperVoiceUpdater = {
   const available=this.availableUpdateVersion(),notice=this.hasUpdateNotice(),fresh=notice&&this.get('announcedUpdateVersion','')!==available;
   const busy=['checking','installing'].includes(this.updateState),phase=this.updateState==='checking'?'连接中…':({download:'正在下载…',verify:'正在校验…',install:'正在安装…'})[this.updatePhase]||'连接中…';
   const progress=this.updateState==='installing'&&this.updatePhase==='download'?this.updateProgress:null;
-  const panels=[...this.livePanels()];for(const {root,find,action} of panels){
+  // Shared settings own the update UI; retired playback controls need no refresh.
+  const panels=[...this.livePanels()].filter(({root})=>root.dataset.companionOnly!=='true'&&root.dataset.loomSettings!=='true');for(const {root,find,action} of panels){
    const version=this.version||this.installedVersion;
    if(version)find('aboutVersion').textContent='v'+version+' · Junyan Kang';
    find('autoUpdate').checked=!!this.updateAuto;

@@ -22,9 +22,7 @@ try{
  const service=f.querySelector('select[data-translation-setting=translationProvider]');service.value='llm';service.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(200);f.querySelector('.pl-provider-settings').click();await wait(300);
  await inspect(f.querySelector('[data-translation-setting-proxy=llmProvider]'),'.cl-select-popover','LLM providers');
  f._plSelect('appearance');await wait(200);check('switching settings category hides model editor',f.querySelector('.cl-llm-settings').hidden&&!f.querySelector('.cl-settings-tabs').hidden);await inspect(f.querySelector('iframe').contentDocument.querySelector('[data-select-field=language] button'),'.pv-select-popover','interface flags');
- f._plSelect('voice');await wait(250);const inside=f.querySelector('iframe').contentDocument;
- check('separate speech language selector is removed',inside.querySelector('[data-select-field=speechLanguage]').getBoundingClientRect().width===0);
- const button=inside.querySelector('[data-select-field=voice] button');button.click();await wait(200);const menu=inside.querySelector('.pv-shell')._pvSelects.menu,rows=[...menu.querySelectorAll('[role=option]')];check('voice matrix contains all portrait flags',rows.length===14&&rows.every(row=>!row.textContent.trim()&&row.querySelector('.pl-flag')?.complete&&row.querySelector('.pl-voice-avatar')?.style.backgroundImage.includes('portraits.png'))&&new Set(rows.map(row=>row.querySelector('.pl-voice-avatar').style.backgroundPosition)).size===rows.length);inside.querySelector('.pv-shell')._pvSelects.close();
+ check('voice tab is removed',!f.querySelector('.cl-settings-tabs [data-pane=voice]'));
 
  return {passed:true,checks};
 }catch(e){return {passed:false,error:String(e),stack:e.stack,checks};}finally{V.set('llmConfigs',savedConfigs);V.set('llmProvider',savedProvider);T.set('translationProvider',saved);V.syncSettings();}

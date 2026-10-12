@@ -2,7 +2,9 @@
 
 [Home](../README.en.md) · [简体中文](PRIVACY.md)
 
-Paper Loom requires no account and adds no telemetry or usage analytics. Some features contact external services, as described below.
+Listening runs on your computer. Translation and information lookups contact external services when those features are used. Paper Loom requires no account and adds no telemetry or usage analytics.
+
+## What goes online
 
 | Activity | Data handling |
 | --- | --- |
@@ -19,17 +21,23 @@ Translation services include Tencent, Microsoft, Google, or your chosen model pr
 ## Local storage
 
 - `paper-loom` under the Zotero data directory: reading list, metadata caches, author-network indexes, public career caches, appearance settings, and backgrounds.
-- `paper-loom` under the Zotero application-data directory: voice download caches and installed engines. **Engine location** in voice settings shows the active engine path.
-- Zotero preferences: reading progress, shortcuts, voices, translation settings, and update preferences.
+- `paper-loom` under the Zotero application-data directory: voice download caches and installed engines.
+- Zotero preferences: reading progress, shortcuts, voices, and translation settings.
 - Zotero’s login manager: model API keys, identified by `Paper Loom API`; keys are not written into voice packages.
 
-Plugin records are separate from Zotero items and are not guaranteed to sync to other computers through Zotero Sync. Back up Zotero data and preferences before moving computers; download matching voices again on the new system.
+These records are separate from Zotero library items and do not all travel through Zotero Sync. Back up your data and preferences before moving to another computer. You can install the matching voice package again on the new system.
 
-## Offline use and cleanup
+## Offline use
 
 You can listen offline without online translation or information views. In a fully offline environment, metadata enrichment is unavailable or uses existing caches. To prevent all plugin network activity, disable the plugin or enforce an OS-level network policy.
 
-Removing the plugin does not automatically remove voices or local records. Before a complete cleanup, back up your data and quit Zotero. Delete only the **paper-loom subdirectories** described above, never the Zotero data directory itself. Use Zotero’s Config Editor to remove `extensions.paperLoom.voice.*` and `extensions.zotero.paperLoom.shared.*` preferences. Remove API keys in the plugin’s model settings first. Do not delete other plugins or attachments.
+## Uninstalling and removing data
+
+Uninstalling preserves voice packages and local records so you can use them again later. To remove them as well:
+
+1. Remove API keys in the model settings, then back up anything you want to keep.
+2. Quit Zotero and delete only the **paper-loom subdirectories** described above. Keep the Zotero data directory, attachments, and other plugins intact.
+3. Use Zotero’s Config Editor to remove `extensions.paperLoom.voice.*` and `extensions.zotero.paperLoom.shared.*` preferences.
 
 ## Feedback
 

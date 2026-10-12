@@ -423,7 +423,7 @@ var PaperVoiceCore = (() => {
       return parts.join(separator);
     });
   }
-  function rate(value) { return Math.max(0.6, Math.min(1.6, Number(value) || 1)); }
+  function rate(value) { return Math.max(0.5, Math.min(2, Number(value) || 1)); }
   function anchorText(value) { return cleanText(value).normalize('NFKD').replace(/[^\p{L}\p{N}]/gu,'').toLowerCase(); }
   function pageUnits(text,pageIndex) {
     let offset=0,unitInPage=0;

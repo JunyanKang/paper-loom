@@ -13,10 +13,11 @@ var LoomRuntime = {
       this.catalog=LoomRuntimeCore.manifest(data,this.platform.key);
     }
     const command=PathUtils.join(owner.voice.engineRoot(),'python',...(Zotero.isWin?['python.exe']:['bin','python3']));
-    this.emit(await IOUtils.exists(command)?'installed':'idle',await IOUtils.exists(command)?'已找到离线声音，可试听或检查。':this.platform.supported?'可在这里安装离线声音。':this.platform.reason);
+    const installed=await IOUtils.exists(command);
+    this.emit(installed?'installed':'idle',installed?'已找到离线声音，可试听或检查。':this.platform.supported?'可在这里安装离线声音。':this.platform.reason);
   },
   subscribe(fn){this.listeners.add(fn);fn(this.state);return ()=>this.listeners.delete(fn);},
-  emit(phase,message,progress=this.state.progress) {if(['installed','ready'].includes(phase))this.installed=true;else if(phase==='idle')this.installed=false;this.state={phase,message,progress,updatedAt:this.state.phase===phase&&this.state.message===message?this.state.updatedAt:Date.now()};for(const fn of this.listeners)try{fn(this.state);}catch(e){Zotero.logError(e);}},
+  emit(phase,message,progress=this.state.progress) {if(['installed','ready'].includes(phase))this.needsRepair=false;else if(['idle','error'].includes(phase))this.needsRepair=true;if(['installed','ready'].includes(phase))this.installed=true;else if(phase==='idle')this.installed=false;this.state={phase,message,progress,updatedAt:this.state.phase===phase&&this.state.message===message?this.state.updatedAt:Date.now()};for(const fn of this.listeners)try{fn(this.state);}catch(e){Zotero.logError(e);}},
   check(job){if(this.dead||job.cancelled)throw Error('下载已取消，已完成的分片会保留。');},
   async hash(path) {
     const stream=Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);

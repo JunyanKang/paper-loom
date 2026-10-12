@@ -1,39 +1,43 @@
-# FAQ
+# Frequently asked questions
 
 [Home](../README.en.md) · [简体中文](FAQ.md)
 
-## I cannot see the book
+## The book is missing
 
-Check that the plugin is enabled and your Zotero version is supported. The library entry is in the left toolbar; **Tools → Paper Loom** also opens it. The floating book should appear at the lower right in a PDF. Switch back to the PDF or reopen the attachment. Include your Zotero version and a screenshot when reporting a problem.
+Check that Paper Loom is enabled in Zotero’s plugin manager and that the host version is supported. Try **Tools → Paper Loom**. Reopen the attachment if the PDF entry is missing. Include the full version and a screenshot in a report.
 
-## A download stopped or is slow
+## A download is slow or interrupted
 
-GitHub hosts the plugin and voice files, so speed depends on your network. Retry to reuse completed parts; no separate installer is needed. Check free disk space and whether a proxy or firewall blocks GitHub downloads.
+Voices are hosted on GitHub, so speed depends on your connection. Check free space, proxies, and firewall settings, then retry with the wrench. Completed, verified parts are reused.
 
-## The engine is installed but I hear nothing
+## Voices are installed but silent
 
-Run **Check installed voices**, then preview a voice. Check the system output device, volume, and Bluetooth connection. The first engine startup may take a moment. If the engine folder is unavailable, import the correct folder again or repair the download.
+Run the shield check in Settings, then check system volume, output devices, and Bluetooth. The first request starts the engine. Use the wrench if the check fails; reinstalling Zotero is unnecessary.
 
-## A language or pronunciation is wrong
+## Pronunciation sounds wrong
 
-Check that the reading language matches the passage, then choose and preview a voice. Technical abbreviations and equations may not be pronounced as a human reader would. All 14 voices use local speech synthesis; they are not human recordings.
+Match the source language and voice. English offers US and UK accents. Acronyms, equations, and names may not sound as expected. All voices are synthesized.
 
-## Scanned pages, tables, or columns read incorrectly
+## Selecting text no longer starts audio
 
-Check that text can be selected; OCR scanned PDFs first. Complex layouts can affect extraction order. Try selection, sentence, or paragraph mode. Use a publicly shareable PDF when reporting a reproducible issue.
+Selection chooses a scope; the headphones start playback. This lets you copy or look up text without starting audio. Hover over the headphones to choose a mode directly.
 
-## A citation is not recognized or has no abstract
+## Hovering over text pauses playback
 
-PDF encoding, layout, and citation style can affect recognition. Open the reference panel and confirm the paper by DOI or title. Metadata providers do not always supply abstracts; missing fields are not replaced by invented content.
+Entering the current source passage, translation, or controls pauses at the end of the sentence so you can interact. Moving away resumes. A manual pause requires manual resumption.
 
-## Translation fails
+## Reading order or citation recognition is wrong
 
-Check connectivity, target language, and provider. Built-in services may rate-limit requests; retry later or switch services. Model endpoints require the correct URL, model, and key, and may incur provider charges. Use the connection test to verify settings.
+Scans need OCR. Unusual columns, tables, or encoding can affect results. Try a smaller selection or find the paper by title or DOI in the paper list. Switching sources cannot guarantee an abstract if none is available.
 
-## The author network is small or mixes identical names
+## Translation fails or a language cannot be spoken
 
-The basic graph uses your current Zotero library, not all papers online. Complete author, date, and DOI fields to improve matching. Check papers and ORCID to distinguish people; identical names do not establish identity.
+Check the network and provider settings. Built-in services can be rate-limited; model services need the correct endpoint, model, and key. Translation covers more languages than speech. Bundled voices support English, Mandarin Chinese, Japanese, and French.
 
-## Where can I report a problem?
+## The author graph is sparse or names collide
 
-Use [GitHub Issues](https://github.com/JunyanKang/paper-loom/issues). Include Paper Loom/Zotero versions, OS and architecture, steps, and expected behavior. Remove API keys and private library information from screenshots and logs.
+The graph reflects the selected library and collection. Complete authors, years, and DOIs, and verify ORCID. A shared name alone does not establish identity.
+
+## Report a problem
+
+Use [Issues](https://github.com/JunyanKang/paper-loom/issues). Include OS, processor, Zotero and plugin versions, steps, and expected behavior. Prefer public samples and remove keys and private full text.

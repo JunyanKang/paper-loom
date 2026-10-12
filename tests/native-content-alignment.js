@@ -12,7 +12,7 @@ try{for(const reader of [r,null]){const doc=reader?reader._iframeWindow.document
  const settle=async()=>{await U.pageScopes.get(doc)?.queue;await wait(250);};await settle();
  const f=doc.querySelector('.cl-settings'),frame=rect(f),left=frame.left+20,right=frame.right-20;
  const nav=rect(f.querySelector('.pl-main-actions>button'));
- for(const tab of ['general','voice','shortcuts','appearance']){f._plSelect(tab);await wait(240);const inside=f.querySelector('iframe').contentDocument;
+ for(const tab of ['general','shortcuts','appearance']){f._plSelect(tab);await wait(240);const inside=f.querySelector('iframe').contentDocument;
   for(const d of [doc,inside])for(const row of d.querySelectorAll('.cl-settings .cl-setting-row,.pl-embedded .pv-setting-row,.pl-embedded .pv-shortcut-row')){if(!visible(row)||row.closest('.cl-llm-popover'))continue;same(label+' '+tab+' row left',rect(row).left,left);same(label+' '+tab+' row right',rect(row).right,right);
    for(const c of row.querySelectorAll(':scope>input[type=checkbox]'))same(label+' '+tab+' switch right',rect(c).right,right);
    for(const c of row.querySelectorAll('.pl-language-select:not(.pl-voice-select) img,.pl-voice-select .pl-voice-symbol>.pl-flag'))same(label+' '+tab+' logo right',rect(c).right,right);

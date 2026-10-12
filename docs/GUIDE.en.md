@@ -2,57 +2,54 @@
 
 [Home](../README.en.md) · [简体中文](GUIDE.md)
 
-## Open and collapse
+## Open a paper
 
-Click the book in the library toolbar or a PDF to open Settings. The bottom icons switch between authors, papers, and settings. Click outside the workspace or click the book again to collapse it. Drag the book to reposition it.
+Click the book for Settings. The three bottom icons open authors, papers, and settings. Click outside or click the book again to collapse the window. Drag the book to move it. Switching workspaces does not interrupt audio.
 
-Each document shows one expanded panel at a time. Switching between settings, references, and the network keeps the navigation anchored and does not stop reading. PDF tabs and separate reader windows retain their own panel state.
+## Choose how much to read
 
-![Settings](images/voices-en.png)
+Select text and click the headphones. Hover over the headphones to choose one of four modes. The default is one paragraph, read once; selecting text alone does not start playback.
 
-## Choose a reading scope
-
-The default is one paragraph, read once. Selecting text does not start playback automatically; click the headphones to begin.
-
-| Mode | How to use it |
+| Mode | Scope |
 | --- | --- |
-| Selection | Select PDF text; release to start listening if automatic reading is enabled |
-| Sentence | Select text within a sentence to hear the complete sentence; replay it as needed |
-| Paragraph | Select within a paragraph to hear the full paragraph and set repeats |
-| Full text | Read from the beginning, a selected position, or saved progress |
+| Sentence | The sentence at the selected position |
+| Selection | The selected text |
+| Paragraph | The paragraph at the selected position |
+| Full text | Continue from the selected position or reading progress |
 
-Hover over the translation caption or the currently spoken source sentence for two rows of controls. The first contains sentence and paragraph navigation, pause/resume, and Stop. The second has all four reading modes, the current language, and a translation-display toggle. Text-translation flags expand upward in two columns. Spoken translation uses portrait flags with US and UK English separated; hover a language to choose other voices on its left. Click the flag to toggle translated audio. The eye button or a double-click on the flag toggles caption display. Speed and voice remain in Settings; mode and repeats are in the caption toolbar.
+When audio starts, the launch popup and its original selection clear. A newer selection made while audio was preparing remains intact.
 
-Hover over sentence or paragraph replay to choose 1, 3, 5, or ∞ repetitions. The two loop icons control the complete current sentence or paragraph, with one repetition by default. Entering the currently spoken source sentence, caption, or controls pauses reading at the end of the current sentence; moving away resumes it automatically. A manual pause stays paused. Controls close about 0.7 seconds after you leave; moving back cancels dismissal. If a paper card, abstract window, or new selection popup overlaps the caption, the caption and controls fade out and return when the overlap ends.
+## Keep the controls beside the text
 
-The PDF must contain extractable text. OCR scanned pages first. Complex tables, equations, and unusual layouts may not read as expected. Text processing handles citation markers and running headers; figure-caption reading is configurable.
+![Listening controls](images/caption-controls-en.png)
 
-Language choices use flags; translation services and model providers use logos. Hover over a provider logo for its name. Select the LLM service and use the gear beside its logo to configure your provider and model. The LLM symbol changes to your provider logo after configuration. In Settings, the four category icons open reading and translation, voices, shortcuts, and appearance. Update options are at the bottom of Appearance.
+Hover over the current source passage, its translation, or the area below it. The first row controls sentences, paragraphs, pause, and stop. The second holds modes, speed, language, and translation visibility.
 
-## Compare a translation
+- Hover over replay to choose **1, 3, 5, or ∞** repeats, separately for sentences and paragraphs.
+- Choose **0.5×, 0.75×, 1×, 1.25×, 1.5×, or 2×**. The new speed applies to subsequent synthesis.
+- Hovering pauses at the end of the sentence; moving away resumes. A manual pause remains paused until you resume it.
+- Controls close about **180 ms** after the pointer leaves. Move back to keep using them.
 
-Translation display is enabled by default. Hover over the language icon to choose a target directly. Click the current language icon once to toggle **Read translation**. The eye button marks caption display; the flag background marks translated audio. Both icons remain available when disabled. With spoken translation enabled, the language list contains only supported voice languages; turn it off to restore all text-translation languages. The translation target and interface language are separate choices. Targets without a bundled voice can still be displayed. Online translation requires connectivity; built-in services may rate-limit requests, or you can use your own model provider.
+When a reference, abstract, or new selection popup overlaps the listening caption, the caption fades out and returns when the obstruction clears. With translations hidden, controls can still appear beneath the current source passage.
 
-The selection translation card has a flag synchronized with the caption controls. Changing it refreshes the translation. Three scope icons select sentence, selection, or paragraph; hovering over the headphones button reveals four equal mode areas. Click Sentence, Selection, Paragraph, or Document to start one reading; Document starts at the selected passage.
+## Choose a language and voice
 
-![Translation caption controls](images/caption-controls-en.png)
+The current flag represents the translation target. Click it to toggle translated speech. Use the eye to show or hide the translation; double-clicking the flag also toggles visibility. Changing the target updates passage, selection, and abstract translation together.
 
-## Inspect in-text citations
+When translated speech is enabled, the menu offers supported speech languages. A small portrait on the flag identifies the voice. US and UK English are separate; hover for other voices. Unsupported speech languages can still be translated, but do not offer an active translated voice.
 
-Hover over supported numeric or author–year citations to inspect the referenced paper. Locate occurrences, open a local paper or DOI, or copy a formatted citation. Recognition depends on the PDF’s text structure. If it fails, open the reference panel or search by DOI/title.
+Source and translated voice preferences are retained separately. Interface language changes labels, not the translation target.
 
-Click or hover a paper title to expand its abstract. Abstracts support original, translated, and bilingual views. If an abstract is missing locally, query online metadata where offered. Paper Loom does not invent an abstract when a source has none.
+## Follow a citation
 
-![Reference abstract](images/references-en.png)
+![Paper details and abstract](images/references-en.png)
 
-## Read later and save
+Hover over a recognized numeric or author–year citation. Locate its occurrences, open a local attachment or DOI, or copy a formatted citation. Abstracts offer original, translated, and bilingual views without a listening action.
 
-Add interesting papers to **Read later** and return to the list directly from your library, without opening a PDF. Open papers, inspect abstracts, copy citations, or save entries to Zotero. Check the title, authors, year, and DOI before saving: similar candidates are not necessarily the same paper.
+Add promising papers to **Read later** and return through the paper list without reopening the source PDF. Check title, authors, year, and DOI before saving to Zotero. Removing a reading-list entry does not delete an existing Zotero item.
 
-Removing an entry from Read later does not delete the corresponding Zotero paper. Full-text access still depends on publisher permissions; Paper Loom does not bypass paywalls or sign-in requirements.
+## Work with difficult PDFs
 
-Continue with [Settings](SETTINGS.en.md), [Authors & careers](NETWORK.en.md), or the [FAQ](FAQ.en.md).
+Scans need OCR first. Columns, equations, tables, and unusual encoding can affect reading order and reference recognition. Try a smaller selection or look up the reference in the paper list. Full-text access still depends on your publisher or institutional permissions.
 
-Abstracts, selection translations, and reading captions share the target language. The floating abstract window offers original, translated, and bilingual views without a listening action. Switching display modes keeps the abstract open.
-
-Once selection-started audio begins playing, its launch popup and original selection clear. A different selection made during preparation remains intact.
+[Settings](SETTINGS.en.md) · [Authors](NETWORK.en.md) · [FAQ](FAQ.en.md)

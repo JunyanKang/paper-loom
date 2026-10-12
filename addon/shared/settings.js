@@ -53,10 +53,12 @@ var LoomSettings = {
     const aliases={captionSize:'translationSize',captionFont:'translationFont'};
     V.get=(key,fallback)=>aliases[key]?T.get(aliases[key],fallback):this.isShared(key)?T.get(key,fallback):appearance[key]&&S.state?.settings?(S.state.settings[appearance[key]]??rawGet(key,fallback)):rawGet(key,fallback);
     V.set=(key,value)=>{
-      if(aliases[key]){T.set(aliases[key],String(value));R.CiteLensThemes.refresh();return;}
+      if(aliases[key]){T.set(aliases[key],String(value));return;}
       if(this.isShared(key)){T.set(key,value);return;}
-      if(appearance[key]&&S.state?.settings){S.state.settings[appearance[key]]=value;S.persist().catch(e=>Zotero.logError(e));R.CiteLensThemes.refresh();}else rawSet(key,value);
+      if(appearance[key]&&S.state?.settings){if(S.state.settings[appearance[key]]===value)return;S.state.settings[appearance[key]]=value;S.persist().catch(e=>Zotero.logError(e));R.CiteLensThemes.refresh();}else rawSet(key,value);
     };
+    // Companion controls are retired: keep the requested one-minute active default.
+    rawSet('companionInteractions',true);rawSet('companionInterval',1);
     V.themeImagePath=()=>R.CiteLensThemes.imagePath();
     R.CiteLensThemes.globalBackgrounds=V.globalBackgrounds;R.CiteLensThemes.globalAssetURI=V.assetURI+'themes/';
     V.importThemeImage=path=>R.CiteLensThemes.importImage(path);
@@ -81,8 +83,10 @@ var LoomSettings = {
     owner.translationUnsubscribe?.();owner.translationUnsubscribe=T.subscribe(keys=>{
       if(![...keys].some(k=>['translationTarget','translationProvider','translationSize','translationFont'].includes(k)))return;
       if(T.get('translationProvider','tencenttransmart')==='tencenttransmart'&&T.get('translationTarget')==='zh-Hant'){T.set('translationTarget','zh-Hans');return;}
-      V.syncTranslationVoice();
-      V.syncSettings();if(keys.has('translationSize')||keys.has('translationFont')){if(V.caption)V.applyCaptionTypography(V.caption.box);R.CiteLensThemes.refresh();}if(keys.has('translationTarget')||keys.has('translationProvider'))V.refreshTranslation?.();
+      const typography=keys.has('translationSize')||keys.has('translationFont'),translation=keys.has('translationTarget')||keys.has('translationProvider');
+      if(translation)V.syncTranslationVoice();
+      if(typography){if(V.caption)V.applyCaptionTypography(V.caption.box);R.CiteLensThemes.refresh();}else V.syncSettings();
+      if(translation)V.refreshTranslation?.();
     });
   },
   async restoreTranslation(source) {

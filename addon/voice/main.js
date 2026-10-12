@@ -336,7 +336,7 @@ var PaperVoice = {
   translationVoiceLanguage(target=this.get('translationTarget','zh-Hans')) {
     return ({'zh-Hans':'zh','zh-Hant':'zh',en:'en',ja:'ja',fr:'fr'})[target]||null;
   },
-  companionIntervalMs() {return Math.max(1,Math.min(60,Number(this.get('companionInterval',5))||5))*60000;},
+  companionIntervalMs() {return Math.max(1,Math.min(60,Number(this.get('companionInterval',1))||1))*60000;},
   setCompanionInterval(value) {value=Number(value);if(![1,3,5,10,15,30].includes(value))return;this.set('companionInterval',value);for(const panel of this.livePanels())panel.resetCompanionSchedule?.();this.syncSettings();},
   installedCaptionFonts() {
     if(!this.captionFonts){try{this.captionFonts=PaperVoiceFonts.discover(this.host);}catch(error){Zotero.logError(error);return [];}}
@@ -403,7 +403,7 @@ var PaperVoice = {
       syncShortcutBindings?.();
       root.style.setProperty('--pv-opacity',String(this.surfaceOpacity()));
       this.syncTheme?.(root);
-      if(find('companionInterval'))find('companionInterval').value=this.get('companionInterval',5);
+      if(find('companionInterval'))find('companionInterval').value=this.get('companionInterval',1);
       if(find('companion'))find('companion').checked=this.get('companionInteractions',true);
       if(find('captionPlacement'))find('captionPlacement').value=this.get('captionPlacement','below');
       if(find('captionFont')){this.syncCaptionFonts(find('captionFont'));find('captionSize').value=this.get('captionSize',12);}
@@ -433,6 +433,7 @@ var PaperVoice = {
       if(find('provider'))find('provider').value=this.get('translationProvider','tencenttransmart');
       if(action?.('configureLLM')){action('configureLLM').hidden=this.get('translationProvider','tencenttransmart')!=='llm';find('llmSummary').textContent=this.t('配置大模型')+' · '+this.llmConfig().name;}
       if(find('target'))find('target').value=this.get('translationTarget','zh-Hans');
+      if(root.dataset.loomSettings==='true')this.localize(root);
     }
     this.syncSharedTranslationControls?.();
     for(const selection of this.selectionContexts.values())selection.syncTranslation?.();
@@ -543,7 +544,7 @@ var PaperVoice = {
     this.caption?.controls?.sync();
     const active=['playing','paused','loading'].includes(this.state),mode=this.get('mode','selection');
     for (const {root,find,action,closeNavigation,closeAudioPopover,finishInteraction,syncCompanionPose,syncQuickLanguages} of this.livePanels()) {
-      if(root.dataset.state!==this.state)finishInteraction?.();root.dataset.state=this.state;syncCompanionPose?.();if(root.dataset.companionOnly==='true')continue;find('status').textContent=this.status;
+      if(root.dataset.state!==this.state)finishInteraction?.();root.dataset.state=this.state;syncCompanionPose?.();if(root.dataset.companionOnly==='true'||root.dataset.loomSettings==='true')continue;find('status').textContent=this.status;
       const preview=find('preview'),text=this.currentSentence||this.lastText||'选择一段文字，留一点时间给耳朵。';
       if(preview.textContent!==text){preview.textContent=text;preview.scrollTop=0;}
       find('progressBar').style.width=(this.readProgress?100*(this.readProgress.fraction??(this.readProgress.total?this.readProgress.current/this.readProgress.total:0)):0)+'%';
@@ -750,7 +751,7 @@ var PaperVoice = {
     try {
       const timeout=new Promise((_,reject)=>{timer=this.host.setTimeout(()=>{expired=true;proc?.kill();reject(new Error('Voice test timed out'));},120000);});
       const test=(async()=>{
-        proc=await Subprocess.call({command:PathUtils.join(path,...required[3].split('/')),arguments:['-E','-s','-B','-X','utf8',PathUtils.join(path,'worker.py')],environment:this.workerEnvironment(),stderr:'pipe'});
+        proc=await Subprocess.call({command:PathUtils.join(path,...required[3].split('/')),arguments:['-E','-s','-B','-X','utf8',...(this.workerArguments?await this.workerArguments(path):[PathUtils.join(path,'worker.py')])],environment:this.workerEnvironment(),stderr:'pipe'});
         if(expired||this.dead||cancelled()){proc.kill();throw new Error('Voice test cancelled');}
         this.engineTestProcess=proc;
         (async()=>{try{while(await proc.stderr.readString()) {}}catch(_){}})();
@@ -801,9 +802,9 @@ var PaperVoice = {
     this.processStart = (async () => {
       const root = this.engineRoot(),started=Date.now(),generation=this.generation;
       const command = Zotero.isWin ? PathUtils.join(root,'python','python.exe') : PathUtils.join(root,'python','bin','python3');
-      if (!(await IOUtils.exists(command))) throw new Error('尚未安装离线声音。请在「设置 → 声音与引擎」中下载后重试。');
+      if (!(await IOUtils.exists(command))) throw new Error('尚未安装离线声音。请在「设置 → 发音环境」中下载后重试。');
       const { Subprocess } = ChromeUtils.importESModule('resource://gre/modules/Subprocess.sys.mjs');
-      const proc = await Subprocess.call({ command, arguments: ['-E','-s','-B','-X','utf8',PathUtils.join(root, 'worker.py')],
+      const proc = await Subprocess.call({ command, arguments: ['-E','-s','-B','-X','utf8',...(this.workerArguments?await this.workerArguments(root):[PathUtils.join(root,'worker.py')])],
         environment: this.workerEnvironment(), stderr: 'pipe' });
       // Drain stderr so native warnings can never block synthesis; do not log selected text.
       (async () => { try { while (await proc.stderr.readString()) {} } catch (_) {} })();
@@ -824,7 +825,7 @@ var PaperVoice = {
               const line = buffer.slice(0, end); buffer = buffer.slice(end+1);
               if (!line) continue;
               const result = JSON.parse(line);
-              if (result.ready) { this.workerVoices=result.voices||[];this.host.clearTimeout(timeout); readyResolve(); }
+              if (result.ready) { this.workerStartupMetrics=result.timings||null;this.workerVoices=result.voices||[];this.host.clearTimeout(timeout); readyResolve(); }
               else {
                 const request = this.pending.get(result.id); this.pending.delete(result.id);
                 if (request) { this.host.clearTimeout(request.timer); result.ok ? request.resolve(result) : request.reject(new Error(result.error)); }
@@ -908,7 +909,6 @@ var PaperVoice = {
     const selectedVoice=this.get('voice','af_heart'),voiceChoices=Object.fromEntries(PaperVoiceCore.speechLanguages.map(x=>[x.id,this.get('voiceFor_'+x.id,PaperVoiceCore.voices.find(v=>v.language===x.id).id)]));
     voiceChoices[this.speechLanguage()]=selectedVoice;
     let contextText='',documentLanguage=languageMode;
-    const rate=PaperVoiceCore.rate(this.get('rate',1));
     const session=this.session={units,sample,remainingLoops:loops,pendingMode:this.session?.pendingMode||null,context:this.session?.context};
     let lastPage=null,extension=null;
     const extend=()=>{
@@ -920,9 +920,9 @@ var PaperVoice = {
     const configFor=index=>{
       if(activeConfig&&sameSentence(activeSentence,units[index]))return activeConfig;
       const readTranslation=!sample&&this.get('readTranslation',false),target=this.get('translationTarget','zh-Hans'),language=this.translationVoiceLanguage(target);
-      return {readTranslation,provider:this.get('translationProvider','tencenttransmart'),target,voice:readTranslation?this.get('voiceFor_'+language,PaperVoiceCore.voices.find(v=>v.language===language)?.id):null};
+      return {rate:PaperVoiceCore.rate(this.get('rate',1)),readTranslation,provider:this.get('translationProvider','tencenttransmart'),target,voice:readTranslation?this.get('voiceFor_'+language,PaperVoiceCore.voices.find(v=>v.language===language)?.id):null};
     };
-    const audioKey=config=>[config.readTranslation,config.provider,config.target,config.voice].join('|');
+    const audioKey=config=>[config.readTranslation,config.provider,config.target,config.voice,config.rate].join('|');
     const buffered=new Map();let bufferTicket=0;
     const prepare=(index,priority=0)=>{
       const unit=units[index],config=configFor(index),{readTranslation,target,provider}=config,key=audioKey(config);
@@ -951,7 +951,7 @@ var PaperVoice = {
         if(readTranslation&&!translated?.text?.trim())throw new Error('译文未能获取，请重试或切换翻译服务');
         const spoken=PaperVoiceCore.measurementSpeech(readTranslation?translated.text:sourceSpeech,outputLanguage);
         const texts=PaperVoicePipeline.clauses(spoken,outputLanguage).flatMap(x=>PaperVoiceCore.chunks(x,340));
-        const stream=new PaperVoicePipeline.ClipStream(texts,(text,p)=>this.synthesize(text,voice,rate,reportStage,generation,p));
+        const stream=new PaperVoicePipeline.ClipStream(texts,(text,p)=>this.synthesize(text,voice,config.rate,reportStage,generation,p));
         const first=await stream.get(0,priority);return {...first,stream,translated};
       })();
       translation.catch(()=>{});speech.catch(()=>{});

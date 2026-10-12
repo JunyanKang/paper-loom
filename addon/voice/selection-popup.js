@@ -31,19 +31,16 @@ var PaperVoiceSelectionUI = {
    .pv-selection-card{box-sizing:border-box;width:100%;min-width:0;max-width:100%;padding:5px 9px 7px;color:var(--pv-ink);background:color-mix(in srgb,var(--pv-paper) 88%,transparent);border-radius:12px;font:12px/1.45 system-ui,sans-serif;text-align:start}
    .pv-selection-card *{box-sizing:border-box}.pv-selection-card [hidden]{display:none!important}
    .pv-selection-heading{display:flex;flex-wrap:nowrap;align-items:center;gap:5px;min-height:22px;margin:0 0 3px;color:var(--pv-muted);font-size:10px;font-weight:500;letter-spacing:0}
-   .pv-selection-symbol{width:15px;height:15px;flex:none;background:var(--pv-accent);mask:var(--pv-selection-translate-icon) center/contain no-repeat}
-   .pv-selection-card[data-translation-state=loading] .pv-selection-symbol{animation:pv-selection-breathe 1.3s ease-in-out infinite}
-   .pv-selection-language{display:flex;align-items:center;gap:6px;margin-right:auto}
+   .pv-selection-language{position:relative;display:flex;align-items:center;margin-right:auto}
    .pv-selection-card .pv-selection-language>button,.pv-selection-card .pv-selection-languages>button,.pv-selection-card .pv-selection-scopes>button{display:flex;align-items:center;justify-content:center;flex:none;width:32px;height:28px;margin:0;padding:5px;border:0;border-radius:6px;background:transparent;color:var(--pv-muted);cursor:pointer}
    .pv-selection-card .pl-flag{display:block;width:24px;height:16px;border-radius:2px;object-fit:contain}
-   .pv-selection-languages{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:4px 0 8px;padding:4px;background:var(--pv-soft);border-radius:8px}
+   .pv-selection-languages{position:absolute;z-index:2;bottom:100%;left:-4px;display:grid;grid-template-columns:repeat(3,32px);gap:2px;width:108px;max-height:96px;overflow-y:auto;scrollbar-width:none;margin:0;padding:4px;background:var(--pv-glass);border-radius:8px;outline:1px solid var(--pv-glass-line);outline-offset:-1px;box-shadow:var(--pv-small-shadow);backdrop-filter:blur(18px)}
    .pv-selection-card .pv-selection-languages>button{justify-self:center}
    .pv-selection-card .pv-selection-languages>button[aria-pressed=true]{background:var(--pv-paper)}
    .pv-selection-mode-icon{display:block;width:18px;height:18px;background:currentColor;mask:var(--pv-selection-mode-icon) center/contain no-repeat}
    .pv-selection-scopes{display:flex;gap:1px;padding:2px;border-radius:8px;background:color-mix(in srgb,var(--pv-ink) 5%,transparent)}
    .pv-selection-scopes button{appearance:none;border:0;border-radius:6px;background:transparent;color:var(--pv-muted);padding:2px 4px;font:500 10px/14px system-ui,sans-serif;cursor:pointer;transition:background .18s ease,color .18s ease,box-shadow .18s ease}
    .pv-selection-scopes button:hover{color:var(--pv-ink)}.pv-selection-scopes button[aria-pressed=true]{color:var(--pv-accent);background:var(--pv-paper);box-shadow:0 1px 3px #172c3d12}
-   .pv-selection-card[data-translation-state=streaming] .pv-selection-symbol{animation:pv-selection-breathe 1.3s ease-in-out infinite}
    .pv-selection-translation{font-size:12px;line-height:1.45;font-weight:400;overflow-wrap:anywhere;white-space:pre-wrap;max-height:min(190px,35vh);overflow-y:auto;scrollbar-width:none;transition:opacity .15s ease}
    .pv-selection-card[data-translation-state=loading] .pv-selection-translation,.pv-selection-card[data-translation-state=error] .pv-selection-translation{color:var(--pv-muted);text-align:center}
    .pv-selection-translation:focus-visible,.pv-selection-card button:focus-visible{outline:none;background:var(--pv-soft)}
@@ -72,14 +69,24 @@ var PaperVoiceSelectionUI = {
    @media(prefers-reduced-motion:reduce){.selection-popup[data-pv-selection],.pv-selection-card *,.pv-selection-card *::before{animation:none!important;transition:none!important}}
   `;
   const heading=doc.createElement('div');heading.className='pv-selection-heading';
-  const symbol=doc.createElement('span');symbol.className='pv-selection-symbol';symbol.setAttribute('aria-hidden','true');
   const languageGroup=doc.createElement('div');languageGroup.className='pv-selection-language';
   const language=doc.createElement('button');language.type='button';language.setAttribute('aria-expanded','false');
-  const flag=doc.createElement('img');flag.className='pl-flag';flag.alt='';language.append(flag);languageGroup.append(symbol,language);
+  const flag=doc.createElement('img');flag.className='pl-flag';flag.alt='';language.append(flag);languageGroup.append(language);
   const languages=doc.createElement('div');languages.className='pv-selection-languages';languages.hidden=true;languages.setAttribute('role','group');languages.setAttribute('aria-label',controller.t('译文语言'));
-  language.onclick=()=>{languages.hidden=!languages.hidden;language.setAttribute('aria-expanded',String(!languages.hidden));};
-  for(const code of ['zh-Hans','zh-Hant','ja','ko','fr','en','de','es','ru']){const b=doc.createElement('button');b.type='button';b.dataset.language=code;b.setAttribute('aria-label',controller.t(controller.translationLanguage(code).label));const img=doc.createElement('img');img.className='pl-flag';img.alt='';img.src=controller.flagURI?.(code)||'';b.append(img);b.onclick=()=>{languages.hidden=true;language.setAttribute('aria-expanded','false');controller.setTranslationTarget(code);};languages.append(b);}
-  card.addEventListener('keydown',e=>{if(e.key==='Escape'&&!languages.hidden){e.preventDefault();e.stopPropagation();languages.hidden=true;language.setAttribute('aria-expanded','false');language.focus();}});
+  languageGroup.append(languages);
+  const win=doc.defaultView;let dismissTimer=0;
+  const cancelDismiss=()=>{win.clearTimeout(dismissTimer);dismissTimer=0;};
+  const closeLanguages=()=>{cancelDismiss();languages.hidden=true;language.setAttribute('aria-expanded','false');};
+  const openLanguages=()=>{cancelDismiss();if(!card.isConnected)return;languages.style.maxHeight=Math.min(96,Math.max(28,languageGroup.getBoundingClientRect().top-8))+'px';languages.hidden=false;language.setAttribute('aria-expanded','true');};
+  const dismissLanguages=()=>{cancelDismiss();dismissTimer=win.setTimeout(closeLanguages,Zotero.PaperLoom?.hoverDismissDelay??180);};
+  languageGroup.addEventListener('pointerenter',openLanguages);
+  languageGroup.addEventListener('pointerleave',dismissLanguages);
+  languageGroup.addEventListener('focusout',e=>{if(!languageGroup.contains(e.relatedTarget))dismissLanguages();});
+  language.addEventListener('focus',()=>{if(language.matches(':focus-visible'))openLanguages();});
+  languages.addEventListener('focusin',cancelDismiss);
+  language.onclick=openLanguages;
+  for(const code of ['zh-Hans','zh-Hant','ja','ko','fr','en','de','es','ru']){const b=doc.createElement('button');b.type='button';b.dataset.language=code;b.setAttribute('aria-label',controller.t(controller.translationLanguage(code).label));const img=doc.createElement('img');img.className='pl-flag';img.alt='';img.src=controller.flagURI?.(code)||'';b.append(img);b.onclick=()=>{closeLanguages();controller.setTranslationTarget(code);};languages.append(b);}
+  card.addEventListener('keydown',e=>{if(e.key==='Escape'&&!languages.hidden){e.preventDefault();e.stopPropagation();language.focus();closeLanguages();}});
   const scopeGroup=doc.createElement('div');scopeGroup.className='pv-selection-scopes';scopeGroup.setAttribute('role','group');scopeGroup.setAttribute('aria-label',controller.t('翻译范围'));
   const scopes=PaperVoiceCore.modes.filter(m=>m.id!=='document').map(mode=>{const b=doc.createElement('button');b.type='button';b.dataset.scope=mode.id;b.setAttribute('aria-label',controller.t(mode.short));b.title=controller.t(mode.short);const icon=doc.createElement('span');icon.className='pv-selection-mode-icon';icon.setAttribute('aria-hidden','true');icon.style.setProperty('--pv-selection-mode-icon',`url("${controller.assetURI}icons/${mode.icon}.svg")`);b.append(icon);b.setAttribute('aria-pressed','false');scopeGroup.append(b);return b;});
   heading.append(languageGroup,scopeGroup);
@@ -91,8 +98,8 @@ var PaperVoiceSelectionUI = {
   const modeGroup=doc.createElement('div');modeGroup.className='pv-selection-read-modes';modeGroup.setAttribute('role','group');modeGroup.setAttribute('aria-label',controller.t('朗读模式'));
   const readModes=PaperVoiceCore.modes.map(mode=>{const b=doc.createElement('button');b.type='button';b.dataset.readMode=mode.id;b.setAttribute('aria-label',controller.t(mode.short));b.title=controller.t(mode.short);const icon=doc.createElement('span');icon.className='pv-selection-mode-icon';icon.setAttribute('aria-hidden','true');icon.style.setProperty('--pv-selection-mode-icon',`url("${controller.assetURI}icons/${mode.icon}.svg")`);b.append(icon);b.onclick=e=>{e.preventDefault();e.stopPropagation();onStartMode?.(mode.id);};modeGroup.append(b);return b;});
   start.append(button,modeGroup);
-  card.append(style,heading,languages,translation,retry,start);controller.applyTheme(card);
-  for(const [name,asset] of [['translate','languages'],['play','headphones'],['retry','repeat'],['audio','audio-lines'],['pause','pause']])card.style.setProperty('--pv-selection-'+name+'-icon',`url("${controller.assetURI}icons/${asset}.svg")`);
+  card.append(style,heading,translation,retry,start);controller.applyTheme(card);
+  for(const [name,asset] of [['play','headphones'],['retry','repeat'],['audio','audio-lines'],['pause','pause']])card.style.setProperty('--pv-selection-'+name+'-icon',`url("${controller.assetURI}icons/${asset}.svg")`);
   const decorate=()=>{if(!card.isConnected)return;const popup=card.closest('.selection-popup');if(popup){popup.dataset.pvSelection='true';popup.dataset.pvSelectionTranslation=String(controller.get('selectionTranslation',true));controller.applyTheme(popup);}};
   doc.defaultView.setTimeout(decorate,0);
   return {card,heading,translation,retry,language,languageGroup,languages,flag,scopes,readModes,decorate};

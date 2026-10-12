@@ -30,19 +30,20 @@ def validate(request):
     if voice not in VOICES:
         raise ValueError('Unknown voice')
     rate = request.get('rate', 1)
-    if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not 0.6 <= rate <= 1.6:
-        raise ValueError('Rate must be between 0.6 and 1.6')
+    if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not 0.5 <= rate <= 2:
+        raise ValueError('Rate must be between 0.5 and 2')
     return text, voice, float(rate)
 
 def main():
-    # Limit CPU use on the reader's host. No network clients or download paths are used.
+    started = time.monotonic()
+    # Keep the proven runtime defaults; explicit four-thread limiting slowed warm synthesis.
     os.environ['OMP_NUM_THREADS'] = '4'
-    os.environ['ORT_NUM_THREADS'] = '4'
     from kokoro_onnx import Kokoro
     from kokoro_onnx.config import EspeakConfig
     import espeakng_loader
     import soundfile as sf
-    root = Path(__file__).resolve().parent
+    imported = time.monotonic()
+    root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent
     # eSpeak resolves paths and has a native path length limit; copy data to a short private path.
     with tempfile.TemporaryDirectory(prefix='paper-voice-', dir='/private/tmp' if sys.platform=='darwin' else None) as folder:
         data = Path(folder) / 'data'
@@ -52,7 +53,7 @@ def main():
         with contextlib.redirect_stdout(sys.stderr):
             engine = Kokoro(str(root / 'models/kokoro-v1.0.onnx'), str(root / 'models/voices-v1.0.bin'), espeak_config=config)
         frontends = {}
-        reply({'ready': True, 'version': '1.1.0', 'languages': ['en', 'zh', 'ja', 'fr'], 'voices': sorted(VOICES)})
+        reply({'ready': True, 'version': '1.1.0', 'languages': ['en', 'zh', 'ja', 'fr'], 'voices': sorted(VOICES), 'timings': {'imports': round(imported-started, 3), 'model': round(time.monotonic()-imported, 3)}})
         for line in sys.stdin:
             request = {}
             try:
@@ -84,10 +85,12 @@ def main():
                     else:
                         lang = 'fr-fr' if prefix == 'f' else 'en-gb' if prefix == 'b' else 'en-us'
                         samples, sr = engine.create(text, voice=voice, speed=rate, lang=lang)
+                synthesized = time.monotonic()
                 buffer = io.BytesIO()
                 sf.write(buffer, samples, sr, format='WAV', subtype='PCM_16')
-                reply({'id': request.get('id'), 'ok': True, 'audio': base64.b64encode(buffer.getvalue()).decode(),
-                       'duration': len(samples) / sr, 'seconds': round(time.monotonic() - start, 3)})
+                audio = base64.b64encode(buffer.getvalue()).decode()
+                reply({'id': request.get('id'), 'ok': True, 'audio': audio,
+                       'duration': len(samples) / sr, 'seconds': round(time.monotonic() - start, 3), 'timings': {'synthesis': round(synthesized-start, 3), 'encoding': round(time.monotonic()-synthesized, 3)}})
             except Exception as exc:
                 reply({'id': request.get('id') if isinstance(request, dict) else None, 'ok': False, 'error': str(exc)[:240]})
 

@@ -23,6 +23,17 @@ Object.assign(PaperLoom,{
       }
       const VS=this.voiceScope,RS=this.referencesScope,V=this.voice=VS.PaperVoice,R=this.references=RS.CiteLens;
       V.providerMeta=code=>this.providerMeta(code);RS.CiteLensControls.providerMeta=code=>this.providerMeta(code);V.flagURI=code=>this.flagURI(code);RS.CiteLensControls.flagURI=code=>this.flagURI(code);
+      // Ship the worker with the plugin so existing voice assets gain new capabilities
+      // without rewriting the installed engine or downloading models again.
+      V.workerArguments=async root=>{
+        if(!this.workerScriptPromise)this.workerScriptPromise=(async()=>{
+          const directory=PathUtils.join(Services.dirsvc.get('UAppData',Components.interfaces.nsIFile).path,'paper-loom','workers');
+          await IOUtils.makeDirectory(directory,{ignoreExisting:true});
+          const path=PathUtils.join(directory,'worker-'+this.version+'.py'),source=await (await Zotero.getMainWindow().fetch(this.rootURI+'shared/worker.py')).text();
+          await IOUtils.writeUTF8(path,source,{tmpPath:path+'.'+Date.now()+'.tmp'});return path;
+        })().catch(error=>{this.workerScriptPromise=null;throw error;});
+        return [await this.workerScriptPromise,root];
+      };
       V.version=R.version=this.version;R.rootURI=this.rootURI+'references/';V.assetURI='resource://'+this.resource+'/voice/assets/';V.cssText=VS.PaperVoiceStyle;
       // One main-window and Reader entry; the original companion stays available.
       V.addWindow=()=>{};V.removeWindow=()=>{};V.onToolbar=({reader})=>{if(reader)V.attachReader(reader);};V.watchToolbar=()=>{};
@@ -38,8 +49,9 @@ Object.assign(PaperLoom,{
         const ui=readerUI(doc);if(!ui)return;const win=doc.defaultView,o=ui.action('orb').getBoundingClientRect();
         // Keep a useful reading surface even when the mascot has been dragged high.
         const bottom=Math.max(8,Math.min(win.innerHeight-220,win.innerHeight-o.top+12));
-        doc.documentElement.style.setProperty('--pl-dock-right',Math.max(16,win.innerWidth-o.right)+'px');
-        doc.documentElement.style.setProperty('--pl-dock-bottom',bottom+'px');
+        const style=doc.documentElement.style,right=Math.max(16,win.innerWidth-o.right)+'px',base=bottom+'px';
+        if(style.getPropertyValue('--pl-dock-right')!==right)style.setProperty('--pl-dock-right',right);
+        if(style.getPropertyValue('--pl-dock-bottom')!==base)style.setProperty('--pl-dock-bottom',base);
       };
       this.managedWorkspaces=true;
       U.fitPage=fitWorkspace;U.onDockProgress=(doc,p,m)=>readerUI(doc)?.dockCompanion(p,m);
@@ -84,7 +96,7 @@ Object.assign(PaperLoom,{
           ui.action('orb').onclick=()=>{const active=[...U.livePages(doc)].find(v=>!v.container.hidden);if(active){if(active.frame.dataset.dockMotion==='closing')active.activate();else active.dismiss();return;}if(!ui.panel.hidden&&ui.panel.dataset.pvVisible!=='false'){V.dismissPanel(reader);return;}this.showHome(reader,doc);};
           RS.CiteLensI18n.install(doc);
         }
-        const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=()=>{try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);}catch(_){}dispose();};refit();}
+        const uiDoc=ui.root.ownerDocument,uiWin=uiDoc.defaultView,refit=()=>{try{if(ui.root.isConnected)fitWorkspace(uiDoc);}catch(_){}};if(!uiDoc.location.href.endsWith('shared/settings-frame.html')){uiWin.addEventListener('resize',refit);ui.action('orb').addEventListener('pointermove',refit);const dispose=ui.dispose;ui.dispose=()=>{try{uiWin.removeEventListener('resize',refit);ui.action('orb').removeEventListener('pointermove',refit);}catch(_){}dispose();};refit();}
         ui.action('settings').onclick=()=>this.showSettings(reader,ui.root.ownerDocument);
         for(const [action,key] of [['help','guide'],['feedback','feedback'],['privacy','privacy']])ui.action(action).onclick=()=>this.showInfo(key,ui.root.ownerDocument);
         return ui;
@@ -94,7 +106,7 @@ Object.assign(PaperLoom,{
       const ensureWorker=V.ensureWorker.bind(V);
       V.ensureWorker=async()=>{
         const command=PathUtils.join(V.engineRoot(),'python',...(Zotero.isWin?['python.exe']:['bin','python3']));
-        if(!await IOUtils.exists(command)){this.showSettings(this.currentReader(),this.currentReader()?._iframeWindow?.document||Zotero.getMainWindow().document,'voice');throw Error('请在「声音与引擎」中下载离线声音，或导入已有声音文件夹。');}
+        if(!await IOUtils.exists(command)){this.showSettings(this.currentReader(),this.currentReader()?._iframeWindow?.document||Zotero.getMainWindow().document,'voice');throw Error('请在「阅读与翻译」的「发音环境」中下载或修复声音。');}
         return ensureWorker();
       };
       LoomSettings.connect(this);
@@ -102,8 +114,8 @@ Object.assign(PaperLoom,{
       try{
         await R.start();await V.start();await LoomRuntime.init(this);this.started=true;
         for(const win of Zotero.getMainWindows())R.addWindow(win);
-        // One discovery schedule; Zotero manages update installation.
-        V.stopUpdateSchedule();this.connectUpdates();V.startUpdateSchedule();
+        // Manual updates only; keep the native verification and install path.
+        V.stopUpdateSchedule();V.updateAuto=false;V.set('updateCheckEnabled',false);this.connectUpdates();await RS.CiteLensUpdater.setAutomatic(false);
       }catch(e){await this.stopModules();throw e;}
     })().finally(()=>{this.starting=null;});
   },

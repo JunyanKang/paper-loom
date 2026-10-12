@@ -1,84 +1,66 @@
-<p align="center"><img src="addon/assets/loom.png" width="144" alt="Paper Loom mascot: a book with headphones and a magnifying glass" /></p>
-<h1 align="center">Paper Loom</h1>
-<p align="center"><strong>听读论文，串起研究线索。</strong></p>
-<p align="center">在 Zotero 中听读、翻译、查阅引文，探索作者与论文之间的联系。</p>
-<p align="center"><a href="README.en.md">English</a> · <a href="https://github.com/JunyanKang/paper-loom/releases/latest">下载 XPI</a> · <a href="docs/GUIDE.md">使用指南</a> · <a href="https://github.com/JunyanKang/paper-loom/issues">问题反馈</a></p>
+![Paper Loom：让论文读得下去](docs/images/hero-zh.png)
 
-Paper Loom 把阅读中需要的下一步放在手边：听一遍难懂的段落，对照译文，查看被引论文的摘要，存入稍后读，再沿着作者的合作关系继续探索。整个过程都在 Zotero 中完成。
+<p align="center"><a href="https://github.com/JunyanKang/paper-loom/releases/latest"><strong>下载 Paper Loom</strong></a> · <a href="docs/INSTALL.md">安装指南</a> · <a href="README.en.md">English</a> · <a href="https://github.com/JunyanKang/paper-loom/issues">反馈</a></p>
 
-![Zotero 中的 Paper Loom 听读界面](docs/images/caption-controls-zh.png)
+读到难懂的一段，听一遍。遇到关键引文，就地看摘要。想继续追下去，先放进稍后读。
 
+**Paper Loom 是 Zotero 里的听读与文献探索插件。** 它把离线朗读、对照翻译、引文预览和作者合作网络放进同一个阅读流程，无需来回切换应用。
 
-## 开始使用
+## 从这一段开始
 
-1. 从[最新版本](https://github.com/JunyanKang/paper-loom/releases/latest)下载 **paper-loom-1.0.6.xpi**。
-2. 在 Zotero 中打开 **工具 → 插件 → 齿轮 → 从文件安装插件…**，选择 XPI；如提示，请重启 Zotero。
-3. 点击**左侧工具栏的小书**，进入 **设置 → 声音与引擎 → 下载引擎与声音**。Paper Loom 会识别电脑系统和处理器，选择对应资源。
-4. 打开 PDF，划选文字即可听读；点击悬浮小书打开设置，通过底部图标切换文献列表与作者网络。
+![译文与两行听读控制栏](docs/images/caption-controls-zh.png)
 
-插件只需安装一个 XPI。声音在插件内按需下载；引文、稍后读、翻译和作者工具不依赖声音包。无需安装 Python、使用终端或另装桌面程序。
+选择单句、划选、段落或全文，按自己的节奏听。默认读一遍，难句可以重复，语速从 0.5× 到 2×。鼠标移入当前原文、译文或控制栏，读完这一句后暂停；移开后继续。
 
-| 使用条件 | 支持情况 |
+声音在本机合成。安装声音包后，英语、普通话、日语和法语可离线朗读，共 14 个音色，英语区分美音与英音。翻译可以显示在原文旁，也可以切换为朗读译文。
+
+## 顺着引文，把问题追下去
+
+![引文详情与摘要](docs/images/references-zh.png)
+
+悬停可识别的正文引文，查看论文信息和摘要。打开本地附件或 DOI，复制指定格式的引用，把值得细读的论文放进稍后读。摘要支持原文、译文和双语对照，翻译语种与正文共用。
+
+引文识别依赖 PDF 的文字结构，复杂排版和扫描件可能需要手动查找。在线来源没有摘要时，界面会保留缺失状态。
+
+## 看见文献背后的作者
+
+![从本地文献建立的作者网络](docs/images/network-zh.png)
+
+从自己的 Zotero 文献库出发，查看谁与谁共同署名、合作过哪些论文。聚焦一个作者，再打开其公开 ORCID 履历，继续了解教育、任职和作品。
+
+图中网络使用演示文献库。实际网络取决于你的收藏与书目信息；同名作者需要结合论文和 ORCID 确认。
+
+## 装好，就在 Zotero 里用
+
+1. 在[发布页](https://github.com/JunyanKang/paper-loom/releases/latest)下载 **`.xpi`**，不要解压。
+2. Zotero → **工具 → 插件 → 齿轮 → 从文件安装插件**。
+3. 点击小书打开设置。在**发音环境**一行点扳手安装声音，盾牌用于检查。
+4. 打开可选中文字的 PDF，划选一段，点击耳麦开始。单纯划选不会自动播放。
+
+文献、翻译和作者功能不需要下载声音。声音包内含运行环境，无需自己安装 Python。
+
+| 运行条件 | 说明 |
 | --- | --- |
-| Zotero | 10.0.5-beta.1 及更新的 10.x；11.x（含当前测试版） |
-| Mac 自动声音下载 | Apple Silicon，macOS 14 及以上；约 494 MiB |
-| Windows 自动声音下载 | Intel / AMD x64；约 482 MiB |
-| Intel Mac、原生 Windows ARM、Linux | 暂无自动声音下载；可导入兼容引擎 |
-| 磁盘空间 | 建议至少预留 3 GB，用于下载、解压和修复 |
+| Zotero | 插件声明兼容 10.0.5-beta.1 起的 10.x 与 11.x；测试版的变化可能影响功能 |
+| Mac 声音包 | Apple Silicon，macOS 14+，约 494 MiB |
+| Windows 声音包 | Intel / AMD x64，约 482 MiB |
+| 其他平台 | 暂无自动声音包 |
+| 可用空间 | 建议至少 3 GB，用于下载、解压和修复 |
 
-平台说明、声音导入和下载重试见[安装与更新](docs/INSTALL.md)。
+[详细安装步骤 →](docs/INSTALL.md)
 
-## 按自己的节奏听读
+## 留下适合你的阅读界面
 
-- **划选、单句、段落、全文四种模式**：选择适合当前任务的范围，重复听读，随时暂停、继续，或跳到上一句、下一段。
-- **面向论文的文本处理**：处理双栏阅读顺序、跨页段落、引文标记与页眉页脚，并可选择是否朗读图注。
-- **四种语言、14 个音色**：支持英语、普通话、日语和法语，提供美音、英音及多种男女声音色。声音由本机自然语音合成生成，并非真人录音。
-- **小巧的阅读伙伴**：悬停译文显示两行朗读、模式与语种控制，点击悬浮小书打开设置；支持自定义快捷键和恢复听读进度。
+![统一设置页](docs/images/appearance-zh.png)
 
-## 理解段落，也理解它的引文
+主题、透明度、界面语言、快捷键、译文字体与引用格式集中在一页。支持自定义背景和自己的模型翻译服务。更新、指南、隐私与反馈固定在窗口底部。
 
-查看原文与译文对照、翻译引文摘要，或直接听读摘要。可选内置翻译服务，也可配置自己的模型服务；这些场景共用翻译选择和阅读外观。
+## 数据留在哪里
 
-![引文摘要与听读操作](docs/images/references-zh.png)
+语音合成和 PDF 文本处理在本机完成。翻译会把文字发送给你选择的服务，在线书目与作者查询会发送相应的查询信息。Paper Loom 不要求注册账号，也不添加遥测或使用统计。详见[隐私与数据](docs/PRIVACY.md)。
 
-在支持识别的正文引文上悬停，可查看被引论文、定位其在 PDF 中的出现位置、检查出版信息，并打开本地附件或 DOI。感兴趣的文献可加入**稍后读**、保存到 Zotero，或复制指定格式的引用。
+## 继续了解
 
-[听读、引文与稍后读指南 →](docs/GUIDE.md) · [翻译与设置 →](docs/SETTINGS.md)
+[使用指南](docs/GUIDE.md) · [设置](docs/SETTINGS.md) · [作者与履历](docs/NETWORK.md) · [常见问题](docs/FAQ.md) · [更新记录](CHANGELOG.md)
 
-## 从论文找到作者，从作者发现联系
-
-作者朋友圈基于 Zotero 文献库中的论文建立。可搜索作者或论文、聚焦合作者、浏览共同发表的文献，并返回原来的网络位置。通过公开 ORCID，可在网络旁查看作者的教育、任职和作品时间线。
-
-![作者网络与合作论文](docs/images/network-zh.png)
-
-![公开 ORCID 学术履历](docs/images/career-zh.png)
-
-*履历示例来自 Dawang Zhou 的公开 ORCID。公开资料可能不完整，缺少某项记录不代表该经历不存在。*
-
-[作者网络与学术履历 →](docs/NETWORK.md)
-
-## 调整到舒服的阅读状态
-
-在一个设置中心管理阅读与翻译、主题、字体、透明度、背景、声音和快捷键。按语言选择音色、调整语速，并在下载声音的同一页面检查引擎。
-
-![离线声音下载与配置](docs/images/voices-zh.png)
-
-## 数据与联网
-
-声音合成、PDF 文本处理和基础作者网络在本机完成。翻译会将文本发送给所选服务；在线文献、期刊信息和 ORCID 查询会访问相应公开服务。无需 Paper Loom 账号，无新增遥测或使用统计。
-
-[隐私与数据](docs/PRIVACY.md)说明本地保存内容、何时联网，以及如何清理数据。
-
-## 文档导航
-
-| 我想…… | 查看 |
-| --- | --- |
-| 安装、下载声音或更新 | [安装与更新](docs/INSTALL.md) |
-| 听读、查引文、整理稍后读 | [使用指南](docs/GUIDE.md) |
-| 设置翻译、外观和快捷键 | [设置详解](docs/SETTINGS.md) |
-| 探索合作关系和公开履历 | [作者与履历](docs/NETWORK.md) |
-| 解决下载、声音、PDF 或翻译问题 | [常见问题](docs/FAQ.md) |
-| 了解本地数据和在线请求 | [隐私与数据](docs/PRIVACY.md) |
-| 自行构建或参与开发 | [参与开发](CONTRIBUTING.md) |
-
-[更新记录](CHANGELOG.md) · [反馈问题](https://github.com/JunyanKang/paper-loom/issues) · [MIT 许可](LICENSE) · [第三方声明](NOTICE.md)
+开源代码采用 [MIT 许可](LICENSE)。欢迎[反馈问题](https://github.com/JunyanKang/paper-loom/issues)或[参与开发](CONTRIBUTING.md)；声音依赖与第三方资源适用[各自的许可](NOTICE.md)。

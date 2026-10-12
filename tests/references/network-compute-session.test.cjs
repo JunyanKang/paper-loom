@@ -27,3 +27,9 @@ test('search close during initialization and worker failure reject all waiters',
 test('search idle timeout releases the worker without closing the reusable session',async()=>{
  const {N,workers,win}=setup(),timers=new Map();let serial=0;win.setTimeout=(fn,ms)=>{timers.set(++serial,{fn,ms});return serial;};win.clearTimeout=id=>timers.delete(id);const s=N.searchSession({nodes:[]}),p=s.query('test'),w=workers[0];w.onmessage({data:{ready:true}});await Promise.resolve();w.onmessage({data:{request:w.sent[1].payload.request,result:[]}});await p;const idle=[...timers.values()].find(t=>t.ms===30000);assert.ok(idle);idle.fn();assert.equal(N.workers.size,0);assert.equal(s.closed,false);s.close();
 });
+
+test('search request timeout rejects every waiter and releases native resources',async()=>{
+ const {N,workers,win}=setup(),timers=new Map();let serial=0;win.setTimeout=(fn,ms)=>{timers.set(++serial,{fn,ms});return serial;};win.clearTimeout=id=>timers.delete(id);
+ const session=N.searchSession({nodes:[]}),results=Promise.allSettled([session.query('one'),session.query('two')]),w=workers[0];w.onmessage({data:{ready:true}});await Promise.resolve();
+ assert.equal(timers.size,2);[...timers.values()][0].fn();const settled=await results;assert.ok(settled.every(r=>r.status==='rejected'&&/搜索超时/.test(r.reason.message)));assert.equal(timers.size,0);assert.equal(N.workers.size,0);assert.equal(w.terminated,true);assert.equal(session.closed,true);
+});

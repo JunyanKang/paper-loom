@@ -552,3 +552,12 @@ test('same source text at a different PDF position is a new selection',()=>{
  assert.equal(p.sameReadingSelection(a,{...a,position:{...a.position,pageIndex:1}}),false);
  assert.equal(p.sameReadingSelection(a,{...a,position:{...a.position,rects:[[2,3,4,5]]}}),false);
 });
+
+test('speed changes apply at the next sentence despite prefetched audio',async()=>{
+ const {p}=setup(),played=[];
+ p.synthesize=async(text,voice,rate)=>({audio:rate+':'+text,duration:1});
+ p.playAudio=async audio=>{played.push(audio);if(played.length===1)p.set('rate',2);};
+ p.set('rate',.5);p.set('repeat',1);
+ await p.speak('First complete sentence. Second complete sentence.',{},true);
+ assert.equal(played.length,2);assert.ok(played[0].startsWith('0.5:'));assert.ok(played[1].startsWith('2:'));
+});

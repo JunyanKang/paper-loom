@@ -2,11 +2,11 @@
 
 [Home](README.en.md) · [简体中文](CONTRIBUTING.md)
 
-Report reproducible problems or propose an improvement in [Issues](https://github.com/JunyanKang/paper-loom/issues). Include the OS, architecture, Zotero and Paper Loom versions, steps, and expected behavior. Share only non-sensitive examples.
+Contributions can start with a reproducible problem, a design improvement, or code. Describe the use case, OS, and full versions in [Issues](https://github.com/JunyanKang/paper-loom/issues). Use public samples without credentials or private full text.
 
-## Build
+## Build locally
 
-Requirements: Node.js 20+ and Python 3.10+. No npm dependency installation is required.
+Use Node.js 20+ and Python 3.10+. Building needs no npm dependencies.
 
 ```sh
 npm test
@@ -14,20 +14,34 @@ npm run build
 npm run verify
 ```
 
-The XPI and checksums are written to `dist/`. Install the XPI into a dedicated Zotero profile for development. Do not develop against your only copy of a personal library.
+Packages and checksums appear in `dist/`. Test in a separate Zotero profile and keep a backup of your personal library.
 
-`addon/shared` provides product navigation, settings, and runtime management. `addon/voice` handles speech and PDF reading; `addon/references` handles citations, authors, and careers. `addon/catalogs` pins downloadable resources. A build is self-contained and does not require a sibling project.
+## Code ownership
 
-## Interface rules
+| Directory | Responsibility |
+| --- | --- |
+| `addon/shared` | Entry points, shared settings, layout, voice installation and runtime |
+| `addon/voice` | PDF text processing, speech, captions, shortcuts |
+| `addon/references` | Citations, abstracts, reading lists, networks, careers |
+| `addon/catalogs` | Pinned voice resources by platform |
+| `tests` | Unit tests and isolated Zotero interaction checks |
 
-Define shared rules in `addon/shared/design.js`, including embedded settings documents. Use the system UI font for controls; reserve user-selected reading fonts for captions and article content. The type scale is 17 px for window titles, 13 px for settings and controls, and 12 px for supporting text. Use 400 weight for labels and 600 for headings.
+Translation providers, target language, and typography share one settings layer. Reuse controllers rather than duplicating state. Network tasks need cancellation, timeouts, and cleanup. Release observers, listeners, and timers when a view is destroyed.
 
-Listening, references, and settings use the shared 360 px width, 20 px content gutters, and a bottom-right anchor. Settings rows use a 38 px minimum height and grow with translated text. Put long compound controls on a second row. Keep scrolling available without visible scrollbars. Language and service menus use 24 px icons in a 48 px column aligned to the trigger icon; selection uses a soft tint, with accessible names for all icons and hover names for providers only. Workspace switching preserves opacity; only opening and collapsing use the dock animation.
+## Interface conventions
 
-## Documentation and releases
+Shared styles live in `addon/shared/design.js`. Interface labels use system fonts; reading fonts apply to source and translated content. Settings and the paper list share a 360 px width and 680 px height, capped by the viewport. Keep content scrollable in smaller windows.
 
-Keep Chinese and English pages aligned. Screenshots must come from the current product UI and match the documented language. Label demo data. Check local links with `python3 scripts/check_docs.py` (requires `markdown2`).
+Short labels remain on one line; longer explanations get their own text area. Check all five interface languages. Flags and voices need accessible names, and controls need keyboard access. Keep selected and hover states distinct. Preserve the surface during page switches and respect reduced motion.
 
-Release XPI assets are immutable versioned files. `scripts/release_metadata.py` creates the Zotero update feed with SHA-512 verification. Publish the release asset before deploying its update feed. The workflow tests the package; native validation uses separate test profiles. A successful compile alone does not verify sound output or UI behavior.
+## Validate changes
 
-Do not commit profiles, library contents, API keys, downloaded runtimes, generated caches, or diagnostic logs.
+Run affected tests first, then the full suite. Exercise host APIs, audio, and windows in an isolated Zotero profile. Cover cancellation, closing, re-entry, and timeout behavior. Compare performance on identical inputs and record measurement conditions.
+
+## Document and release
+
+Keep Chinese and English documentation aligned. Capture current interfaces with complete borders, shadows, and breathing room. Identify demonstration data. Install `markdown2` and run `python3 scripts/check_docs.py` for local links and previews.
+
+Build and compare the XPI with source before release. Update versions and release notes. `scripts/release_metadata.py` creates the SHA-512 update feed. Upload the versioned XPI before deploying the feed, then download the public asset, verify it, and test upgrading an earlier release.
+
+Do not commit personal libraries, settings, credentials, engines, caches, or runtime logs. Preserve third-party licenses and attribution.

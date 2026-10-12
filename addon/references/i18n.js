@@ -1578,9 +1578,10 @@ var CiteLensI18n = {
    this._keys||={};const keys=this._keys[language]||(this._keys[language]=Object.keys(catalog).sort((a,b)=>b.length-a.length));for(let i=0;i<output.length;){let key=keys.find(k=>output.startsWith(k,i));if(key){output=output.slice(0,i)+catalog[key]+output.slice(i+key.length);i+=catalog[key].length;}else i++;}return output;
  },
  apply(root){
+   const protectedContent='.cl-reference-preview,[data-cl-citation],.cl-title,.cl-row-title,.cl-byline,.cl-journal,.cl-authors,.cl-author-name,.cl-existing,.cl-raw,.cl-summary-content:not([data-ui-status="true"]),.cl-cite-snippet,.pn-snippet,.pn-authorline,.pn-node-abstract,.pn-node-link>button:first-child,.pn-abstract-preview p,.pn-proof-row>span,.pn-paper,.pn-publication,.pn-authors,.pn-location';if((root.nodeType===1?root:root.parentElement)?.closest?.(protectedContent))return;
    const lang=this.language(),update=(node,key,value,set)=>{let map=this.sources.get(node);if(!map){map=new Map();this.sources.set(node,map);}const old=map.get(key),source=old&&old.output===value?old.source:value,exact=(node.nodeType===3?node.parentElement:node)?.closest?.('[data-cl-data="true"]')||(node.nodeType===3&&node.parentElement?.tagName==='OPTION'&&!node.parentElement.closest('.cl-settings')),output=exact?(lang==='zh'?source:this.catalogs[lang][source]||source):this.text(source,lang);map.set(key,{source,output});if(output!==value)set(output);};
    const visit=n=>{if(n.nodeType===3){update(n,'text',n.nodeValue,v=>n.nodeValue=v);return;}if(n.nodeType!==1||['STYLE','SCRIPT'].includes(n.tagName))return;
-     if(n.matches('.cl-reference-preview,[data-cl-citation],.cl-title,.cl-row-title,.cl-byline,.cl-journal,.cl-authors,.cl-author-name,.cl-existing,.cl-raw,.cl-summary-content:not([data-ui-status="true"]),.cl-cite-snippet,.pn-snippet,.pn-authorline,.pn-node-abstract,.pn-node-link>button:first-child,.pn-abstract-preview p,.pn-proof-row>span,.pn-paper,.pn-publication,.pn-authors,.pn-location'))return;
+     if(n.matches(protectedContent))return;
      if(n.matches('[data-select-id="cl-setting-interfaceLanguage"],#cl-setting-interfaceLanguage'))return;
      for(const key of ['title','data-cl-tooltip','data-pv-tooltip','aria-label','placeholder'])if(n.hasAttribute(key))update(n,key,n.getAttribute(key),v=>n.setAttribute(key,v));
      if(['INPUT','TEXTAREA'].includes(n.tagName))return;for(const c of n.childNodes)visit(c);
@@ -1591,12 +1592,12 @@ var CiteLensI18n = {
    const win=doc.defaultView,selector='.cl-root,.cl-dialog,.cl-floating,.cl-summary,.cl-select-popover,.cl-tooltip,.pl-engine,.pl-navigation,.pl-main-actions,.pl-conflicts,[data-cite-lens="toolbar"]',dirty=new Set();let scheduled=0;
    const options={subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','data-cl-tooltip','data-pv-tooltip','aria-label','placeholder']};
    const flush=()=>{scheduled=0;observer.disconnect();try{const roots=[...dirty].filter(n=>n.isConnected);dirty.clear();for(const root of roots)if(!roots.some(other=>other!==root&&other.contains(root)))this.apply(root);}finally{observer.observe(doc.documentElement,options);}};
-   const mark=node=>{const el=node?.nodeType===1?node:node?.parentElement;if(!el)return;const root=el.closest(selector);if(root){dirty.add(root);return;}for(const child of el.querySelectorAll(selector))dirty.add(child);};
-   const observer=new win.MutationObserver(records=>{for(const record of records){const el=record.target.nodeType===1?record.target:record.target.parentElement,root=el?.closest(selector);if(root)dirty.add(root);for(const node of record.addedNodes||[])if(node.nodeType===1)mark(node);}if(dirty.size&&!scheduled)scheduled=win.requestAnimationFrame(flush);});
+   const mark=node=>{const el=node?.nodeType===1?node:node?.parentElement;if(!el)return;const root=el.closest(selector);if(root){dirty.add(node);return;}for(const child of el.querySelectorAll(selector))dirty.add(child);};
+   const observer=new win.MutationObserver(records=>{for(const record of records){const el=record.target.nodeType===1?record.target:record.target.parentElement,root=el?.closest(selector);if(root)dirty.add(record.target);for(const node of record.addedNodes||[])if(node.nodeType===1)mark(node);}if(dirty.size&&!scheduled)scheduled=win.requestAnimationFrame(flush);});
    const apply=()=>{for(const root of doc.querySelectorAll(selector))dirty.add(root);win.cancelAnimationFrame(scheduled);flush();};
    this.documents.set(doc,{apply,observer,cancel:()=>{win.cancelAnimationFrame(scheduled);dirty.clear();}});apply();
  },
- refresh(){for(const entry of this.documents.values())entry.apply();},
+ refresh(){const lang=this.language();if(this.refreshedLanguage===lang)return;this.refreshedLanguage=lang;for(const entry of this.documents.values())entry.apply();},
  release(doc){this.documents.get(doc)?.cancel?.();this.documents.get(doc)?.observer.disconnect();this.documents.delete(doc);}
 };
 // Shared network and citation controls. Bibliographic content is never translated.
@@ -1949,3 +1950,6 @@ for(const [i,lang] of ['en','ja','fr','de'].entries())Object.assign(CiteLensI18n
 });
 
 for(const [source,values] of Object.entries({"当前范围暂无可关联作者，可选择其他文献夹。": ["No connected authors here. Choose another collection.", "関連する著者がいません。別のコレクションを選択してください。", "Aucun auteur associé ici. Choisissez une autre collection.", "Keine verbundenen Autoren. Wählen Sie eine andere Sammlung."], "已是最新版本": ["Up to date", "最新版です", "À jour", "Aktuell"]}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
+
+// Compact controls keep their row geometry when the interface language changes.
+for(const [source,values] of Object.entries({"暂停／继续": ["Pause / play", "一時停止／再開", "Pause / lire", "Pause / weiter"], "停止朗读": ["Stop", "停止", "Arrêter", "Stopp"], "显示／隐藏译文": ["Translation", "訳文表示", "Traduction", "Übersetzung"], "原文／译文朗读": ["Read translation", "訳文朗読", "Lire trad.", "Übers. lesen"], "上一句": ["Prev. sentence", "前の文", "Phrase préc.", "Satz zurück"], "下一句": ["Next sentence", "次の文", "Phrase suiv.", "Satz weiter"], "重读当前句": ["Replay sentence", "文を再読", "Relire phrase", "Satz erneut"], "上一段": ["Prev. paragraph", "前の段落", "Paragr. préc.", "Absatz zurück"], "下一段": ["Next paragraph", "次の段落", "Paragr. suiv.", "Absatz weiter"], "重读当前段": ["Replay paragraph", "段落を再読", "Relire paragr.", "Absatz erneut"], "译文字体": ["Caption font", "訳文字体", "Police", "Schrift"], "译文位置": ["Caption position", "訳文位置", "Position", "Position"], "指南": ["Guide", "ガイド", "Guide", "Hilfe"], "隐私": ["Privacy", "プライバシー", "Vie privée", "Datenschutz"], "反馈": ["Feedback", "意見", "Retour", "Feedback"], "更新": ["Update", "更新", "Màj", "Update"]}))for(const [i,lang] of ['en','ja','fr','de'].entries())CiteLensI18n.catalogs[lang][source]=values[i];
