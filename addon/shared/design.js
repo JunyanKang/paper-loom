@@ -137,8 +137,14 @@ var LoomDesignStyle = `
 .cl-settings.pl-settings .cl-settings-tabs.cl-tabs>button[aria-selected=true]::after{content:'';position:absolute;left:1px;right:1px;bottom:-2px;height:4px;z-index:2;background:var(--pl-tab-surface);pointer-events:none}
 .cl-settings.pl-settings .cl-dialog-body{margin:0 0 8px;padding:8px var(--pl-content-inset) 12px!important;border-radius:10px;background:var(--pl-tab-surface);box-shadow:inset 0 0 0 1px var(--pl-tab-line)}
 .cl-settings.pl-settings .cl-dialog-footer{padding:4px 20px 12px}
-.cl-root.pl-workspace-page .cl-header{padding:12px var(--pl-content-inset) 4px}.cl-root.pl-workspace-page .cl-header>.cl-tabs{margin-top:0}
-.pn-map-window.pl-workspace-page .pn-map-workspace{gap:8px;padding:8px;box-sizing:border-box}
+/* List and network share the same top inset, control height and following gap. */
+.pl-workspace-page{--pl-header-inset:12px;--pl-header-control-height:34px;--pl-header-gap:10px}
+.cl-root.pl-workspace-page .cl-header{padding:var(--pl-header-inset) var(--pl-content-inset) 4px}
+.cl-root.pl-workspace-page .cl-header>.cl-tabs{margin:0;height:var(--pl-header-control-height);box-sizing:border-box}
+.cl-root.pl-workspace-page .cl-header>.cl-search{margin-top:var(--pl-header-gap);height:var(--pl-header-control-height)}
+.pn-map-window.pl-workspace-page .pn-map-controls{padding:var(--pl-header-inset) var(--pl-content-inset) 0}
+.pn-map-window.pl-workspace-page .pn-map-controls :is(input,.cl-select-trigger){height:var(--pl-header-control-height);min-height:var(--pl-header-control-height)}
+.pn-map-window.pl-workspace-page .pn-map-workspace{gap:8px;padding:var(--pl-header-gap) 8px 8px;box-sizing:border-box}
 .pn-map-window.pl-workspace-page .pn-map-stage{margin:0;border-radius:10px;overflow:hidden}
 .pn-map-window.pl-workspace-page .pn-map-inspector{margin:0;border-radius:10px}
 .pn-map-window.pl-workspace-page .pn-map-tools{bottom:12px;left:12px}

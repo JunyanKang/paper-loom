@@ -7,9 +7,9 @@ var PaperLoom = {
   currentReader(doc){if(doc){const match=Zotero.Reader._readers.find(r=>r._iframeWindow?.document===doc||r._window?.document===doc);if(match)return match;}const win=doc?.defaultView||Zotero.getMainWindow();return Zotero.Reader.getByTabID(win.Zotero_Tabs?.selectedID)||null;},
   logo(doc,size=28){const image=this.el(doc,'img');image.src=this.assetURI+'loom.png';image.alt='';image.style.cssText='width:'+size+'px;height:'+size+'px;object-fit:contain';return image;},
   flagURI(code){const id=({'zh':'cn','zh-Hans':'cn','zh-Hant':'tw',en:'gb','en-US':'us',ja:'jp',ko:'kr',fr:'fr',de:'de',es:'es',ru:'ru',auto:'auto'})[code]||'auto';return this.assetURI+'flags/'+id+'.svg';},
-  providerMeta(code){
+  providerMeta(code,{generic=false}={}){
     const presets=this.voice.llmPresets;let id=code;
-    if(code==='llm'){try{const selected=this.voice.get('llmProvider','');const saved=JSON.parse(this.voice.get('llmConfigs','{}'));id=selected&&saved[selected]?selected:'llm';}catch(_){id='llm';}}
+    if(code==='llm'&&!generic){try{const selected=this.voice.get('llmProvider','');const saved=JSON.parse(this.voice.get('llmConfigs','{}'));id=selected&&saved[selected]?selected:'llm';}catch(_){id='llm';}}
     const known=['tencenttransmart','bing','google','llm',...presets.map(p=>p.id)];if(!known.includes(id))id='custom';
     const label=({tencenttransmart:'Tencent',bing:'Microsoft',google:'Google',llm:'LLM',custom:'Custom API',qwen:'Qwen',doubao:'Doubao',glm:'GLM',hunyuan:'Hunyuan',qianfan:'Qianfan',anthropic:'Claude'})[id]||presets.find(p=>p.id===id)?.name||'LLM';
     return {id,label:code==='llm'&&id!=='llm'?'LLM · '+label:label,uri:this.assetURI+'providers/'+id+(id==='tencenttransmart'?'.png':'.svg')};

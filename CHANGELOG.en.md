@@ -2,6 +2,12 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.16 · 2026-10-12
+
+Align the reference list and author network header spacing and control heights. Settings show the installed version between temporary update messages.
+
+Use the brain-shaped AI icon for the LLM option in translation-service menus. The selected control still shows the configured provider logo.
+
 ## 1.0.15 · 2026-10-12
 
 Use a consistent English interface on a fresh installation. Translate caption placement options as complete phrases in English, Japanese, French and German. Retain the bottom-right anchored workspace backgrounds from 1.0.14.
