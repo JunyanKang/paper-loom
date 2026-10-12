@@ -1961,3 +1961,5 @@ for (const [source, values] of Object.entries({
 })) for (const [i, lang] of ["en", "ja", "fr", "de"].entries()) CiteLensI18n.catalogs[lang][source] = values[i];
 
 for(const [lang,label] of Object.entries({en:'Check',ja:'確認',fr:'Vérifier',de:'Prüfen'}))CiteLensI18n.catalogs[lang]['检查']=label;
+
+for(const [lang,label] of Object.entries({en:"Author labels",ja:"著者名",fr:"Noms des auteurs",de:"Autorennamen"}))CiteLensI18n.catalogs[lang]["作者标签"]=label;

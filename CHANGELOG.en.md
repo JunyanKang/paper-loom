@@ -2,6 +2,10 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.0.19 · 2026-10-12
+
+Match the coauthor network window height to the reference list while preserving header control heights and spacing. Add an author-label toggle beside the zoom controls; the choice is saved for future visits.
+
 ## 1.0.18 · 2026-10-12
 
 Normalize excessive transparency after loading saved settings, then persist the capped value so it stays consistent after restarting. Includes the Check/Update action and native installation progress from 1.0.17.

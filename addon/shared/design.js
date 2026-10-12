@@ -143,7 +143,7 @@ var LoomDesignStyle = `
 .cl-root.pl-workspace-page .cl-header>.cl-tabs{margin:0;height:var(--pl-header-control-height);box-sizing:border-box}
 .cl-root.pl-workspace-page .cl-header>.cl-search{margin-top:var(--pl-header-gap);height:var(--pl-header-control-height)}
 .pn-map-window.pl-workspace-page .pn-map-controls{padding:var(--pl-header-inset) var(--pl-content-inset) 0}
-.pn-map-window.pl-workspace-page .pn-map-controls :is(input,.cl-select-trigger){height:var(--pl-header-control-height);min-height:var(--pl-header-control-height)}
+.pn-map-window.pl-workspace-page .pn-map-controls :is(input,.cl-select-trigger){margin:0;height:var(--pl-header-control-height);min-height:var(--pl-header-control-height)}
 .pn-map-window.pl-workspace-page .pn-map-workspace{gap:8px;padding:var(--pl-header-gap) 8px 8px;box-sizing:border-box}
 .pn-map-window.pl-workspace-page .pn-map-stage{margin:0;border-radius:10px;overflow:hidden}
 .pn-map-window.pl-workspace-page .pn-map-inspector{margin:0;border-radius:10px}
@@ -342,8 +342,8 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .pl-settings .pl-engine .pl-engine-actions>button[data-loom-action=install-runtime][data-health=error]{color:#c44842!important}
 .pl-settings .pl-engine .pl-engine-actions>button[data-loom-action=test-runtime][data-health=ready]{color:#278255!important}
 
-/* A single settings sheet shares its outer geometry with the bibliography. */
-.cl-root.pl-workspace-page,.cl-settings.pl-settings{height:680px;max-height:calc(100vh - var(--pl-dock-bottom,24px) - 48px)!important}
+/* All main pages share the bibliography height without changing header spacing. */
+.cl-root.pl-workspace-page,.cl-settings.pl-settings,.pn-map-window.pl-workspace-page{height:680px;max-height:calc(100vh - var(--pl-dock-bottom,24px) - 48px)!important}
 .cl-settings.pl-settings .cl-dialog-body{padding:12px var(--pl-content-inset) 10px!important}
 .pl-settings .pl-settings-frame{flex:none}
 .pl-settings .pl-settings-group,.pl-embedded .pl-settings-group~.pl-settings-group{border-top:1px solid var(--cl-line,var(--pv-glass-line));padding-top:6px!important;margin-top:6px!important}
