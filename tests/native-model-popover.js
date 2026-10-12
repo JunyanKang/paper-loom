@@ -4,9 +4,13 @@ const check=(name,ok,detail)=>{checks.push({name,ok:!!ok,detail});if(!ok)throw E
 try{for(const r of [reader,null]){
  const doc=r?r._iframeWindow.document:Zotero.getMainWindow().document,win=doc.defaultView,name=r?'PDF':'library';if(r)Zotero.getMainWindow().Zotero_Tabs.select(r._tabID||r.tabID);
  await L.showSettings(r,doc);await U.pageScopes.get(doc)?.queue;await wait(400);const f=doc.querySelector('.cl-settings');f._plSelect('general');await wait(200);
- const service=f.querySelector('[data-translation-setting=translationProvider]');service.value='llm';service.dispatchEvent(new win.Event('change',{bubbles:true}));await wait(150);
+ const service=f.querySelector('[data-translation-setting=translationProvider]');
+ const setProvider=async value=>{service.value=value;service.dispatchEvent(new win.Event('change',{bubbles:true}));await wait(60);};
+ for(const value of ['tencenttransmart','bing','google']){await setProvider(value);const button=f.querySelector('.pl-provider-settings');check(name+' '+value+' has no model gear',button.hidden&&button.disabled&&button.getBoundingClientRect().width===0);}
+ service.value='llm';service.dispatchEvent(new win.Event('change',{bubbles:true}));await wait(150);
  const gear=f.querySelector('.pl-provider-settings'),popup=f.querySelector('.cl-llm-popover'),before=f.getBoundingClientRect().toJSON();gear.click();await wait(150);const p=popup.getBoundingClientRect(),a=gear.getBoundingClientRect();
  check(name+' opens beside gear within available space without changing page or size',!popup.hidden&&!f.querySelector('.cl-settings-tabs')&&!f.querySelector('.cl-settings-pane').hidden&&f.getBoundingClientRect().height===before.height&&(popup.dataset.side==='above'?p.bottom<=a.top:p.top>=a.bottom)&&p.top>=before.top&&p.right<=before.right&&p.bottom<=f.querySelector('.pl-main-actions').getBoundingClientRect().top,{frame:before,popup:p.toJSON(),gear:a.toJSON()});
+ check(name+' LLM gear is visible',!gear.hidden&&!gear.disabled&&gear.getBoundingClientRect().width>0);
  check(name+' provider label stays on one line',popup.querySelector('.cl-setting-row label').getBoundingClientRect().height<30);
  check(name+' all model controls remain available',popup.querySelectorAll('[data-llm]').length===3&&popup.querySelectorAll('.cl-llm-actions>button').length===2&&!!popup.querySelector('[data-update-models]'));
  const provider=popup.querySelector('[data-translation-setting-proxy=llmProvider]');provider.click();await wait(100);const menu=doc.querySelector('.cl-select-popover');check(name+' provider menu coexists with editor',!menu.hidden&&!popup.hidden);provider.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(100);check(name+' first Escape closes only provider list',!popup.hidden);popup.querySelector('input').dispatchEvent(new win.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(80);check(name+' second Escape closes editor only',popup.hidden&&!f.hidden);
@@ -14,5 +18,5 @@ try{for(const r of [reader,null]){
  gear.click();await wait(100);gear.click();check(name+' gear toggles editor',popup.hidden);
  gear.click();await wait(100);gear.click();check(name+' close preserves unified page',popup.hidden&&!f.hidden);gear.click();await wait(100);
  if(r){const b=f.getBoundingClientRect(),c=doc.createElement('canvas');c.width=Math.ceil(b.width*2);c.height=Math.ceil(b.height*2);const ctx=c.getContext('2d');ctx.scale(2,2);ctx.drawWindow(win,b.x,b.y,b.width,b.height,'#fff');const base=PathUtils.parent(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path),out=PathUtils.join(base,PathUtils.filename(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path).replace('qa-profile','test-results'));await IOUtils.write(PathUtils.join(out,'model-popover.png'),Uint8Array.from(win.atob(c.toDataURL().split(',')[1]),x=>x.charCodeAt(0)));}
- gear.click();f._clPage.snap(false);
+ gear.click();T.set('translationProvider','bing');await wait(80);check(name+' shared provider switch hides gear and open editor',gear.hidden&&popup.hidden&&gear.getAttribute('aria-expanded')==='false');f._clPage.snap(false);
  }return {passed:true,checks};}catch(e){return {passed:false,error:String(e),stack:e.stack,checks};}finally{T.set('translationProvider',saved);L.voice.syncSettings();}

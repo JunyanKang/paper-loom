@@ -5,7 +5,7 @@ const theme=L.referencesScope.CiteLensServices.state.settings.theme,state={...Ru
 try{
 w.focus();d.querySelector('.cl-settings')?._clPage.destroy();L.referencesScope.CiteLensServices.state.settings.theme='porcelain';L.referencesScope.CiteLensThemes.refresh();
 for(const lang of ['zh','en','de','ja','fr']){
- V.setLanguage(lang);await L.showSettings(null,d);await U.pageScopes.get(d)?.queue;await wait(200);
+ V.setLanguage(lang);await L.showSettings(null,d);await U.pageScopes.get(d)?.queue;await wait(400);
  const f=d.querySelector('.cl-settings'),body=f.querySelector('.cl-dialog-body'),iframe=f.querySelector('iframe'),inside=iframe.contentDocument,iw=inside.defaultView;
  const contentAccessible=()=>{if(body.scrollHeight<=body.clientHeight+1)return true;if(f.getBoundingClientRect().height>=679||w.getComputedStyle(body).overflowY!=='auto')return false;const before=body.scrollTop;body.scrollTop=body.scrollHeight;const bottom=body.scrollTop+body.clientHeight>=body.scrollHeight-1;body.scrollTop=before;return bottom;};
  check(lang+' single page without category tabs',!f.querySelector('.cl-settings-tabs')&&f.dataset.settingsPage==='all');

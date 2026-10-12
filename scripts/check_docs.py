@@ -11,12 +11,12 @@ css='''body{margin:0;color:#1f2328;background:#f6f8fa;font:16px/1.6 -apple-syste
 def slug(s):return re.sub(r'[^\w\-\s]','',re.sub(r'<[^>]+>','',s).lower()).replace(' ','-')
 checks=[]
 # Screenshots are captured at 2x: keep their intended CSS size in every document.
-from PIL import Image
+import struct
 for name in names:
  p=root/name;s=p.read_text()
  for src,width in re.findall(r'<img src="([^"]+)"[^>]*width="(\d+)"',s):
   if 'hero-' not in src:
-   pixels=Image.open(p.parent/src).width
+   raw=(p.parent/src).read_bytes();assert raw[:8]==b'\x89PNG\r\n\x1a\n';pixels=struct.unpack('>I',raw[16:20])[0]
    assert abs(int(width)-pixels/2)<=1,(name,src,'screenshot must display at native UI scale')
  for pair in re.findall(r'\]\(([^)]+)\)|(?:href|src)="([^"]+)"',s):
   ref=next(x for x in pair if x)

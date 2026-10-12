@@ -364,5 +364,6 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .pl-embedded.pv-shell .pl-shortcuts-inline .pv-shortcut-row>span{white-space:nowrap;line-height:1.3!important}
 .pl-embedded.pv-shell .pl-shortcuts-inline .pv-shortcut-key{white-space:nowrap;max-width:none}
 .cl-settings.pl-settings .cl-update-links.pl-resource-links{gap:10px}
+.cl-settings .pl-provider-settings[hidden]{display:none!important}
 .cl-settings .cl-llm-popover[data-side=above]::before{top:auto;bottom:-7px;transform:rotate(225deg)}
 `;
