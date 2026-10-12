@@ -4,7 +4,7 @@
 
 ## 1.0.20 · 2026-10-12
 
-Fixed missing bibliography entries when reference indentation differs from the surrounding page, including numbered citation ranges and entries continuing onto the next page.
+Fixed missing bibliography entries when reference indentation differs from the surrounding page, including numbered citation ranges and entries continuing onto the next page. Superscript citations after a punctuated year, such as `1961,¹`, are no longer excluded as mathematical powers.
 
 Reference lists are prepared in small batches and displayed together. Switching between authors and references preserves existing text and scroll position without resizing the text during the transition. PDFs share completed author layouts while retaining independent view state.
 

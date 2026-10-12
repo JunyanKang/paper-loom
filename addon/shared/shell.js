@@ -36,8 +36,8 @@ var PaperLoom = {
       }return false;
     };
     const cancel=()=>{win.clearTimeout(closeTimer);closeTimer=0;};
-    const close=()=>{cancel();for(const view of U.livePages(doc))if(!view.container.hidden&&view.frame.dataset.dockMotion!=='closing'){lastView=view;view.dismiss();}};
-    const schedule=()=>{cancel();closeTimer=win.setTimeout(()=>{if(!disposed&&!hovered)close();},this.hoverDismissDelay);};
+    const close=()=>{cancel();ui._hoverWorkspace=false;for(const view of U.livePages(doc))if(!view.container.hidden&&view.frame.dataset.dockMotion!=='closing'){lastView=view;view.dismiss();}};
+    const schedule=()=>{if(closeTimer)return;closeTimer=win.setTimeout(()=>{closeTimer=0;if(!disposed&&!hovered)close();},this.hoverDismissDelay);};
     const open=()=>{
       if(disposed)return;hovered=true;ui._hoverWorkspace=true;cancel();
       const active=[...U.livePages(doc)].find(v=>!v.container.hidden);

@@ -28,7 +28,7 @@ test('Cell mixed-layout bibliography retains all 98 references and cross-page co
  assert.deepEqual(refs.map(r=>r.number),Array.from({length:98},(_,i)=>i+1));
  assert.equal(refs[5].author,'López-Otín');assert.match(refs[10].title,/basic biology and clinical relevance/);assert.ok(refs.every(r=>!r.raw.includes('OPEN ACCESS')));
  const L=require('../../addon/references/citation-links'),page=L.page(fixture.citationChars);
- for(const [text,numbers] of [['2–7',[2,3,4,5,6,7]],['2–6,8–10',[2,3,4,5,6,8,9,10]],['3,5,6,11–15',[3,5,6,11,12,13,14,15]]]){
+ for(const [text,numbers] of [['1',[1]],['2–7',[2,3,4,5,6,7]],['2–6,8–10',[2,3,4,5,6,8,9,10]],['3,5,6,11–15',[3,5,6,11,12,13,14,15]]]){
   const run=page.numericRuns.find(r=>r.text===text);assert.ok(run,text);assert.deepEqual(L.resolve({offset:run.offsets[0]},page,refs).records.map(r=>r.number),numbers);
   for(let i=0;i<run.rects.length;i++){const r=run.rects[i],hit=L.pointed(page,[(r[0]+r[2])/2,(r[1]+r[3])/2],refs);assert.ok(hit?.records.length,text+' glyph '+i);assert.equal(hit.unresolved.length,0);}
  }

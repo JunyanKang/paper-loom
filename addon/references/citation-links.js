@@ -8,7 +8,8 @@ var CiteLensCitationLinks={
       // A raised small-font run attached to prose. Baseline digits and units are not citations.
       if(ratio<.42||ratio>.84||rise<.16||rise>.8||gap<-.45*before.fontSize||gap>1.2*before.fontSize)continue;
       let token=before.c;for(let n=i-2;n>=Math.max(0,i-32)&&!chars[n].spaceAfter&&!chars[n].lineBreakAfter;n--)token=chars[n].c+token;
-      if(/^(?:[\d.,]+|[a-z]|cm|mm|nm|µm|μm|um|m|s|kg|mol)$/i.test(token.trim()))continue;
+      // A sentence separator after a number (for example 1961,¹) is a citation boundary, not a power.
+      if((/^[\d.,]+$/.test(token.trim())&&!/[,.]$/.test(token.trim()))||/^(?:[a-z]|cm|mm|nm|µm|μm|um|m|s|kg|mol)$/i.test(token.trim()))continue;
       let end=i+1;
       while(end<chars.length){const prev=chars[end-1],next=chars[end];if(!numeric(next)||Math.abs(next.fontSize-first.fontSize)>.15*first.fontSize||Math.abs(next.baseline-first.baseline)>.25*first.fontSize||next.rect[0]<prev.rect[0]||next.rect[0]-prev.rect[2]>.65*first.fontSize)break;end++;}
       while(end>i+1&&!/^\d$/.test(chars[end-1].c))end--;

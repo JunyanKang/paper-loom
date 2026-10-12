@@ -69,3 +69,9 @@ test('spatial lookup preserves glyph order at tile boundaries and limits malform
 test('reference index preserves ambiguity and rebuilds for replaced and extended arrays',()=>{
  const refs=[{number:2,title:'First'}],mention=C.citationMentions('[2]');assert.equal(L.result(mention,refs).records.length,1);refs.push({number:2,title:'Conflicting'});assert.equal(L.result(mention,refs).records.length,0);const replacement=[{number:2,title:'Replacement'}];assert.equal(L.result(mention,replacement).records[0].title,'Replacement');
 });
+
+test('superscripts after a punctuated year resolve without admitting mathematical powers',()=>{
+ const refs=[{number:1,title:'The serial cultivation of human diploid cell strains'}];
+ for(const base of ['1961,','1961.']){const chars=raised(base,'1'),page=L.page(chars);assert.deepEqual(L.resolve({offset:chars.at(-1).offset},page,refs).records,refs);}
+ for(const base of ['10','1961','3.14','cm','x'])assert.equal(L.superscripts(raised(base,'2')).length,0);
+});
