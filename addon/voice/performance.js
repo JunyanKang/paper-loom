@@ -45,18 +45,19 @@ Object.assign(PaperVoice,{
  async publicationMargins(pdf){
   this.marginTaskCache||=new WeakMap();if(!this.marginTaskCache.has(pdf)){const task=Promise.all(Array.from({length:Math.min(5,pdf.numPages)},(_,i)=>this.pageContent(pdf,i))).then(pages=>PaperVoiceCore.marginSignatures(pages));this.marginTaskCache.set(pdf,task);task.catch(()=>this.marginTaskCache.delete(pdf));}return this.marginTaskCache.get(pdf);
  },
- async pageLayout(reader,index){
+ async pageLayout(reader,index,{includeCaptions=false}={}){
   const pdf=reader?._internalReader?._primaryView?._iframeWindow?.PDFViewerApplication?.pdfDocument;if(!pdf)return null;
   this.layoutCache||=new WeakMap();let cache=this.layoutCache.get(pdf);if(!cache){cache=new Map();this.layoutCache.set(pdf,cache);}
-  if(!cache.has(index)){const task=(async()=>{const [margins,page]=await Promise.all([this.publicationMargins(pdf),this.pageContent(pdf,index)]);return PaperVoiceCore.pdfLayout(page.items,index,page.height,{margins});})();cache.set(index,task);task.catch(()=>cache.delete(index));}
-  return cache.get(index);
+  const key=includeCaptions?'selection:'+index:index;
+  if(!cache.has(key)){const task=(async()=>{const [margins,page]=await Promise.all([this.publicationMargins(pdf),this.pageContent(pdf,index)]);return PaperVoiceCore.pdfLayout(page.items,index,page.height,{margins,skipCaptions:!includeCaptions});})();cache.set(key,task);task.catch(()=>cache.delete(key));}
+  return cache.get(key);
  },
- async localUnits(reader,anchor,mode='sentence',generation=this.generation){
+ async localUnits(reader,anchor,mode='sentence',generation=this.generation,options={}){
   const pdf=reader?._internalReader?._primaryView?._iframeWindow?.PDFViewerApplication?.pdfDocument;if(!pdf)return [];
   let first=Math.max(0,anchor.pageIndex-1),last=Math.min(pdf.numPages-1,anchor.pageIndex+1);
   while(true){
    if(generation!==this.generation||this.dead)throw PaperVoicePipeline.cancelled();
-   const pages=[];for(let i=first;i<=last;i++)pages.push(await this.pageLayout(reader,i));
+   const pages=[];for(let i=first;i<=last;i++)pages.push(await this.pageLayout(reader,i,options));
    const units=PaperVoiceCore.layoutUnits(pages),group=PaperVoiceCore.scopeUnits(units,anchor,mode);
    if(!group.length)return [];
    const key=mode==='paragraph'?'paragraphId':'sentenceId';

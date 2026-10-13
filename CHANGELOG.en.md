@@ -2,6 +2,12 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.1.1 · 2026-10-13
+
+Fixed translation failures when a figure caption is selected in sentence or paragraph mode. Explicitly selected captions can now be translated, while continuous narration retains its existing caption filtering.
+
+When PDF text layout is unavailable, translation falls back to the selected text. Failed translations show the specific error and keep the retry action available.
+
 ## 1.1.0 · 2026-10-13
 
 New installations without voices show a small, themed invitation. Accepting opens Speech environment and starts installation. Choosing Not now shows where to install later, with an option to highlight the wrench in Settings. Existing users and installations with voices are not prompted again.

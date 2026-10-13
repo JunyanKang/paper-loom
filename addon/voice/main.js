@@ -239,7 +239,7 @@ var PaperVoice = {
           ui.translation.textContent=result.text;ui.card.dataset.translationState='ready';
         }catch(error){
           if(!current())return;
-          ui.translation.textContent=this.t('翻译暂不可用');ui.translation.title=this.t(error.message||String(error));ui.card.dataset.translationState='error';ui.retry.hidden=false;
+          ui.translation.textContent=this.t(error.message||'翻译暂不可用');ui.translation.title='';ui.card.dataset.translationState='error';ui.retry.hidden=false;
         }
       },220);
     };
@@ -260,17 +260,25 @@ var PaperVoice = {
     selection.syncTranslation();
   },
   async selectionTranslationText(reader,selection,scope='selection') {
-    const resolved=await this.resolveSelection(reader,selection);
-    if(scope==='selection'){
-      const pdf=reader._internalReader?._primaryView?._iframeWindow?.PDFViewerApplication?.pdfDocument;
-      if(!pdf||!Number.isInteger(selection.pageIndex))return selection.text;
-      const page=Components.utils.waiveXrays(await pdf.getPage(selection.pageIndex+1));
-      return PaperVoiceCore.completeSelection((await page.getTextContent()).items,selection,resolved?.anchorOffset);
-    }
-    if(!resolved)throw new Error('无法定位划选位置，请重新划选');
-    const units=await this.localUnits(reader,resolved,scope),group=PaperVoiceCore.scopeUnits(units,resolved,scope);
-    if(!group.length)throw new Error('无法定位划选位置，请重新划选');
-    return PaperVoiceCore.cleanText(group.map(unit=>unit.text).join(' '));
+    const selected=PaperVoiceCore.cleanText(selection?.text||'');
+    if(!selected)throw new Error('无法定位划选位置，请重新划选');
+    let resolved=null;
+    try{
+      resolved=await this.resolveSelection(reader,selection);
+      if(scope!=='selection'&&resolved){
+        // Explicit translation includes figure captions; continuous narration
+        // keeps its existing caption filter and its separate cached layout.
+        const units=await this.localUnits(reader,resolved,scope,this.generation,{includeCaptions:true}),group=PaperVoiceCore.scopeUnits(units,resolved,scope);
+        if(group.length)return PaperVoiceCore.cleanText(group.map(unit=>unit.text).join(' '));
+      }
+      const pdf=reader?._internalReader?._primaryView?._iframeWindow?.PDFViewerApplication?.pdfDocument;
+      if(pdf&&Number.isInteger(selection.pageIndex)){
+        const {items}=await this.pageContent(pdf,selection.pageIndex);
+        return PaperVoiceCore.completeSelection(items,selection,resolved?.anchorOffset)||selected;
+      }
+    }catch(error){if(error.name==='AbortError'||this.dead)throw error;}
+    // A usable selection can still be translated if PDF layout is incomplete.
+    return selected;
   },
   ensurePanel(reader) {
     const old=this.panels.get(reader);

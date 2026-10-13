@@ -432,7 +432,7 @@ test('selection translation uses the configured service and ignores stale select
 });
 test('selection translation may be disabled and failures keep reading controls independent',async()=>{
  const {p}=setup(),r={},s={text:'Cells detect light.'},ui={card:{isConnected:true,dataset:{}},heading:{},translation:{},retry:{setAttribute(){}},language:{setAttribute(){}},flag:{},languageGroup:{},languages:{children:[]},scopes:[]};p.t=s=>s;p.translationLanguage=()=>({label:'简体中文'});p.set('selectionTranslation',false);let calls=0;p.translate=async()=>{calls++;throw Error('offline');};
- p.selectionContexts.set(r,s);p.translateSelection(r,s,ui);assert.equal(ui.translation.hidden,true);assert.equal(calls,0);p.set('selectionTranslation',true);p.translateSelection(r,s,ui);await new Promise(r=>setTimeout(r,250));assert.equal(ui.card.dataset.translationState,'error');assert.equal(ui.retry.hidden,false);assert.notEqual(p.state,'error');
+ p.selectionContexts.set(r,s);p.translateSelection(r,s,ui);assert.equal(ui.translation.hidden,true);assert.equal(calls,0);p.set('selectionTranslation',true);p.translateSelection(r,s,ui);await new Promise(r=>setTimeout(r,250));assert.equal(ui.card.dataset.translationState,'error');assert.equal(ui.translation.textContent,'offline');assert.equal(ui.translation.title,'');assert.equal(ui.retry.hidden,false);assert.notEqual(p.state,'error');
 });
 
 test('primary captures the selected popup without opening the main panel',async()=>{
