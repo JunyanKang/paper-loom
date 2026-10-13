@@ -1,0 +1,7 @@
+if(!/qa-profile/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
+const Q=L.referencesScope,N=Q.CiteLensNetworkCore,M=Q.CiteLensNetworkMap,root=PathUtils.parent(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path),records=JSON.parse(await IOUtils.readUTF8(PathUtils.join(root,'tests','fixtures','church-author-variants.json'))),before=JSON.stringify(records),checks=[],check=(name,ok)=>{checks.push({name,ok:!!ok});if(!ok)throw Error(name);};
+const papers=[...records,{id:'churchill-control',local:true,title:'Distinct researcher',creators:[{firstName:'Gary A.',lastName:'Churchill'}]}];
+const graph=await Q.CiteLensNetwork.compute('map',{nodes:papers,edges:[],references:[],mode:'authors'}),church=graph.nodes.filter(n=>/Church$/.test(n.title));
+check('worker merges four real publication signatures',church.length===1&&church[0].members.length===4);check('complete name and canonical ORCID',church[0].title==='George M. Church'&&church[0].orcid==='0000-0003-3535-2076');check('Churchill stays distinct',graph.nodes.some(n=>n.title==='Gary A. Churchill'&&n.members.length===1));check('creator metadata remains unchanged',before===JSON.stringify(records));
+const resolved=await Q.CiteLensNetwork.authorORCID({...church[0],orcid:'0000-0002-0775-2913'},records,{cachedOnly:true});check('detail badge uses same canonical ORCID',resolved.orcid==='0000-0003-3535-2076');
+return {passed:true,checks,node:{title:church[0].title,orcid:church[0].orcid,publications:church[0].members.length}};

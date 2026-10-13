@@ -12,9 +12,14 @@ var LoomRuntime = {
       const data=await (await Zotero.getMainWindow().fetch(owner.rootURI+'catalogs/runtime-'+this.platform.key+'.json')).json();
       this.catalog=LoomRuntimeCore.manifest(data,this.platform.key);
     }
-    const command=PathUtils.join(owner.voice.engineRoot(),'python',...(Zotero.isWin?['python.exe']:['bin','python3']));
-    const installed=await IOUtils.exists(command);
+    const installed=await this.detectInstalled(owner.voice.engineRoot());
     this.emit(installed?'installed':'idle',installed?'已找到离线声音，可试听或检查。':this.platform.supported?'可在这里安装离线声音。':this.platform.reason);
+  },
+  async detectInstalled(root){
+    // A Python executable alone does not mean the separately downloaded voices exist.
+    const required=[Zotero.isWin?'python/python.exe':'python/bin/python3','models/kokoro-v1.0.onnx','models/voices-v1.0.bin'];
+    const found=await Promise.all(required.map(async name=>{try{const info=await IOUtils.stat(PathUtils.join(root,...name.split('/')));return info.type==='regular'&&info.size>0;}catch(_){return false;}}));
+    return found.every(Boolean);
   },
   subscribe(fn){this.listeners.add(fn);fn(this.state);return ()=>this.listeners.delete(fn);},
   emit(phase,message,progress=this.state.progress) {if(['installed','ready'].includes(phase))this.needsRepair=false;else if(['idle','error'].includes(phase))this.needsRepair=true;if(['installed','ready'].includes(phase))this.installed=true;else if(phase==='idle')this.installed=false;this.state={phase,message,progress,updatedAt:this.state.phase===phase&&this.state.message===message?this.state.updatedAt:Date.now()};for(const fn of this.listeners)try{fn(this.state);}catch(e){Zotero.logError(e);}},

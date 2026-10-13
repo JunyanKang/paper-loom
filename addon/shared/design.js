@@ -385,4 +385,13 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .cl-settings.pl-settings .cl-update-links.pl-resource-links{gap:10px}
 .cl-settings .pl-provider-settings[hidden]{display:none!important}
 .cl-settings .cl-llm-popover[data-side=above]::before{top:auto;bottom:-7px;transform:rotate(225deg)}
+
+/* A compact non-modal first-use invitation, themed like the workspace. */
+.pl-voice-welcome{position:fixed;right:24px;bottom:24px;z-index:2147483646;box-sizing:border-box;width:340px;max-width:calc(100vw - 32px);max-height:calc(100vh - 48px);overflow:auto;padding:22px;border:1px solid var(--cl-surface-rim);border-radius:18px;color:var(--cl-ink);background:linear-gradient(var(--cl-mask),var(--cl-mask)),var(--cl-art) right bottom/cover,var(--cl-bg);box-shadow:var(--cl-shadow);font:13px/1.6 var(--pl-font);animation:pl-welcome-in .18s ease-out}
+.pl-voice-welcome h2{font:650 17px/1.4 var(--pl-font);margin:12px 20px 8px 0;color:inherit}.pl-voice-welcome p{font:13px/1.65 var(--pl-font);margin:0 0 10px;color:var(--cl-muted)}.pl-voice-welcome small{font-size:11px;color:var(--cl-muted)}
+.pl-welcome-icon{display:inline-block;width:20px;height:20px;background:currentColor;mask:var(--welcome-icon) center/contain no-repeat;flex:none}.pl-welcome-badge{color:var(--cl-accent);display:flex}.pl-welcome-badge .pl-welcome-icon{width:28px;height:28px}
+.pl-voice-welcome button{font:500 12px/1.4 var(--pl-font);color:inherit;background:transparent;border:1px solid var(--cl-line);border-radius:9px;min-height:34px;padding:7px 10px;cursor:pointer}.pl-voice-welcome button:disabled{opacity:.5;cursor:default}.pl-voice-welcome button:focus-visible,.pl-welcome-highlight{outline:2px solid var(--cl-accent)!important;outline-offset:3px!important}
+.pl-voice-welcome .pl-welcome-dismiss{position:absolute;top:12px;right:12px;display:flex;padding:5px;border:0;min-height:28px}.pl-welcome-actions{display:flex;align-items:stretch;gap:8px;justify-content:flex-end;margin-top:18px}.pl-welcome-actions button:last-child{background:var(--cl-soft);color:var(--cl-accent);border-color:transparent}
+.pl-welcome-guide{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--cl-line);border-radius:10px;padding:12px;margin-top:14px;font-size:12px}.pl-welcome-target{display:flex;padding:7px;border:2px solid var(--cl-accent);border-radius:10px;color:var(--cl-accent)}
+@keyframes pl-welcome-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.pl-voice-welcome{animation:none}}
 `;

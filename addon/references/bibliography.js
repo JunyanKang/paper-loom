@@ -16,7 +16,7 @@ var CiteLensBibliography = {
   },
   authorStart(text) {
     text=CiteLensCore.repairPDFAccents(text);
-    return /^(?:The )?[\p{Lu}][\p{L}\d .&’'–-]{3,140}(?:Consortium|Group|Team|Developers)\.?\s*\((?:18|19|20)\d{2}/u.test(text)||/^(?:(?:van|von|de|del|der|den|da|di|la|le|tom) +|al-)*[\p{Lu}][\p{L}'’\- ]{1,40},\s*(?:[\p{Lu}]\.|[\p{Lu}][\p{Ll}])/u.test(text)||/^(?:(?:van|von|de|del|der|den|da|di|la|le|tom) +)*[\p{Lu}][\p{L}'’\-]*(?: [\p{L}'’\-]+){0,3} [A-Z](?:[A-Z]|-[A-Z]){0,8}(?:,|\.\s+[\p{Lu}]|\.?\s*\(?\s*(?:18|19|20)\d{2})/u.test(text);
+    return /^(?:The )?[\p{Lu}][\p{L}\d .&’'–-]{3,140}(?:Consortium|Group|Team|Developers)\.?\s*\((?:18|19|20)\d{2}/u.test(text)||/^(?:(?:van|von|de|del|der|den|da|di|la|le|tom) +|al-)*[\p{Lu}][\p{L}'’\- ]{1,40},\s*(?:[\p{Lu}]\.|[\p{Lu}][\p{Ll}]|[A-Z]{1,8}\.\s)/u.test(text)||/^(?:(?:van|von|de|del|der|den|da|di|la|le|tom) +)*[\p{Lu}][\p{L}'’\-]*(?: [\p{L}'’\-]+){0,3} [A-Z](?:[A-Z]|-[A-Z]){0,8}(?:,|\.\s+[\p{Lu}]|\.?\s*\(?\s*(?:18|19|20)\d{2})/u.test(text);
   },
   columnSplit(usable,width){
     // Find the actual gutter, including alternating inner/outer page margins.

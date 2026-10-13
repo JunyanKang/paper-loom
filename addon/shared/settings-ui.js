@@ -3,12 +3,15 @@ PaperLoom.extendSettings=async function(ctx) {
   frame.classList.add('pl-settings');this.style(doc);
   const embedded=this.el(doc,'iframe');embedded.className='pl-settings-frame';embedded.setAttribute('title','听读设置');embedded.style.cssText='width:calc(100% + 12px);border:0;display:block;height:320px;background:transparent';
   await new Promise((resolve,reject)=>{
-    const win=doc.defaultView;let finished=false,timer;
-    const finish=error=>{if(finished)return;finished=true;win.clearTimeout(timer);embedded.removeEventListener('load',loaded);error?reject(error):resolve();};
-    const loaded=()=>{if(embedded.contentDocument?.body)finish();};
+    const win=doc.defaultView;let finished=false,timer,poll;
+    const finish=error=>{if(finished)return;finished=true;win.clearTimeout(timer);win.clearInterval(poll);embedded.removeEventListener('load',loaded);error?reject(error):resolve();};
+    const loaded=()=>{const page=embedded.contentDocument;if(page?.body&&page.documentURI===embedded.src&&['interactive','complete'].includes(page.readyState))finish();};
     cleanups.push(()=>finish());embedded.addEventListener('load',loaded);
     embedded.src='resource://'+this.resource+'/shared/settings-frame.html';root.append(embedded);
-    timer=win.setTimeout(()=>finish(!root.isConnected||embedded.contentDocument?.body?null:Error('听读设置页面未能加载')),8000);
+    // Some Zotero chrome documents omit the iframe load event. Check only until
+    // this local page is ready, rather than waiting for the eight-second timeout.
+    poll=win.setInterval(loaded,50);
+    timer=win.setTimeout(()=>finish(!root.isConnected||embedded.contentDocument?.body?null:Error('听读设置页面未能加载')),8000);loaded();
   });
   if(!root.isConnected)return;
   const inside=embedded.contentDocument;inside._pvSelectHost=frame;inside.documentElement.classList.add('pl-settings-document');inside.body.style.cssText='margin:0;padding-right:12px;box-sizing:border-box;background:transparent;overflow:hidden';this.style(inside);this.referencesScope.CiteLensUI.appearance(inside);this.referencesScope.CiteLensI18n.install(inside);

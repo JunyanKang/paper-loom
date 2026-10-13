@@ -3,9 +3,9 @@
     "paper-loom@local.research": {
       "updates": [
         {
-          "version": "1.0.23",
-          "update_link": "https://github.com/JunyanKang/paper-loom/releases/download/v1.0.23/paper-loom-1.0.23.xpi",
-          "update_hash": "sha512:8fad8ebedd6c0e736f59a308a8d9660d52caa3bbbba3c3d570402399689d9dec05139b73532ee0197a9f7dbe0075794aeab5c39266669f598b68b1e388dbe6b2",
+          "version": "1.1.0",
+          "update_link": "https://github.com/JunyanKang/paper-loom/releases/download/v1.1.0/paper-loom-1.1.0.xpi",
+          "update_hash": "sha512:dd19cc7c91f864e0b95cbd8cb2f8e4681ee093e55b8e9c54ec7579d2b1af028fd916d856c42364a2fe6c6ed343944976d0549da1b16bbebac75d3d2ff8e93c76",
           "applications": {
             "zotero": {
               "strict_min_version": "10.0.5-beta.1",

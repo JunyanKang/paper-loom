@@ -91,3 +91,19 @@ test('complete publication membership affects overview even without display brid
  const graph=M.layout({mode:'authors',nodes,edges:[],authorCommunities:groups,authorship:{},stats:{}}),g=k=>graph.communities.find(g=>g.members.includes(k+':0')),d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
  assert.equal(graph.communityEdges.length,2);assert.deepEqual(Array.from(graph.communityEdges,e=>e.count).sort(),[1,4]);assert.ok(d(g(0),g(1))<d(g(0),g(2))*.9);
 });
+
+test('publisher-verified identifier aliases and middle-name omissions unite Church records',()=>{
+ const papers=require('../fixtures/church-author-variants.json'),before=JSON.stringify(papers);
+ for(const input of [papers,[...papers].reverse()]){const people=build(input).nodes.filter(n=>/Church$/.test(n.title));assert.equal(people.length,1);assert.equal(people[0].title,'George M. Church');assert.equal(people[0].orcid,'0000-0003-3535-2076');assert.equal(people[0].members.length,4);}
+ assert.equal(JSON.stringify(papers),before);assert.equal(N.orcid('0000-0002-0775-2913'),'0000-0002-0775-2913');assert.equal(N.identityORCID('0000-0002-0775-2913'),'0000-0003-3535-2076');
+});
+test('compatible middle-name variants require shared-person evidence',()=>{
+ const co=[person('Alice','Jones'),person('Robert','Brown')],a=paper('a','Retinal development',[person('Jane M.','Smith'),...co]),b=paper('b','Supplementary information',[person('Jane','Smith'),...co]);
+ assert.equal(build([a,b]).nodes.filter(n=>/Smith$/.test(n.title)).length,1);
+ b.creators=[person('Jane','Smith')];assert.equal(build([a,b]).nodes.filter(n=>/Smith$/.test(n.title)).length,2);
+});
+test('missing middle name cannot bridge conflicting middle names or unrelated ORCIDs',()=>{
+ const co=[person('Alice','Jones'),person('Robert','Brown')],papers=['A.','','B.'].map((middle,i)=>paper('p'+i,'Retinal development',[person('Jane '+middle,'Smith'),...co]));
+ for(const input of [papers,[...papers].reverse()])assert.equal(build(input).nodes.filter(n=>/Smith$/.test(n.title)).length,3);
+ const a=person('Jane','Smith',{ORCID:'0000-0002-1825-0097'}),b=person('Jane M.','Smith',{ORCID:'0000-0001-5109-3700'});assert.equal(build([paper('a','Retinal development',[a,...co]),paper('b','Retinal development',[b,...co])]).nodes.filter(n=>/Smith$/.test(n.title)).length,2);
+});

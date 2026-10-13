@@ -1,0 +1,379 @@
+[
+  {
+    "title": "Recording gene expression order in DNA by CRISPR addition of retron barcodes",
+    "DOI": "10.1038/s41586-022-04994-6",
+    "year": "2022",
+    "creators": [
+      {
+        "firstName": "Santi",
+        "lastName": "Bhattarai-Kline",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Sierra K.",
+        "lastName": "Lear",
+        "creatorType": "author",
+        "ORCID": "0000-0002-7410-9688",
+        "affiliations": []
+      },
+      {
+        "firstName": "Chloe B.",
+        "lastName": "Fishman",
+        "creatorType": "author",
+        "ORCID": "0000-0002-4698-4469",
+        "affiliations": []
+      },
+      {
+        "firstName": "Santiago C.",
+        "lastName": "Lopez",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Elana R.",
+        "lastName": "Lockshin",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Max G.",
+        "lastName": "Schubert",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Jeff",
+        "lastName": "Nivala",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "George M.",
+        "lastName": "Church",
+        "creatorType": "author",
+        "ORCID": "0000-0003-3535-2076",
+        "affiliations": []
+      },
+      {
+        "firstName": "Seth L.",
+        "lastName": "Shipman",
+        "creatorType": "author",
+        "ORCID": "0000-0003-3130-8043",
+        "affiliations": []
+      }
+    ],
+    "id": "church-0",
+    "local": true
+  },
+  {
+    "title": "Developmental barcoding of whole mouse via homing CRISPR",
+    "DOI": "10.1126/science.aat9804",
+    "year": "2018",
+    "creators": [
+      {
+        "firstName": "Reza",
+        "lastName": "Kalhor",
+        "creatorType": "author",
+        "ORCID": "0000-0002-5558-7545",
+        "affiliations": [
+          "Department of Genetics, Harvard Medical School, Boston, MA, USA.",
+          "Wyss Institute for Biologically Inspired Engineering at Harvard University, Boston, MA, USA."
+        ]
+      },
+      {
+        "firstName": "Kian",
+        "lastName": "Kalhor",
+        "creatorType": "author",
+        "ORCID": "0000-0001-9416-3078",
+        "affiliations": [
+          "Department of Electrical Engineering, Sharif University of Technology, Tehran, Iran."
+        ]
+      },
+      {
+        "firstName": "Leo",
+        "lastName": "Mejia",
+        "creatorType": "author",
+        "ORCID": "0000-0003-4383-8439",
+        "affiliations": [
+          "Department of Genetics, Harvard Medical School, Boston, MA, USA."
+        ]
+      },
+      {
+        "firstName": "Kathleen",
+        "lastName": "Leeper",
+        "creatorType": "author",
+        "ORCID": "0000-0003-1728-9683",
+        "affiliations": [
+          "Wyss Institute for Biologically Inspired Engineering at Harvard University, Boston, MA, USA."
+        ]
+      },
+      {
+        "firstName": "Amanda",
+        "lastName": "Graveline",
+        "creatorType": "author",
+        "ORCID": "0000-0002-2626-4093",
+        "affiliations": [
+          "Wyss Institute for Biologically Inspired Engineering at Harvard University, Boston, MA, USA."
+        ]
+      },
+      {
+        "firstName": "Prashant",
+        "lastName": "Mali",
+        "creatorType": "author",
+        "affiliations": [
+          "Department of Bioengineering, University of California, San Diego, La Jolla, CA, USA."
+        ]
+      },
+      {
+        "firstName": "George M.",
+        "lastName": "Church",
+        "creatorType": "author",
+        "ORCID": "0000-0002-0775-2913",
+        "affiliations": [
+          "Department of Genetics, Harvard Medical School, Boston, MA, USA.",
+          "Wyss Institute for Biologically Inspired Engineering at Harvard University, Boston, MA, USA."
+        ]
+      }
+    ],
+    "id": "church-1",
+    "local": true
+  },
+  {
+    "title": "Supplementary information",
+    "DOI": null,
+    "year": "",
+    "creators": [
+      {
+        "firstName": "Santi",
+        "lastName": "Bhattarai-Kline",
+        "creatorType": "author"
+      },
+      {
+        "firstName": "Sierra K",
+        "lastName": "Lear",
+        "creatorType": "author"
+      },
+      {
+        "firstName": "Chloe B",
+        "lastName": "Fishman",
+        "creatorType": "author"
+      },
+      {
+        "firstName": "Elana",
+        "lastName": "Lockshin",
+        "creatorType": "author"
+      },
+      {
+        "firstName": "Max G",
+        "lastName": "Schubert",
+        "creatorType": "author"
+      },
+      {
+        "firstName": "Jeff",
+        "lastName": "Nivala",
+        "creatorType": "author"
+      },
+      {
+        "firstName": "George",
+        "lastName": "Church",
+        "creatorType": "author"
+      }
+    ],
+    "id": "church-2",
+    "local": true
+  },
+  {
+    "title": "Reprogramming to recover youthful epigenetic information and restore vision",
+    "DOI": "10.1038/s41586-020-2975-4",
+    "year": "2020",
+    "creators": [
+      {
+        "firstName": "Yuancheng",
+        "lastName": "Lu",
+        "creatorType": "author",
+        "ORCID": "0000-0002-5982-3963",
+        "affiliations": []
+      },
+      {
+        "firstName": "Benedikt",
+        "lastName": "Brommer",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Xiao",
+        "lastName": "Tian",
+        "creatorType": "author",
+        "ORCID": "0000-0001-5300-3596",
+        "affiliations": []
+      },
+      {
+        "firstName": "Anitha",
+        "lastName": "Krishnan",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Margarita",
+        "lastName": "Meer",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Chen",
+        "lastName": "Wang",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Daniel L.",
+        "lastName": "Vera",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Qiurui",
+        "lastName": "Zeng",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Doudou",
+        "lastName": "Yu",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Michael S.",
+        "lastName": "Bonkowski",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Jae-Hyun",
+        "lastName": "Yang",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Songlin",
+        "lastName": "Zhou",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Emma M.",
+        "lastName": "Hoffmann",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Margarete M.",
+        "lastName": "Karg",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Michael B.",
+        "lastName": "Schultz",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Alice E.",
+        "lastName": "Kane",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Noah",
+        "lastName": "Davidsohn",
+        "creatorType": "author",
+        "ORCID": "0000-0002-4470-5665",
+        "affiliations": []
+      },
+      {
+        "firstName": "Ekaterina",
+        "lastName": "Korobkina",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Karolina",
+        "lastName": "Chwalek",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Luis A.",
+        "lastName": "Rajman",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "George M.",
+        "lastName": "Church",
+        "creatorType": "author",
+        "ORCID": "0000-0003-3535-2076",
+        "affiliations": []
+      },
+      {
+        "firstName": "Konrad",
+        "lastName": "Hochedlinger",
+        "creatorType": "author",
+        "ORCID": "0000-0001-5811-5386",
+        "affiliations": []
+      },
+      {
+        "firstName": "Vadim N.",
+        "lastName": "Gladyshev",
+        "creatorType": "author",
+        "ORCID": "0000-0002-0372-7016",
+        "affiliations": []
+      },
+      {
+        "firstName": "Steve",
+        "lastName": "Horvath",
+        "creatorType": "author",
+        "ORCID": "0000-0002-4110-3589",
+        "affiliations": []
+      },
+      {
+        "firstName": "Morgan E.",
+        "lastName": "Levine",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Meredith S.",
+        "lastName": "Gregory-Ksander",
+        "creatorType": "author",
+        "affiliations": []
+      },
+      {
+        "firstName": "Bruce R.",
+        "lastName": "Ksander",
+        "creatorType": "author",
+        "ORCID": "0000-0001-5546-0360",
+        "affiliations": []
+      },
+      {
+        "firstName": "Zhigang",
+        "lastName": "He",
+        "creatorType": "author",
+        "ORCID": "0000-0001-6080-6880",
+        "affiliations": []
+      },
+      {
+        "firstName": "David A.",
+        "lastName": "Sinclair",
+        "creatorType": "author",
+        "ORCID": "0000-0002-9936-436X",
+        "affiliations": []
+      }
+    ],
+    "id": "church-3",
+    "local": true
+  }
+]

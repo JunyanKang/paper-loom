@@ -14,9 +14,24 @@ var CiteLensNetworkCore=(()=>{
     let sum=0;for(const digit of raw.slice(0,15))sum=(sum+Number(digit))*2;const check=(12-sum%11)%11;
     return raw.at(-1)===(check===10?'X':String(check))?raw.match(/.{4}/g).join('-'):'';
   }
+  // Curated identifier equivalences, never inferred from a shared name alone.
+  // Both publishers associate these identifiers with the same name, Harvard/Wyss
+  // affiliation and correspondence address.
+  // Keep source ORCIDs on paper creators; the canonical ID only groups graph nodes.
+  const authorIDAliases=Object.freeze([Object.freeze({
+    canonical:'0000-0003-3535-2076',aliases:Object.freeze(['0000-0002-0775-2913']),
+    sources:Object.freeze(['https://pubs.acs.org/doi/10.1021/acschembio.7b00842','https://elifesciences.org/reviewed-preprints/87730v2']),checked:'2026-10-13'
+  })]);
+  const canonicalIDs=new Map(authorIDAliases.flatMap(x=>x.aliases.map(id=>[id,x.canonical])));
+  function identityORCID(value){const id=orcid(value);return canonicalIDs.get(id)||id;}
+  function compatibleNames(a,b){
+    if(a.fieldMode||b.fieldMode||!a.firstName||!b.firstName||C.norm(a.lastName)!==C.norm(b.lastName))return false;
+    const x=C.norm(a.firstName).split(' '),y=C.norm(b.firstName).split(' ');
+    return x.every((part,i)=>!y[i]||part===y[i]||part[0]===y[i][0]&&(part.length===1||y[i].length===1))&&y.every((part,i)=>!x[i]||part===x[i]||part[0]===x[i][0]&&(part.length===1||x[i].length===1));
+  }
   function enrichCreators(creators,evidence){
-    const compatible=(a,b)=>{if(a.fieldMode||b.fieldMode||!a.firstName||!b.firstName||C.norm(a.lastName)!==C.norm(b.lastName))return false;const x=C.norm(a.firstName).split(' '),y=C.norm(b.firstName).split(' ');return x.every((part,i)=>!y[i]||part===y[i]||part[0]===y[i][0]&&(part.length===1||y[i].length===1))&&y.every((part,i)=>!x[i]||part===x[i]||part[0]===x[i][0]&&(part.length===1||x[i].length===1));};
-    return creators.map(a=>{const matches=evidence.filter(b=>compatible(a,b));if(matches.length!==1||creators.filter(b=>compatible(b,matches[0])).length!==1)return {...a};const b=matches[0],own=orcid(a.ORCID||a.orcid),remote=orcid(b.ORCID||b.orcid);if(own&&remote&&own!==remote)return {...a};
+    const compatible=compatibleNames;
+    return creators.map(a=>{const matches=evidence.filter(b=>compatible(a,b));if(matches.length!==1||creators.filter(b=>compatible(b,matches[0])).length!==1)return {...a};const b=matches[0],own=orcid(a.ORCID||a.orcid),remote=orcid(b.ORCID||b.orcid);if(own&&remote&&identityORCID(own)!==identityORCID(remote))return {...a};
       return {...a,...(C.clean(b.firstName).length>C.clean(a.firstName).length?{firstName:b.firstName}:{}),...(remote?{ORCID:remote}:{}),affiliations:[...new Set([...(a.affiliations||[]),a.affiliation,...(b.affiliations||[]),b.affiliation].filter(x=>typeof x==='string'&&x.trim()))]};
     });
   }
@@ -25,17 +40,18 @@ var CiteLensNetworkCore=(()=>{
   function authorIdentities(papers){
     const blocks=new Map(),contexts=new Map(),knownNames=new Map(),assignments=new Map(),metrics={blocks:0,comparisons:0,splitNames:0,orcidRecords:0,capped:0,resolvedByEvidence:0,ambiguousSignatures:0};
     const normalizedName=a=>authorKey(a),put=(map,key,row)=>{if(!map.has(key))map.set(key,[]);map.get(key).push(row);};
-    for(const paper of papers){const names=new Set((paper.creators||[]).map(normalizedName).filter(Boolean));contexts.set(paper.id,{paper,names,oids:new Set((paper.creators||[]).map(a=>orcid(a.ORCID||a.orcid)).filter(Boolean)),words:null});
-      (paper.creators||[]).forEach((a,position)=>{const oid=orcid(a.ORCID||a.orcid),name=normalizedName(a);if(!name&&!oid)return;
+    for(const paper of papers){const names=new Set((paper.creators||[]).map(normalizedName).filter(Boolean));contexts.set(paper.id,{paper,names,oids:new Set((paper.creators||[]).map(a=>identityORCID(a.ORCID||a.orcid)).filter(Boolean)),words:null});
+      (paper.creators||[]).forEach((a,position)=>{const oid=identityORCID(a.ORCID||a.orcid),name=normalizedName(a);if(!name&&!oid)return;
         const signature=JSON.stringify([paper.id,position]),affiliations=(Array.isArray(a.affiliations)?a.affiliations:[a.affiliation]).filter(x=>typeof x==='string').map(C.norm).filter(x=>x.length>=12);
-        const email=String(a.email||'').trim().toLowerCase(),row={signature,paperID:paper.id,name:name||'orcid:'+oid,oid,affiliations,email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?email:'',title:C.clean([a.firstName,a.lastName].filter(Boolean).join(' '))};put(blocks,row.name,row);if(oid){metrics.orcidRecords++;if(!knownNames.has(row.name))knownNames.set(row.name,new Set());knownNames.get(row.name).add(oid);}
+        const email=String(a.email||'').trim().toLowerCase(),row={signature,creator:a,paperID:paper.id,name:name||'orcid:'+oid,oid,affiliations,email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?email:'',title:C.clean([a.firstName,a.lastName].filter(Boolean).join(' '))};put(blocks,name?C.norm(a.lastName)+'|'+C.norm(a.firstName).split(' ')[0]:row.name,row);if(oid){metrics.orcidRecords++;if(!knownNames.has(row.name))knownNames.set(row.name,new Set());knownNames.get(row.name).add(oid);}
       });
     }
     const evidence=(a,b)=>{const ca=contexts.get(a.paperID),cb=contexts.get(b.paperID);if(a.paperID===b.paperID)return 0;
       if(a.oid&&b.oid)return a.oid===b.oid?100:0;
+      if(!compatibleNames(a.creator,b.creator))return 0;
       if(!ca.words)ca.words=new Set(terms(C.researchTitle(ca.paper)+' '+String(ca.paper.abstract||'').slice(0,1200)));
       if(!cb.words)cb.words=new Set(terms(C.researchTitle(cb.paper)+' '+String(cb.paper.abstract||'').slice(0,1200)));
-      let shared=0;if(ca.names.size<=64&&cb.names.size<=64)for(const name of ca.names)if(name!==a.name&&cb.names.has(name)&&(knownNames.get(name)?.size||0)<=1)shared++;
+      let shared=0;if(ca.names.size<=64&&cb.names.size<=64)for(const name of ca.names)if(name!==a.name&&name!==b.name&&cb.names.has(name)&&(knownNames.get(name)?.size||0)<=1)shared++;
       let overlap=0;for(const word of ca.words)if(cb.words.has(word))overlap++;const similarity=overlap/Math.max(1,Math.min(ca.words.size,cb.words.size));
       let verifiedShared=0;for(const oid of ca.oids)if(oid!==a.oid&&oid!==b.oid&&cb.oids.has(oid))verifiedShared++;
       const affiliation=a.affiliations.some(x=>b.affiliations.includes(x)),email=!!a.email&&a.email===b.email;
@@ -43,10 +59,10 @@ var CiteLensNetworkCore=(()=>{
       // Content can corroborate a team or institution, but cannot identify a person alone.
       return Number(email)*20+Number(affiliation)*5+Math.min(verifiedShared,3)*3+Math.min(shared,6)*2+Math.min(similarity,1);
     };
-    for(const [name,raw] of blocks){metrics.blocks++;if(raw.length===1){const row=raw[0];assignments.set(row.signature,{id:row.oid?'author:orcid:'+row.oid:'author:'+name,title:row.title,identity:row.oid?'orcid':'name',orcid:row.oid||'',nameKey:name,disambiguated:false});continue;}const rows=raw.sort((a,b)=>a.signature.localeCompare(b.signature)),parent=rows.map((_,i)=>i),paperSets=rows.map(r=>new Set([r.paperID])),ids=rows.map(r=>r.oid),root=i=>{while(parent[i]!==i){parent[i]=parent[parent[i]];i=parent[i];}return i;};
+    for(const [name,raw] of blocks){metrics.blocks++;if(raw.length===1){const row=raw[0];assignments.set(row.signature,{id:row.oid?'author:orcid:'+row.oid:'author:'+row.name,title:row.title,identity:row.oid?'orcid':'name',orcid:row.oid||'',nameKey:row.name,disambiguated:false});continue;}const rows=raw.sort((a,b)=>a.signature.localeCompare(b.signature)),parent=rows.map((_,i)=>i),paperSets=rows.map(r=>new Set([r.paperID])),ids=rows.map(r=>r.oid),root=i=>{while(parent[i]!==i){parent[i]=parent[parent[i]];i=parent[i];}return i;};
       const join=(a,b)=>{a=root(a);b=root(b);if(a===b)return;if(ids[a]&&ids[b]&&ids[a]!==ids[b])return;if(!(ids[a]&&ids[a]===ids[b]))for(const paperID of paperSets[a])if(paperSets[b].has(paperID))return;const keep=Math.min(a,b),drop=Math.max(a,b);parent[drop]=keep;ids[keep]=ids[a]||ids[b];for(const paperID of paperSets[drop])paperSets[keep].add(paperID);};
       const byORCID=new Map(),postings=new Map();rows.forEach((r,i)=>{if(r.oid){if(byORCID.has(r.oid))join(i,byORCID.get(r.oid));else byORCID.set(r.oid,i);}const context=contexts.get(r.paperID);
-        if(context.names.size<=64)for(const coauthor of context.names)if(coauthor!==name)put(postings,'c:'+coauthor,i);
+        if(context.names.size<=64)for(const coauthor of context.names)if(coauthor!==r.name)put(postings,'c:'+coauthor,i);
         for(const oid of context.oids)if(oid!==r.oid)put(postings,'o:'+oid,i);for(const affiliation of r.affiliations)put(postings,'a:'+affiliation,i);if(r.email)put(postings,'e:'+r.email,i);
       });
       const candidates=rows.map(()=>new Set());for(const posting of postings.values())for(let i=0;i<posting.length;i++)for(let j=i+1;j<Math.min(posting.length,i+17);j++){
@@ -59,13 +75,14 @@ var CiteLensNetworkCore=(()=>{
         for(const i of posting){if(anchored.length>32)incomplete.add(i);for(const j of anchored.slice(0,32))if(i!==j){if(candidates[i].has(j)||candidates[i].size<96){candidates[i].add(j);candidates[j].add(i);}else incomplete.add(i);}}
       }
       const supportedEdges=[],adj=rows.map(()=>[]);for(let i=0;i<rows.length;i++)for(const j of candidates[i])if(j>i){metrics.comparisons++;const score=evidence(rows[i],rows[j]);if(score){supportedEdges.push([i,j,score]);adj[i].push([j,score]);adj[j].push([i,score]);}}
+      const variantAmbiguous=new Set();for(let i=0;i<rows.length;i++){if(rows[i].oid)continue;const peers=[...new Map(adj[i].map(([j])=>[rows[j].name+"|"+rows[j].oid,rows[j]])).values()];if(peers.some((a,j)=>peers.slice(j+1).some(b=>!compatibleNames(a.creator,b.creator)&&!(a.oid&&a.oid===b.oid))))variantAmbiguous.add(i);}
       const known=rows.map(r=>r.oid),resolved=[...known],direct=rows.map(()=>new Map()),winning=rows.map(()=>null);
       const rank=(i,labels)=>{const scores=new Map();for(const [j,score] of adj[i])if(labels[j]){const oid=labels[j];if(!scores.has(oid)||scores.get(oid).score<score)scores.set(oid,{oid,score,paperID:rows[j].paperID});}return [...scores.values()].sort((a,b)=>b.score-a.score||a.oid.localeCompare(b.oid));};
       rows.forEach((row,i)=>{if(!row.oid)direct[i]=new Map(rank(i,known).map(r=>[r.oid,r]));});
       // Decide per paper signature before unioning. Otherwise one ambiguous paper
       // can contaminate an entire chain, even when each endpoint has clear evidence.
       for(let pass=0;pass<3;pass++){const next=[...resolved];let changes=0;
-        for(let i=0;i<rows.length;i++){if(resolved[i]||incomplete.has(i))continue;const choices=rank(i,resolved),best=choices[0],runner=choices[1];
+        for(let i=0;i<rows.length;i++){if(resolved[i]||incomplete.has(i)||variantAmbiguous.has(i))continue;const choices=rank(i,resolved),best=choices[0],runner=choices[1];
           if(!best||contexts.get(rows[i].paperID).oids.has(best.oid))continue;
           // Require a material evidence margin; these scores are not probabilities.
           if(runner&&(best.score<6||best.score-runner.score<3||best.score<runner.score*1.4))continue;
@@ -78,7 +95,7 @@ var CiteLensNetworkCore=(()=>{
         for(let i=0;i<rows.length;i++)resolved[i]=next[i];if(!changes)break;
       }
       rows.forEach((row,i)=>{if(!row.oid&&resolved[i]){ids[i]=resolved[i];join(i,byORCID.get(resolved[i]));metrics.resolvedByEvidence++;}});
-      for(const [i,j] of supportedEdges)if(!resolved[i]&&!resolved[j])join(i,j);
+      for(const [i,j] of supportedEdges)if(!resolved[i]&&!resolved[j]&&(!(variantAmbiguous.has(i)||variantAmbiguous.has(j))||rows[i].name===rows[j].name))join(i,j);
       const anchors=new Map();for(let i=0;i<rows.length;i++)if(!resolved[i]){const key=root(i);if(!anchors.has(key))anchors.set(key,new Set());for(const row of rank(i,resolved))anchors.get(key).add(row.oid);}
       const ambiguous=new Set();for(const [key,choices] of anchors)if(choices.size>1)ambiguous.add(root(key));
       for(let i=0;i<rows.length;i++)if(!resolved[i]&&(ambiguous.has(root(i))||incomplete.has(i)))metrics.ambiguousSignatures++;
@@ -88,8 +105,8 @@ var CiteLensNetworkCore=(()=>{
       for(const [key,group] of components){const oid=ids[root(key)];for(const row of group){
         // An unanchored signature cannot bridge two different verified ORCIDs.
         const identity=oid?'orcid':ambiguous.has(root(key))?'unresolved':split?(group.length>=2?'coauthor-evidence':'unresolved'):'name';
-        const id=oid?'author:orcid:'+oid:split||byORCID.size?'author:'+name+'#'+encodeURIComponent(group[0].signature):'author:'+name;
-        const support=winning[rowIndex.get(row.signature)];assignments.set(row.signature,{id,title:row.title,identity,orcid:oid||'',nameKey:name,disambiguated:split,...(support?{linkEvidence:{paperID:support.paperID,score:support.score}}:{})});
+        const variants=new Set(group.map(r=>r.name)),id=oid?'author:orcid:'+oid:split||byORCID.size||variants.size>1?'author:'+name+'#'+encodeURIComponent(group[0].signature):'author:'+row.name;
+        const support=winning[rowIndex.get(row.signature)];assignments.set(row.signature,{id,title:row.title,identity,orcid:oid||'',nameKey:row.name,disambiguated:split,...(support?{linkEvidence:{paperID:support.paperID,score:support.score}}:{})});
       }}
     }
     return {assignments,metrics};
@@ -247,6 +264,6 @@ var CiteLensNetworkCore=(()=>{
   return {groups,state:{version:1,resolution,blocks:state},stats};
  }
 
-  return {incrementalCommunities,multilevelCommunities,id,authorKey,orcid,enrichCreators,authorIdentities,build,neighbors,search,consolidate,workspace,communities,terms,searchIndex,queryIndex,authorConnections,authorNeighborhood};
+  return {incrementalCommunities,multilevelCommunities,id,authorKey,orcid,identityORCID,authorIDAliases,enrichCreators,authorIdentities,build,neighbors,search,consolidate,workspace,communities,terms,searchIndex,queryIndex,authorConnections,authorNeighborhood};
 })();
 if(typeof module!=='undefined')module.exports=CiteLensNetworkCore;

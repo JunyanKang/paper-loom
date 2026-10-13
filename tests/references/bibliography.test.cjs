@@ -33,3 +33,19 @@ test('Cell mixed-layout bibliography retains all 98 references and cross-page co
   for(let i=0;i<run.rects.length;i++){const r=run.rects[i],hit=L.pointed(page,[(r[0]+r[2])/2,(r[1]+r[3])/2],refs);assert.ok(hit?.records.length,text+' glyph '+i);assert.equal(hit.unresolved.length,0);}
  }
 });
+
+test('PMC compact-initial books stay separate and resolve Mann and Jakobiec citations',()=>{
+ const C=CiteLensCore,refs=B.parse(require('../fixtures/lutty-2018-bibliography.json').pages);
+ assert.equal(refs.length,50);
+ for(const [name,year,title,place] of [['Mann','1928','The Development of the Human Eye','Cambridge'],['Jakobiec','1982','Ocular Anatomy, Embryology, and Teratology','Philadelphia, PA']]){
+  const found=C.findCitations(`${name}, ${year}`,refs);assert.equal(found.length,1);const r=found[0];assert.equal(r.title,title);assert.equal(r.type,'book');assert.equal(r.place,place);assert.ok(r.creators[0].firstName);assert.ok(r.position.rects.length);
+ }
+ assert.ok(!refs.find(r=>r.author==='Lutty').raw.includes('Mann'));
+ assert.ok(!refs.find(r=>r.author==='Hughes').raw.includes('Jakobiec'));
+});
+
+test('two-author citations with printed initials match only the same bibliography author',()=>{
+ const C=CiteLensCore,refs=B.parse(require('../fixtures/lutty-2018-bibliography.json').pages);
+ assert.equal(C.findCitations('Roca and R.H., 2007',refs)[0]?.title,'Regulation of vascular morphogenesis by Notch signaling');
+ assert.equal(C.findCitations('Roca and X.Y., 2007',refs).length,0);
+});

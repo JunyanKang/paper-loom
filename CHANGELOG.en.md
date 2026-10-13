@@ -2,6 +2,16 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.1.0 · 2026-10-13
+
+New installations without voices show a small, themed invitation. Accepting opens Speech environment and starts installation. Choosing Not now shows where to install later, with an option to highlight the wrench in Settings. Existing users and installations with voices are not prompted again.
+
+Fixed PMC book references with compact author initials and a trailing year being absorbed into the preceding entry. Citations such as Mann 1928 now open their own reference cards. Two-author citations with dotted initials are also matched against the printed bibliography.
+
+Author networks can reconcile omitted middle names when coauthor or other identity evidence supports the match. Two publisher-verified George Church ORCIDs now share one node, while source identifiers are preserved. Conflicting identities and unsupported name matches remain separate.
+
+Settings now appear as soon as their embedded page is ready, avoiding a timeout delay when Zotero omits the initial load event.
+
 ## 1.0.23 · 2026-10-12
 
 Every network level fits an elliptical layout to the available viewport. Child graphs and author details appear together. Navigation moves from the selected group into its network and returns to the original group position; selecting a leaf author updates details without rebuilding the graph. Counts reflect the current network, and repeated navigation reuses the existing layout.

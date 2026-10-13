@@ -26,6 +26,8 @@ Find **Speech environment** near the bottom of Settings and click the wrench. Pa
 
 Allow at least 3 GB free. The package includes the runtime and voices for English, Mandarin Chinese, Japanese, and French. No separate Python installation is needed. Translation, reference, and author features do not require voices.
 
+On a fresh installation without voices, a small prompt offers to install them. **Install voices** opens the installation area and starts the download. **Not now** leaves voices uninstalled and shows where to add them later; **Show me where** opens Settings and briefly highlights the wrench. Existing voice installations and users migrating from earlier plugins are not prompted again.
+
 ## Check or repair voices
 
 Click the shield to check the engine. It turns green on success, and the success message clears shortly afterward. If the check fails, the message remains; use the wrench to repair. The existing engine stays in place until its replacement passes the check.

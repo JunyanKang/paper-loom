@@ -14,6 +14,7 @@ Object.assign(PaperLoom,{
   async startModules() {
     if(this.started)return;if(this.starting)return this.starting;
     return this.starting=(async()=>{
+      LoomVoiceWelcome.prepare(this);
       await LoomSettings.migrate();
       const loaders=await (await Zotero.getMainWindow().fetch(this.rootURI+'module-loaders.json')).json();
       for(const name of ['voice','references']) {
@@ -116,6 +117,7 @@ Object.assign(PaperLoom,{
         for(const win of Zotero.getMainWindows())R.addWindow(win);
         // Manual updates only; keep the native verification and install path.
         V.stopUpdateSchedule();V.updateAuto=false;V.set('updateCheckEnabled',false);this.connectUpdates();await RS.CiteLensUpdater.setAutomatic(false);
+        await LoomVoiceWelcome.start();
       }catch(e){await this.stopModules();throw e;}
     })().finally(()=>{this.starting=null;});
   },
@@ -130,6 +132,7 @@ Object.assign(PaperLoom,{
     U.set('idle','');
   },
   async stopModules() {
+    LoomVoiceWelcome.stop();
     this.updateUnsubscribe?.();this.updateUnsubscribe=null;this.translationUnsubscribe?.();this.translationUnsubscribe=null;
     await LoomRuntime.stop();
     if(this.voice)await this.voice.shutdown();

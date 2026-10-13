@@ -57,6 +57,10 @@ var CiteLensCore = (() => {
   function parse(raw,position=null) {
     raw=clean(repairPDFAccents(raw)).replace(/(10\.\d{4,9}\/)\s+(?=[a-z0-9])/gi,'$1').replace(/(10\.\d{4,9}\/[^\s]*[-/])\s+(?=[a-z0-9])/gi,'$1');
     raw=raw.replace(/(\((?:19|20)\d{2}[a-z]?\)\.)\s+(?:This (?:article|paper)\b|Here, the authors\b|Together with references\b|The authors (?:develop|demonstrate|show)\b).*$/,'$1');
+    // NLM/PMC books use comma-separated compact initials and put the date last.
+    // Require the complete publisher; place: year ending to avoid journal/prose matches.
+    const monograph=raw.match(/^(?:\[?(\d{1,4})\]?[.)]?\s+)?([\p{L}][\p{L}'’–\- ]+),\s*([A-Z]{1,8})\.\s+(.{8,}?)\.\s+(.+?);\s*([^;:]+):\s*((?:1[6-9]|20)\d{2})\.?$/u);
+    if(monograph)return {raw,title:monograph[4],author:monograph[2],creators:[{lastName:monograph[2],firstName:monograph[3],creatorType:'author'}],publisher:monograph[5],place:monograph[6],year:monograph[7],suffix:'',journal:'',type:'book',number:Number(monograph[1])||undefined,DOI:doi(raw),position,source:'PDF 原始参考文献',verified:false};
     const endYear=endYearReference(raw,position);if(endYear)return endYear;
     const yearMatch=raw.match(/\b(1[6-9]\d{2}|20\d{2})([a-z])?\)(?=[.\s]|$)/)||raw.match(/\b(1[6-9]\d{2}|20\d{2})(?:F(?=[a-z][.)]))?([a-z])?(?:[–-](?:(?:19|20)\d{2}|\d{2}))?\b/);
     const year=yearMatch?.[1]||'', suffix=yearMatch?.[2]||'';
@@ -204,7 +208,7 @@ var CiteLensCore = (() => {
     for(const m of text.matchAll(/\brefs?\.\s*(\d+(?:\s*[-–,;]\s*\d+)*)/gi))out.push({start:m.index,end:m.index+m[0].length,text:m[0],keys:numbers(m[1])});
     if(nativeNumeric&&/^\s*\d+(?:\s*[-–,;]\s*\d+)*\s*$/.test(text))out.push({start:0,end:text.length,text,keys:numbers(text)});
     const surname="(?:(?:[Vv]an|[Vv]on|[Dd]e|[Dd]el|[Dd]er|[Dd]en|[Dd]a|[Dd]i|[Ll]a|[Ll]e|tom) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+(?: +(?:(?:y|de|del|da|van|von) +)*[\\p{Lu}](?:[\\p{L}\\p{M}'’\\-]| *[\\p{M}´`¨ˆ˜] *)+){0,2}";
-    const authors="("+surname+")(?:(?:,? +et +al\\.?)|(?: +(?:and|&) +("+surname+")))?";
+    const authors="("+surname+")(?:(?:,? +et +al\\.?)|(?: +(?:and|&) +("+surname+"|(?:[A-Z]\\.){2,4})))?";
     const years="((?:1[6-9]|20)\\d{2}[a-z]?(?:\\s*,\\s*(?:(?:1[6-9]|20)\\d{2}[a-z]?|[a-z](?![.\\p{L}\\p{N}])))*)(?![\\d])";
     const rx=new RegExp(authors+"(?:\\s*[,（(\\[]\\s*|\\s+)"+years,'gu');
     for(const m of text.matchAll(rx)){
