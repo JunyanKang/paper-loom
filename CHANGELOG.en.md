@@ -2,6 +2,12 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.1.2 · 2026-10-13
+
+Fixed inset abstracts and body passages being split into a new paragraph on every line. Paragraph translation and reading now use the complete paragraph without treating the left edge of headings or author metadata as the body margin.
+
+Preserves genuine first-line indentation, paragraph spacing and cross-page continuation. Hanging indents no longer split after the first line, and sentence mode continues to select only the current sentence.
+
 ## 1.1.1 · 2026-10-13
 
 Fixed translation failures when a figure caption is selected in sentence or paragraph mode. Explicitly selected captions can now be translated, while continuous narration retains its existing caption filtering.

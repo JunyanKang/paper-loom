@@ -18,3 +18,14 @@ test('readable selection survives an unavailable PDF layout',async()=>{const {p,
 test('ambiguous selection does not jump to an unrelated sentence',async()=>{const {p,reader}=setup([item('Repeated word.'),item('Repeated word.',100)]);assert.equal(await p.selectionTranslationText(reader,{text:'Repeated',pageIndex:0},'sentence'),'Repeated');});
 test('empty and cancelled selections do not start translation',async()=>{const {p,reader}=setup([]);await assert.rejects(p.selectionTranslationText(reader,{text:' '},'sentence'),/无法定位/);p.resolveSelection=async()=>{throw Object.assign(Error('cancelled'),{name:'AbortError'})};await assert.rejects(p.selectionTranslationText(reader,{text:'Cells.'},'sentence'),{name:'AbortError'});});
 test('ordinary body selections still expand to complete sentences',async()=>{const {p,reader}=setup([item('Retinal cells respond to light. Other cells rest.')]);assert.equal(await p.selectionTranslationText(reader,{text:'respond',pageIndex:0},'sentence'),'Retinal cells respond to light.');});
+test('inset paragraph translation and reading resolve the same complete block from any line',async()=>{
+ const row=(str,x,y,height=10,fontName='body')=>({str,width:360,height,transform:[height,0,0,height,x,y],fontName,hasEOL:true});
+ const text=['Vascular development depends on signals','from the surrounding cells. These signals','guide the growth of new vessels.'];
+ const {p,reader}=setup([row('Institute',90,750),row('Abstract',90,720,12,'bold'),...text.map((t,i)=>row(t,108,700-i*14)),row('Keywords',90,640,10,'bold')]);
+ for(const selected of ['development','surrounding','growth']){
+  const selection={text:selected,pageIndex:0};assert.equal(await p.selectionTranslationText(reader,selection,'paragraph'),text.join(' '));
+  const anchor=await p.resolveSelection(reader,selection),units=await p.localUnits(reader,anchor,'paragraph');
+  assert.equal(core.scopeUnits(units,anchor,'paragraph').map(u=>u.text).join(' '),text.join(' '));
+ }
+ assert.equal(await p.selectionTranslationText(reader,{text:'surrounding',pageIndex:0},'sentence'),'Vascular development depends on signals from the surrounding cells.');
+});

@@ -636,7 +636,13 @@ var PaperVoiceCore = (() => {
     for(let i=0;i<lines.length;i++){
       const current=lines[i],previous=lines[i-1],h=current.height;if(!h)continue;
       const peers=lines.filter(x=>Math.abs(x.x-current.x)<h*3&&Math.abs(x.height-h)<h*.18),left=Math.min(...peers.map(x=>x.x)),width=Math.max(...peers.map(x=>x.right-left));
-      const indent=current.x-left>h*.65&&current.x-left<h*3;
+      // A first-line indent returns to the local text margin on the next line.
+      // Inset abstracts/quotations keep that margin throughout the block; page
+      // headings and metadata farther left must not split every wrapped line.
+      const next=lines[i+1],inset=next?current.x-next.x:0;
+      const indent=inset>h*.65&&inset<h*3&&Math.abs(next.height-h)<h*.18
+        &&current.y-next.y>h*.6&&current.y-next.y<h*leading*1.4
+        &&(!previous||Math.abs(previous.x-next.x)<h*.5);
       if(!previous){startsParagraph=indent||h>(lines[1]?.height||h)*1.18;continue;}
       const sameColumn=Math.abs(current.x-previous.x)<h*4,gap=previous.y-current.y;
       const shortEnding=sameColumn&&previous.right-left<width*.87&&/[.!?。！？][”’"')」』]*$/.test(previous.text.trim());
