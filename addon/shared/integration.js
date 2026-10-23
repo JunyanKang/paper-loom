@@ -72,7 +72,7 @@ Object.assign(PaperLoom,{
         const reader=options.reader,doc=frame.ownerDocument;
         if(frame.matches('.cl-root,.cl-settings,.pn-map-window,.pl-assistant')){
           const active=frame.classList.contains('pl-assistant')?'assistant':frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-map-window')?'network':'references';
-          const workspaceReader=reader||this.workspaceReaders?.get(doc)||{_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};
+          const workspaceReader=reader||this.workspaceReader(doc);
           this.mountWorkspace(frame,workspaceReader,active);
         }
         if(reader){
@@ -118,6 +118,7 @@ Object.assign(PaperLoom,{
         for(const win of Zotero.getMainWindows())R.addWindow(win);
         // Manual updates only; keep the native verification and install path.
         V.stopUpdateSchedule();V.updateAuto=false;V.set('updateCheckEnabled',false);this.connectUpdates();await RS.CiteLensUpdater.setAutomatic(false);
+        this.workspaceTabObserver=Zotero.Notifier.registerObserver({notify:()=>this.syncWorkspaceVisibility()},['tab'],'paper-loom-workspace');this.syncWorkspaceVisibility();
         await LoomVoiceWelcome.start();
       }catch(e){await this.stopModules();throw e;}
     })().finally(()=>{this.starting=null;});
@@ -135,6 +136,7 @@ Object.assign(PaperLoom,{
   async stopModules() {
     if(typeof LoomAssistant!=='undefined')await LoomAssistant.stop();
     LoomVoiceWelcome.stop();
+    if(this.workspaceTabObserver){Zotero.Notifier.unregisterObserver(this.workspaceTabObserver);this.workspaceTabObserver=null;}
     this.updateUnsubscribe?.();this.updateUnsubscribe=null;this.translationUnsubscribe?.();this.translationUnsubscribe=null;
     await LoomRuntime.stop();
     if(this.voice)await this.voice.shutdown();

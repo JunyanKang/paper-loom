@@ -109,6 +109,7 @@ var LoomDesignStyle = `
 .pl-language-option[aria-selected=true]{background:color-mix(in srgb,var(--cl-accent,var(--pv-accent)) 10%,var(--cl-bg,var(--pv-surface)))!important}
 :is(.cl-select-popover,.pv-select-popover).pl-language-menu{min-width:48px!important;width:48px!important;box-sizing:border-box}
 .pl-provider-icon{display:block;width:24px;height:24px;object-fit:contain;filter:none!important;flex:none}
+.pl-provider-icon[data-provider=kimi]{background:#182333;border-radius:5px;padding:2px;box-sizing:border-box}
 .cl-settings.pl-settings .cl-dialog-body{padding:4px var(--pl-page-padding) 12px!important}
 .pl-embedded .pv-caption-style-row>.pv-select{max-width:100%!important}
 .cl-settings.pl-settings .cl-setting-row input[type=range]{min-height:4px;height:4px;padding:0;background:var(--cl-line)}

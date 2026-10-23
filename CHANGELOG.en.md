@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.1 · 2026-10-24
+
+Fixed update checks failing after Zotero windows are closed or reopened. Update and installation deadlines no longer depend on the startup window.
+
+Switching between the library and a PDF now shows only the active page’s floating icon. Library entry points share the same workspace instance.
+
+Refined research assistant model settings with a compact provider icon menu, aligned fields and actions, and less explanatory clutter.
+
 ## 1.2.0 · 2026-10-24
 
 Adds a research assistant accessible from selected text, reading captions and the main panel, with the current passage or paper as context. Supports streamed answers, cancellation, PDF page links and on-demand page images.

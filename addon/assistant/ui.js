@@ -64,7 +64,6 @@ Object.assign(LoomAssistant,{
     const vision=ui.el(doc,'input');vision.type='checkbox';vision.style.cssText='width:32px!important;min-width:32px!important;justify-self:end';row(llm,'看图','assistantVision',vision);
     const search=ui.el(doc,'input');search.type='password';search.autocomplete='off';search.placeholder='可选 · Brave Search API';row(llm,'搜索','assistantSearch',search);
     const remove=ui.iconButton(doc,'移除密钥','remove',async()=>{await A.writeKey('brave','https://api.search.brave.com','',true);search.value='';search.placeholder='可选 · Brave Search API';});search.closest('.cl-setting-row').append(remove);
-    const note=ui.el(doc,'p','文献检索无需搜索密钥；网页搜索可配置 Brave。','cl-note pl-ai-search-note');llm.append(note);
     return {load(c){protocol.value=c.protocol||'openai';vision.checked=!!c.vision;search.value='';},values:()=>({protocol:protocol.value,vision:vision.checked}),async save(){if(search.value.trim())await A.writeKey('brave','https://api.search.brave.com',search.value.trim());search.value='';}};
    }
   };

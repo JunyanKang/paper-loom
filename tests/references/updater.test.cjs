@@ -1,6 +1,6 @@
 process.chdir(require('node:path').resolve(__dirname,'../..'));
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-function setup(check){const addon={version:'0.3.3',applyBackgroundUpdates:1,findUpdates:l=>check(l),cancelUpdate(){}},manager={getAddonByID:async()=>addon,UPDATE_WHEN_USER_REQUESTED:1,AUTOUPDATE_DEFAULT:1,AUTOUPDATE_ENABLE:2,AUTOUPDATE_DISABLE:0,shouldAutoUpdate:a=>a.applyBackgroundUpdates!==0,updateEnabled:true};const ctx={ChromeUtils:{importESModule:()=>({AddonManager:manager})},Zotero:{getMainWindow:()=>({setTimeout,clearTimeout}),logError(){}}};vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../../addon/references/updater.js'),'utf8'),ctx);return {U:ctx.CiteLensUpdater,addon,manager};}
+function setup(check){const addon={version:'0.3.3',applyBackgroundUpdates:1,findUpdates:l=>check(l),cancelUpdate(){}},manager={getAddonByID:async()=>addon,UPDATE_WHEN_USER_REQUESTED:1,AUTOUPDATE_DEFAULT:1,AUTOUPDATE_ENABLE:2,AUTOUPDATE_DISABLE:0,shouldAutoUpdate:a=>a.applyBackgroundUpdates!==0,updateEnabled:true};const ctx={ChromeUtils:{importESModule:uri=>uri.endsWith('Timer.sys.mjs')?{setTimeout,clearTimeout}:{AddonManager:manager}},Zotero:{getMainWindow:()=>({setTimeout,clearTimeout}),logError(){}}};vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../../addon/references/updater.js'),'utf8'),ctx);return {U:ctx.CiteLensUpdater,addon,manager,ctx};}
 test('native auto-update policy persists through reload',async()=>{const {U,addon}=setup(()=>{});await U.start({id:'x',version:'0.4.0'});await U.setAutomatic(false);assert.equal(addon.applyBackgroundUpdates,0);assert.equal(U.automatic,false);await U.setAutomatic(true);assert.equal(addon.applyBackgroundUpdates,2);U.stop();});
 test('current version and global update disable are represented accurately',async()=>{const {U,manager}=setup(l=>l.onUpdateFinished(null,0));manager.updateEnabled=false;await U.start({id:'x'});assert.equal(U.globallyEnabled,false);await U.check();assert.equal(U.phase,'current');U.stop();});
 test('duplicate manual checks share the active operation',async()=>{let calls=0,done;const {U}=setup(l=>{calls++;done=()=>l.onUpdateFinished(null,0)});await U.start({id:'x'});const pending=U.check();await new Promise(r=>setImmediate(r));await U.check();assert.equal(calls,1);done();await pending;U.stop();});
@@ -34,4 +34,12 @@ test('download progress is monotonic, installation waits, and success reports th
 test('unknown download size and failed install never imply success or change the version',async()=>{
  let listener;const install={version:'0.4.0',progress:20,maxProgress:-1,addListener:l=>listener=l,removeListener(){},install(){}};
  const {U}=setup(l=>{l.onUpdateAvailable(null,install);l.onUpdateFinished(null,0)});await U.start({id:'x',version:'0.3.3'});await U.check();const pending=U.apply();listener.onDownloadProgress();assert.equal(U.snapshot().progress,null);listener.onInstallFailed();await pending;assert.equal(U.snapshot().version,'0.3.3');assert.equal(U.phase,'error');assert.equal(U.snapshot().progress,null);assert.equal(U.snapshot().installStage,'');U.stop();
+});
+
+test('checks and installs survive disposal of the startup window',async()=>{
+ let listener;const install={version:'next',addListener:l=>listener=l,removeListener(){},install(){listener.onInstallEnded();}};
+ const {U,ctx}=setup(l=>{l.onUpdateAvailable(null,install);l.onUpdateFinished(null,0)});
+ ctx.Zotero.getMainWindow=()=>({setTimeout(){throw Error('NS_ERROR_NOT_INITIALIZED');},clearTimeout(){}});
+ await U.start({id:'x'});assert.equal(U.host.setTimeout,setTimeout);
+ await U.check();assert.equal(U.phase,'available');await U.apply();assert.equal(U.phase,'current');U.stop();
 });

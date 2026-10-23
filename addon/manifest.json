@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Paper Loom",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "在 Zotero 中连贯听读、对照翻译、追踪引文、探索作者合作与学术履历。",
   "author": "Junyan Kang",
   "applications": {

@@ -1,0 +1,16 @@
+if(!/qa-profile/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
+const wait=ms=>Zotero.Promise.delay(ms),r=Zotero.Reader._readers[0],d=r._iframeWindow.document,w=d.defaultView;await Zotero.Reader.open(r.itemID);await L.showSettings(r,d);await wait(250);
+const frame=d.querySelector('.cl-settings');frame.querySelector('[data-assistant-settings]').click();await wait(200);
+const panel=frame.querySelector('[data-task=assistant]'),content=panel.querySelector('.cl-llm-content'),trigger=panel.querySelector('[data-select-id="cl-setting-assistantProvider"]');
+if(!trigger)throw Error('provider trigger missing');trigger.click();await wait(150);
+const menu=d.querySelector('.cl-select-popover'),box=menu.getBoundingClientRect(),anchor=trigger.getBoundingClientRect(),bounds=panel.getBoundingClientRect(),checks=[];
+const check=(name,ok)=>checks.push({name,ok:!!ok});
+check('explanatory note removed',!panel.querySelector('.pl-ai-search-note'));
+check('provider choices use a two-row icon grid',menu.classList.contains('pl-provider-grid')&&new Set([...menu.children].map(x=>Math.round(x.getBoundingClientRect().top))).size===2);
+check('provider menu stays beside the control',box.top>=anchor.bottom&&box.top-anchor.bottom<10);
+check('menu within viewport',box.left>=0&&box.right<=w.innerWidth&&box.top>=0&&box.bottom<=w.innerHeight);
+check('all provider icons fit menu', [...menu.children].every(x=>{const b=x.getBoundingClientRect();return b.top>=box.top&&b.bottom<=box.bottom&&b.left>=box.left&&b.right<=box.right;}));
+check('configuration fully expanded',content.scrollHeight<=content.clientHeight+1);
+check('panel stays in workspace',bounds.top>=frame.getBoundingClientRect().top&&bounds.bottom<=frame.getBoundingClientRect().bottom);
+const c=d.createElement('canvas'),rect=frame.getBoundingClientRect();c.width=Math.ceil(rect.width*2);c.height=Math.ceil(rect.height*2);const cx=c.getContext('2d');cx.scale(2,2);cx.drawWindow(w,rect.x,rect.y,rect.width,rect.height,'white');await IOUtils.write('/tmp/loom-settings-121.png',Uint8Array.from(w.atob(c.toDataURL().split(',')[1]),x=>x.charCodeAt(0)));
+return {passed:checks.every(x=>x.ok),checks,panel:bounds.toJSON(),menu:box.toJSON(),anchor:anchor.toJSON()};

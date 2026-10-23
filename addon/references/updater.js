@@ -6,7 +6,7 @@ var CiteLensUpdater = {
   emit(){if(this.dead)return;for(const listener of [...this.subscribers])try{listener(this.snapshot());}catch(e){Zotero.logError(e);}},
   set(phase,message='',errorKind=''){if(phase!=='installing'){this.progress=null;this.installStage='';}this.phase=phase;this.message=message;this.errorKind=errorKind;this.emit();},
   subscribe(listener){this.subscribers.add(listener);listener(this.snapshot());return ()=>this.subscribers.delete(listener);},
-  async start(owner){this.owner=owner;this.host=Zotero.getMainWindow();this.dead=false;this.epoch++;this.phase='idle';this.message='';this.install=null;this.progress=null;this.installStage='';this.completedVersion='';await this.load();},
+  async start(owner){this.owner=owner;this.host=ChromeUtils.importESModule('resource://gre/modules/Timer.sys.mjs');this.dead=false;this.epoch++;this.phase='idle';this.message='';this.install=null;this.progress=null;this.installStage='';this.completedVersion='';await this.load();},
   async load(){
     const ticket=this.epoch;
     try{const manager=this.manager(),addon=await manager.getAddonByID(this.owner.id);if(this.dead||ticket!==this.epoch)return;if(!addon)throw Error('Plugin unavailable');
@@ -51,7 +51,7 @@ var CiteLensUpdater = {
         catch(error){
           if(this.dead||ticket!==this.epoch)return;
           // Keep native error codes in diagnostics, never include credentials or library data.
-          Zotero.logError(Error('[Paper Loom updater] check '+(attempt+1)+' failed: '+(error.code??'lookup')));
+          Zotero.logError(Error('[Paper Loom updater] check '+(attempt+1)+' failed: '+(error.code??error.name??'lookup')));
           if(attempt||!error.retryable)throw error;
           await this.pauseRetry();if(this.dead||ticket!==this.epoch)return;
         }
