@@ -1,0 +1,9 @@
+/* Loopback-only controlled model; never a production provider. */
+const http=require('node:http'),fs=require('node:fs');let requests=[];
+http.createServer(async(req,res)=>{if(req.method==='GET'){res.setHeader('content-type','application/json');res.end(JSON.stringify({data:[{id:'research-fixture'}]}));return;}let raw='';for await(const c of req)raw+=c;const body=JSON.parse(raw);requests.push({messages:body.messages?.length,tools:body.tools?.map(t=>t.function.name),hasImage:JSON.stringify(body).includes('image_url')});fs.writeFileSync('/tmp/loom-assistant-model-metrics.json',JSON.stringify(requests));
+res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache'});const event=data=>res.write('data: '+JSON.stringify(data)+'\n\n');
+if(JSON.stringify(body.messages?.filter(m=>m.role==='user').at(-1)?.content).includes('CANCEL TEST')){event({choices:[{delta:{content:'Pending'}}]});const timer=setTimeout(()=>{event({choices:[{delta:{content:' completed'},finish_reason:'stop'}]});res.end('data: [DONE]\n\n');},10000);req.on('close',()=>clearTimeout(timer));return;}
+if(body.messages?.at(-1)?.content==='Reply with OK.'){event({choices:[{delta:{content:'OK'},finish_reason:'stop'}]});res.end();return;}
+if(body.tools?.length&&!body.messages.some(m=>m.role==='tool')){event({choices:[{delta:{tool_calls:[{index:0,id:'read1',type:'function',function:{name:'read_paper',arguments:'{"page":1}'}}]},finish_reason:'tool_calls'}]});res.end();return;}
+event({choices:[{delta:{content:'## Evidence\n\nThe supplied PDF provides text on page one [P1].\n\n'}}]});setTimeout(()=>{event({choices:[{delta:{content:'**Interpretation:** this is a controlled protocol test, not a scientific finding.\n\n| Source | Scope |\n|---|---|\n| P1 | Page text |'},finish_reason:'stop'}]});res.end('data: [DONE]\n\n');},60);
+}).listen(18766,'127.0.0.1',()=>console.log('fixture ready'));

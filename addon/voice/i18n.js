@@ -1086,6 +1086,7 @@ var PaperVoiceI18n = (() => {
   if(root){root.setAttribute('lang',language);visit(root);}
  }
  for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang]['朗读控制']=['Reading controls','読み上げ操作','Commandes de lecture','Lesesteuerung'][i];
+ for(const [i,lang] of ['en','ja','fr','de'].entries())catalogs[lang]['科研助手']=['Research assistant','研究アシスタント','Assistant de recherche','Forschungsassistent'][i];
  return {translate,apply,resolveLanguage,supportedLanguages};
 })();
 if(typeof module!=='undefined')module.exports=PaperVoiceI18n;

@@ -363,6 +363,7 @@ var PaperVoiceTranslation = {
   const pause=button(transport,'pause','暂停',()=>this.primary(c.reader));pause.dataset.captionAction='pause';button(transport,'square','停止',()=>this.stop()).dataset.captionAction='stop';
   const secondRow=make('div','pv-caption-tools-row'),modes=make('div','pv-caption-tools-group pv-caption-modes');tools.append(secondRow);secondRow.append(modes);
   for(const mode of PaperVoiceCore.modes){const b=button(modes,mode.icon,mode.short,()=>this.setMode(mode.id));b.dataset.captionMode=mode.id;}
+  if(this.assistantButton){const ai=this.assistantButton(doc,this.t('科研助手'),async()=>this.openAssistant(c.reader,{kind:'reading',original:this.get('mode','paragraph')==='paragraph'?await this.selectionTranslationText(c.reader,{text:c.unit?.sentenceText||c.unit?.text||'',pageIndex:c.unit?.pageIndex,anchorOffset:c.unit?.anchorOffset},'paragraph'):c.unit?.sentenceText||c.unit?.text||'',translation:c.box.textContent,page:c.unit?.pageIndex??null,scope:this.get('mode','paragraph')}));ai.dataset.captionAction='assistant';secondRow.append(ai);}
   const rateHost=make('div','pv-caption-rate-host');secondRow.append(rateHost);
   const rateButton=button(rateHost,null,'语速',()=>openRate());rateButton.dataset.captionAction='rate';rateButton.setAttribute('aria-haspopup','true');rateButton.setAttribute('aria-expanded','false');
   const rateMenu=make('div','pv-caption-popup pv-caption-rate-menu');rateMenu.hidden=true;rateMenu.setAttribute('role','group');rateHost.append(rateMenu);

@@ -1,6 +1,6 @@
 Object.assign(PaperLoom,{
   async start({rootURI,version}) {
-    this.rootURI=rootURI;this.version=version;this.dead=false;Zotero.PaperLoom=this;
+    this.assistant=LoomAssistant;this.rootURI=rootURI;this.version=version;this.dead=false;Zotero.PaperLoom=this;
     this.resource='paper-loom-'+Services.uuid.generateUUID().toString().replace(/[{}]/g,'');
     const resources=Services.io.getProtocolHandler('resource').QueryInterface(Components.interfaces.nsIResProtocolHandler);
     resources.setSubstitutionWithFlags(this.resource,Services.io.newURI(rootURI),resources.ALLOW_CONTENT_ACCESS);
@@ -23,6 +23,7 @@ Object.assign(PaperLoom,{
         this[name+'Scope']=scope;
       }
       const VS=this.voiceScope,RS=this.referencesScope,V=this.voice=VS.PaperVoice,R=this.references=RS.CiteLens;
+      V.assistantButton=(doc,label,run)=>{LoomAssistant.installStyle(doc);return LoomAssistant.iconButton(doc,label,'assistant',run);};V.openAssistant=(reader,entry)=>this.showAssistant(reader,entry);
       V.providerMeta=(code,options)=>this.providerMeta(code,options);RS.CiteLensControls.providerMeta=(code,options)=>this.providerMeta(code,options);V.flagURI=code=>this.flagURI(code);RS.CiteLensControls.flagURI=code=>this.flagURI(code);RS.CiteLensControls.connectedSurfacePath=(rects,radius)=>VS.PaperVoiceUI.connectedSurfacePath(rects,radius);
       // Ship the worker with the plugin so existing voice assets gain new capabilities
       // without rewriting the installed engine or downloading models again.
@@ -69,8 +70,8 @@ Object.assign(PaperLoom,{
       const page=RS.CiteLensUI.page.bind(RS.CiteLensUI);
       RS.CiteLensUI.page=(frame,options={})=>{
         const reader=options.reader,doc=frame.ownerDocument;
-        if(frame.matches('.cl-root,.cl-settings,.pn-map-window')){
-          const active=frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-map-window')?'network':'references';
+        if(frame.matches('.cl-root,.cl-settings,.pn-map-window,.pl-assistant')){
+          const active=frame.classList.contains('pl-assistant')?'assistant':frame.classList.contains('cl-settings')?'settings':frame.classList.contains('pn-map-window')?'network':'references';
           const workspaceReader=reader||this.workspaceReaders?.get(doc)||{_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};
           this.mountWorkspace(frame,workspaceReader,active);
         }
@@ -132,6 +133,7 @@ Object.assign(PaperLoom,{
     U.set('idle','');
   },
   async stopModules() {
+    if(typeof LoomAssistant!=='undefined')await LoomAssistant.stop();
     LoomVoiceWelcome.stop();
     this.updateUnsubscribe?.();this.updateUnsubscribe=null;this.translationUnsubscribe?.();this.translationUnsubscribe=null;
     await LoomRuntime.stop();

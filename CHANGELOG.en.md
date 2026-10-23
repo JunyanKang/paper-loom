@@ -2,6 +2,18 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.0 · 2026-10-24
+
+Adds a research assistant accessible from selected text, reading captions and the main panel, with the current passage or paper as context. Supports streamed answers, cancellation, PDF page links and on-demand page images.
+
+Configure the assistant in main Settings using the translation-style editor. Its model settings and credentials are stored separately. Zotero library search and Europe PMC / Crossref research are available by default; Brave web search is optional. Page images require an image-capable model.
+
+Literature citations reuse the existing reference cards, including abstracts, translation, library saving, reading-list actions and citation copying.
+
+Browse conversations by calendar, with darker days indicating more questions. Search across dates, rename, delete or export Markdown, then return to the same date or search results. Calendar spacing is tighter, the selected full date appears in the header, and editing and deletion controls remain anchored to their record.
+
+Simplifies the composer and assistant settings, and fixes clipped footer actions and wrapped field labels. Conversations stay on this device; sending a question submits the required paper context to the configured model.
+
 ## 1.1.2 · 2026-10-13
 
 Fixed inset abstracts and body passages being split into a new paragraph on every line. Paragraph translation and reading now use the complete paragraph without treating the left edge of headings or author metadata as the body margin.

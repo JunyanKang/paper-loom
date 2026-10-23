@@ -57,3 +57,11 @@ Add promising papers to **Read later** and return through the paper list without
 Scans need OCR first. Columns, equations, tables, and unusual encoding can affect reading order and reference recognition. Try a smaller selection or look up the reference in the paper list. Full-text access still depends on your publisher or institutional permissions.
 
 [Settings](SETTINGS.en.md) · [Authors](NETWORK.en.md) · [FAQ](FAQ.en.md)
+
+## Discuss research (1.2)
+
+The assistant icon beside a selection or reading caption carries its source text, translation and page into chat. The main assistant tab links the current paper. Configure its model in main Settings. Opening chat sends nothing; Send submits your question, relevant paper excerpts and required conversation history.
+
+You can follow up, stop generation, rename or delete conversations, and export Markdown. Literature research is available by default. After image support is confirmed in main Settings, the model can request PDF page images when needed. Page references navigate to the PDF. Hover over literature citations for the existing reference card, abstracts, abstract translation, saving and reading-list actions. Sources remain attached to saved conversations.
+
+Browse history by calendar. The outer arrows change the year, the inner arrows change the month, and the center shows the selected full date and returns to today when clicked. Darker days mean more questions. A conversation spanning several days appears on each day with questions. Open a conversation and return to the same date. Search matches conversation titles, linked papers and the last-question preview for each day. Rename, delete confirmation and export feedback stay within the selected record.

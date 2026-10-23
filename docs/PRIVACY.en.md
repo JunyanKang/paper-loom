@@ -42,3 +42,11 @@ Uninstalling preserves voice packages and local records so you can use them agai
 ## Feedback
 
 Remove keys, private full text, and personal information before sharing screenshots or logs. Report issues at [GitHub Issues](https://github.com/JunyanKang/paper-loom/issues).
+
+## Research assistant (1.2)
+
+Sending a message submits the question, needed conversation history, paper metadata and retrieved excerpts to the separately configured model. After image support is confirmed in Settings, the assistant may request and send relevant PDF page images. Literature search is available by default; when used, queries go to Europe PMC, Crossref or configured Brave Search; reading a public page contacts that site. Model providers handle content under their own policies.
+
+Conversations and source records stay in `paper-loom/assistant/` inside the Zotero data directory and do not automatically sync. Assistant and search credentials use the separate `Paper Loom Assistant API` login realm. The model cannot modify or delete library items. Saving papers or adding them to the reading list through citation cards remains a user action.
+
+The local calendar index also stores daily question counts and a short preview of the last question for date filtering and search.

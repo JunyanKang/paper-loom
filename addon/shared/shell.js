@@ -37,7 +37,7 @@ var PaperLoom = {
     };
     const cancel=()=>{win.clearTimeout(closeTimer);closeTimer=0;};
     const close=()=>{cancel();ui._hoverWorkspace=false;for(const view of U.livePages(doc))if(!view.container.hidden&&view.frame.dataset.dockMotion!=='closing'){lastView=view;view.dismiss();}};
-    const schedule=()=>{if(closeTimer)return;closeTimer=win.setTimeout(()=>{closeTimer=0;if(!disposed&&!hovered){const occupied=orb.matches(':hover')||[...U.livePages(doc)].some(v=>!v.container.hidden&&v.frame.matches(':hover'));if(!occupied)close();}},this.hoverDismissDelay);};
+    const schedule=()=>{if(closeTimer)return;closeTimer=win.setTimeout(()=>{closeTimer=0;if(!disposed&&!hovered){if([...U.livePages(doc)].some(v=>!v.container.hidden&&v.frame.classList?.contains('pl-assistant')))return;const occupied=orb.matches(':hover')||[...U.livePages(doc)].some(v=>!v.container.hidden&&v.frame.matches(':hover'));if(!occupied)close();}},this.hoverDismissDelay);};
     const open=()=>{
       if(disposed)return;hovered=true;ui._hoverWorkspace=true;cancel();
       const active=[...U.livePages(doc)].find(v=>!v.container.hidden);
@@ -47,7 +47,7 @@ var PaperLoom = {
     };
     const over=event=>{if(disposed||event.pointerType==='touch'||event.type==='pointermove'&&!ui._hoverWorkspace)return;if(inside(event.target)){hovered=true;cancel();if(event.type!=='pointermove'&&orb.contains(event.target)&&!event.buttons)open();}else if(ui._hoverWorkspace){hovered=false;schedule();}};
     const out=event=>{if(disposed||!ui._hoverWorkspace)return;if(inside(event.relatedTarget)){hovered=true;cancel();}else{hovered=false;schedule();}};
-    const outside=event=>{if(disposed||inside(event.target))return;hovered=false;close();};
+    const outside=event=>{if(disposed||inside(event.target))return;if([...U.livePages(doc)].some(v=>!v.container.hidden&&v.frame.classList?.contains('pl-assistant')))return;hovered=false;close();};
     const visible=event=>{if(event.target._clPage)lastView=event.target._clPage;};doc.addEventListener('cl-page-visible',visible,true);
     const scan=surface=>{try{for(const frame of surface.querySelectorAll('iframe,browser'))if(frame.contentDocument)watch(frame.contentDocument,true);}catch(_){} };
     const loaded=event=>{try{const frame=event.target;if(frame.contentDocument)watch(frame.contentDocument,true);else if(frame.nodeType===9)watch(frame,true);}catch(_){} };
@@ -59,9 +59,9 @@ var PaperLoom = {
   },
   mainNavigation(doc,reader,active='settings'){
     const nav=this.el(doc,'nav',null,'pl-main-actions');nav.setAttribute('aria-label','Paper Loom');
-    const entries=[['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['references','references','引文与稍后读',()=>this.references.showPanel(reader,this.references.panels.get(reader)?.isConnected?{}:{view:reader.itemID?'references':'queue'})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];
+    const entries=[['assistant','assistant',LoomAssistant.t('科研助手','Research assistant'),()=>this.showAssistant(reader,{},doc)],['network','authors','朋友圈与学术履历',()=>this.references.showNetwork(reader,{doc})],['references','references','引文与稍后读',()=>this.references.showPanel(reader,this.references.panels.get(reader)?.isConnected?{}:{view:reader.itemID?'references':'queue'})],['settings','settings','设置',()=>this.showSettings(reader,doc)]];
     nav.style.setProperty('--pl-page-count',String(entries.length));nav.style.setProperty('--pl-active-index',String(entries.findIndex(entry=>entry[0]===active)));
-    for(const [id,icon,label,run] of entries){const button=this.referencesScope.CiteLensUI.iconButton(doc,label,icon,()=>{if(id!==active)return run();});button.dataset.loomPage=id;button.setAttribute('aria-current',id===active?'page':'false');nav.append(button);}return nav;
+    for(const [id,icon,label,run] of entries){const button=this.referencesScope.CiteLensUI.iconButton(doc,label,icon,()=>{if(id!==active)return run();});if(id==='assistant')button.replaceChildren(LoomAssistant.icon(doc));button.dataset.loomPage=id;button.setAttribute('aria-current',id===active?'page':'false');nav.append(button);}return nav;
   },
   mountWorkspace(frame,reader,active){
     if(frame.querySelector(':scope>.pl-main-actions'))return;
@@ -79,6 +79,7 @@ var PaperLoom = {
     if(!reader){this.workspaceReaders||=new WeakMap();reader=this.workspaceReaders.get(doc);if(!reader){reader={_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};this.workspaceReaders.set(doc,reader);}}
     this.voice.ensurePanel(reader);return this.showSettings(reader,doc);
   },
+  showAssistant(reader=this.currentReader(),entry={},doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document){return LoomAssistant.open(reader,entry,doc);},
   showQueue(doc=Zotero.getMainWindow().document) {
     this.queueReaders||=new WeakMap();let reader=this.queueReaders.get(doc);if(!reader){reader={_iframeWindow:doc.defaultView,_window:doc.defaultView,itemID:null};this.queueReaders.set(doc,reader);}
     return this.references.showPanel(reader,{view:'queue'});
@@ -104,7 +105,7 @@ var PaperLoom = {
   },
   async showSettings(reader=this.currentReader(),doc=reader?._iframeWindow?.document||Zotero.getMainWindow().document,tab='general') {
     this.style(doc);const result=await this.referencesScope.CiteLensUI.settingsDialog(doc,{reader});
-    const frame=result?.frame||doc.querySelector('.cl-settings');frame?._plSelect?.(tab);return result;
+    const frame=result?.frame||doc.querySelector('.cl-settings');frame?._plSelect?.(tab);await frame?._clPage?.activate();return result;
   },
   showConflicts(doc=Zotero.getMainWindow().document) {
     // Predecessors must stop before their Reader hooks and global aliases are reused.

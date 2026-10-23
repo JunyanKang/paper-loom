@@ -205,6 +205,7 @@ var PaperVoice = {
     this.selectionContexts.get(reader)?.disposeVisibility?.();this.selectionContexts.set(reader,selected);
     if(typeof PaperVoiceSelectionUI!=='undefined'){
       const ui=PaperVoiceSelectionUI.create(this,doc,button,startReading);append(ui.card);
+      if(this.assistantButton){const ai=this.assistantButton(doc,this.t('科研助手'),async()=>this.openAssistant(reader,{kind:'selection',original:await this.selectionTranslationText(reader,selected,this.get('selectionTranslationScope','selection')),translation:ui.card.dataset.translationState==='ready'?ui.translation.textContent:'',page:selected.pageIndex,scope:this.get('selectionTranslationScope','selection')}));ai.dataset.selectionAssistant='true';ui.heading.insertBefore(ai,ui.scopes[0].parentElement);}
       selected.disposeVisibility=PaperVoiceSelectionUI.watchAnchor(this,reader,selected,ui.card);
       this.translateSelection(reader,selected,ui);
     }else append(button);

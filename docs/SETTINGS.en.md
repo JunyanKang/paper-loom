@@ -35,3 +35,7 @@ Speed, reading modes, repeat counts, language, and voice live in the reading con
 ## At the bottom
 
 **Check, Guide, Privacy, and Feedback** stay at the bottom. Check changes to Update when a release is available. During download and installation, a progress bar replaces the version number; completion restores the new version and Check action. Settings and the paper list share a height; scroll to reach content in smaller windows.
+
+## Research assistant (1.2)
+
+Open Research assistant in the main settings. It uses the same provider picker, model fields and save/test controls as translation. The two configurations and credentials stay separate. Enable Vision only for a model that accepts images. Literature search needs no additional key; add a Brave Search API key for general web search.

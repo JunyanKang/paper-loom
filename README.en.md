@@ -8,6 +8,8 @@ Listen to a difficult passage. Inspect the paper behind a citation. Save the nex
 
 **Paper Loom is a listening and literature companion for Zotero.** It brings offline speech, translation, reference previews, and author networks into your reading workflow.
 
+The research assistant connects questions to the current paper, selected passages and traceable literature sources. Find past conversations by date. Configure its model and optional web search separately in main Settings. [Guide](docs/GUIDE.en.md).
+
 ## Start with this passage
 
 <p align="center">

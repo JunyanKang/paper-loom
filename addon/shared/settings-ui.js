@@ -52,6 +52,7 @@ PaperLoom.extendSettings=async function(ctx) {
   ui.find=key=>typography[key]||originalFind(key);
   translation.append(fontRow,placementRow);data.prepend(translation);
   ui.root.querySelector('[data-settings-pane=translation]').hidden=true;
+  const aiRow=this.el(doc,'div',null,'cl-setting-row');aiRow.append(this.el(doc,'label',LoomAssistant.t('科研助手','Research assistant')));const aiSettings=this.referencesScope.CiteLensUI.iconButton(doc,'配置大模型','settings',()=>ctx.modelPages.assistant.open());aiSettings.dataset.assistantSettings='true';aiRow.append(aiSettings);translation.append(aiRow);ctx.modelPages.assistant=ctx.buildModelPage('assistant',aiSettings,'general',LoomAssistant.settingsAdapter());
   const engine=this.enginePanel(doc);data.after(engine.node);cleanups.push(engine.dispose);
   const resize=()=>{if(embedded.isConnected&&!embedded.hidden){const h=ui.panel.getBoundingClientRect().height;if(h>0&&embedded.style.height!==Math.ceil(h)+'px')embedded.style.height=Math.ceil(h)+'px';}};
   const observer=new embedded.contentWindow.ResizeObserver(resize);observer.observe(ui.panel);
