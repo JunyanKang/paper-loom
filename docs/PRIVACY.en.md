@@ -50,3 +50,7 @@ Sending a message submits the question, needed conversation history, paper metad
 Conversations and source records stay in `paper-loom/assistant/` inside the Zotero data directory and do not automatically sync. Assistant and search credentials use the separate `Paper Loom Assistant API` login realm. The model cannot modify or delete library items. Saving papers or adding them to the reading list through citation cards remains a user action.
 
 The local calendar index also stores daily question counts and a short preview of the last question for date filtering and search.
+
+Selected-paper conversations send metadata and abstracts for the pinned papers. When needed, the model can request indexed text excerpts, annotations and child notes from those papers. Selecting a scope sends nothing; model requests begin when you send a question. Include only papers you intend to discuss.
+
+Answers that you preview and save become ordinary Zotero child notes and follow the library’s sync settings, unlike local-only chat history. Saving does not overwrite existing notes.

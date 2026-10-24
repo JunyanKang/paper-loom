@@ -1,9 +1,13 @@
 var LoomAssistantTools={
  async get(url,run,key='',protocol='openai'){return LoomAssistantTransport.request(Zotero.getMainWindow(),{url,method:'GET',signal:run.signal,key,protocol,limit:1500000,timeout:20000});},
  source(run,record){
-  const doi=String(record.doi||record.record?.DOI||'').toLowerCase(),match=[...run.sources,...(run.priorSources||[])].find(s=>doi&&String(s.doi||s.record?.DOI||'').toLowerCase()===doi||record.url&&s.url===record.url||record.page!==undefined&&s.page===record.page&&s.itemID===record.itemID||record.page===undefined&&record.itemID&&s.page===undefined&&s.itemID===record.itemID);
+  const doi=String(record.doi||record.record?.DOI||'').toLowerCase(),match=[...run.sources,...(run.priorSources||[])].find(s=>{
+   if(record.page!==undefined||s.page!==undefined)return record.page!==undefined&&s.page===record.page&&s.itemID===record.itemID;
+   if((record.evidenceKey||'metadata')!==(s.evidenceKey||'metadata'))return false;
+   return doi&&String(s.doi||s.record?.DOI||'').toLowerCase()===doi||record.url&&s.url===record.url||record.itemID&&s.itemID===record.itemID;
+  });
   if(match){if(!run.sources.includes(match))run.sources.push(match);if(record.record){match.record={...record.record,...match.record};for(const [k,v]of Object.entries(record.record))if(!match.record[k]||Array.isArray(match.record[k])&&!match.record[k].length)match.record[k]=v;}return match;}
-  const source={...record,id:record.page!==undefined?'P'+(record.page+1):'L'+(++run.sourceSequence)};run.sources.push(source);return source;
+  const used=new Set([...run.sources,...(run.priorSources||[])].map(s=>s.id));let id=record.page!==undefined?'P'+(record.page+1):null;if(!id||used.has(id)){do{id='L'+(++run.sourceSequence);}while(used.has(id));}const source={...record,id};run.sources.push(source);return source;
  },
  reference(x,kind){
   if(kind==='crossref'&&typeof PaperLoom!=='undefined')return {...PaperLoom.referencesScope.CiteLensCore.fromCrossref(x),publicationStatus:/protocol/i.test(x['group-title']||'')?'protocol':x.type==='posted-content'?(x.subtype||'posted-content'):x.type==='journal-article'?'journal':'other'};
@@ -15,13 +19,15 @@ var LoomAssistantTools={
  distinctStudies(results){const selected=[],byStudy=new Map(),seenIDs=new Set();for(const x of results){if(seenIDs.has(x.source.id))continue;seenIDs.add(x.source.id);const r=x.source.record||{},title=String(r.title||x.source.title||'').normalize('NFKD').toLowerCase().replace(/<[^>]*>/g,' ').replace(/[^a-z0-9]/g,''),author=String(r.creators?.[0]?.lastName||'').normalize('NFKD').toLowerCase().replace(/[^a-z0-9]/g,''),key=title.length>=30&&author?title+'|'+author:null,prior=key?byStudy.get(key):null;if(prior!==null&&prior!==undefined){const old=selected[prior];if(old.source.record?.publicationStatus==='preprint'&&r.publicationStatus==='journal')selected[prior]={...x,otherVersionIDs:[old.source.id,...(old.otherVersionIDs||[])]};else (old.otherVersionIDs||(old.otherVersionIDs=[])).push(x.source.id);}else{if(key)byStudy.set(key,selected.length);selected.push(x);}}return selected;},
  async execute(name,args,run){
   if(!run.allowed.includes(name))throw Error('toolDenied');if(!args||typeof args!=='object')throw Error('toolArgs');
+  if(name==='read_research')return LoomAssistantZotero.read(args,run);
+  const target=['read_paper','view_page','search_paper'].includes(name)?LoomAssistantZotero.target(run,args.itemID):null;
   if(name==='read_paper'||name==='view_page'){
-   const page=Number(args.page)-1,pdf=LoomAssistantContext.pdf(run.reader);if(!Number.isInteger(page)||page<0||page>=(pdf?.numPages||0))throw Error('page');const source=this.source(run,{page,itemID:run.context.paper?.attachmentID,title:run.context.paper?.title||'PDF'});
-   if(name==='view_page'){if(++run.images>3)throw Error('imageLimit');return {source,image:await LoomAssistantContext.image(run.reader,page,run.signal)};}
+   const page=Number(args.page)-1,pdf=LoomAssistantContext.pdf(target.reader);if(!Number.isInteger(page)||page<0||page>=(pdf?.numPages||0))throw Error('page');const source=this.source(run,{page,itemID:target.paper?.attachmentID,title:target.paper?.title||'PDF'});
+   if(name==='view_page'){if(++run.images>3)throw Error('imageLimit');return {source,image:await LoomAssistantContext.image(target.reader,page,run.signal)};}
    const p=Components.utils.waiveXrays(await pdf.getPage(page+1)),text=PaperLoom.voiceScope.PaperVoiceCore.pdfText((await p.getTextContent()).items);return {source,text:text.slice(0,14000),truncated:text.length>14000};
   }
   const query=String(args.query||'').trim().slice(0,300);
-  if(name==='search_paper'){if(!query)throw Error('toolArgs');const indexed=await LoomAssistantContext.pages(run.reader,run.signal),parts=LoomAssistantCore.parts(indexed.pages,query,8000).filter(x=>x.score>0);return {results:parts.map(x=>({source:this.source(run,{page:x.page,itemID:run.context.paper?.attachmentID,title:run.context.paper?.title||'PDF'}),text:x.text})),indexedPages:indexed.pages.length,totalPages:indexed.total,partial:indexed.partial,evidence:'PDF text excerpts; use view_page for visual claims'};}
+  if(name==='search_paper'){if(!query)throw Error('toolArgs');const indexed=await LoomAssistantContext.pages(target.reader,run.signal),parts=LoomAssistantCore.parts(indexed.pages,query,8000).filter(x=>x.score>0);return {results:parts.map(x=>({source:this.source(run,{page:x.page,itemID:target.paper?.attachmentID,title:target.paper?.title||'PDF'}),text:x.text})),indexedPages:indexed.pages.length,totalPages:indexed.total,partial:indexed.partial,evidence:'PDF text excerpts; use view_page for visual claims'};}
   if(name==='search_library'){
    if(!query)throw Error('toolArgs');const search=new Zotero.Search();search.libraryID=Zotero.Libraries.userLibraryID;search.addCondition('quicksearch-titleCreatorYear','contains',query);search.addCondition('itemType','isNot','attachment');const ids=await search.search(),items=await Zotero.Items.getAsync(ids.slice(0,12));return {total:ids.length,results:items.filter(x=>!x.deleted).map(x=>({source:this.source(run,{itemID:x.id,title:x.getField('title'),url:x.getField('DOI')?'https://doi.org/'+x.getField('DOI'):'',record:this.reference(x,'library')}),authors:x.getCreators().map(c=>c.lastName).join(', '),date:x.getField('date'),abstract:x.getField('abstractNote').slice(0,3500),evidence:'library metadata/abstract'}))};
   }

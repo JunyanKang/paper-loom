@@ -2,6 +2,16 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.4 · 2026-10-24
+
+Pin 1–8 selected papers for a conversation and retrieve Zotero indexed text, annotations and notes as needed. Paper evidence stays distinct from personal comments, and conversation scope survives library selection changes. Identical page numbers in different PDFs retain distinct source identities.
+
+Preview an answer and save it as a child note under a chosen paper, including tables and sources. Repeated clicks or saving again from history do not create duplicates. Standalone PDFs remain readable without becoming invalid note parents.
+
+A more compact assistant layout places scope and paper count on one row, and sources and answer actions on another. Note previews omit the duplicate header. Tighter spacing accommodates Chinese, English and smaller windows.
+
+Passage questions no longer scan the whole PDF first. Multi-paper retrieval uses the existing index on demand; item changes invalidate cached PDF context and shutdown releases listeners.
+
 ## 1.2.3 · 2026-10-24
 
 Aligned the research and translation model settings: centered provider logos, shared label widths, aligned fields and trailing controls. Fixed the model picker squeezing out the model name, incorrect vision-toggle sizing, and layouts changing after opening the assistant. Provider choices open upward in two rows; model choices open downward. Chinese and English labels remain on one line.
