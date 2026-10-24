@@ -1,8 +1,9 @@
-if(!/qa-profile-assistant120$/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
+if(!/qa-profile-assistant(?:120|122b)$/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
 const A=L.assistant,r=L.qaReader,view=await L.showAssistant(r,{}),doc=view.doc,win=doc.defaultView,checks=[],wait=ms=>Zotero.Promise.delay(ms),check=(name,ok)=>{checks.push({name,ok:!!ok});if(!ok)throw Error(name);};
 const scope={Zotero,IOUtils,PathUtils,Services};Services.scriptloader.loadSubScript(L.rootURI+'assistant/core.js',scope);Services.scriptloader.loadSubScript(L.rootURI+'assistant/store.js',scope);const Store=scope.LoomAssistantStore;
 async function screenshot(name){const rect=view.frame.getBoundingClientRect(),c=doc.createElement('canvas');c.width=Math.ceil(rect.width*2);c.height=Math.ceil(rect.height*2);const cx=c.getContext('2d');cx.scale(2,2);cx.drawWindow(win,rect.x,rect.y,rect.width,rect.height,'white');await IOUtils.write('/tmp/loom-assistant-'+name+'.png',Uint8Array.from(win.atob(c.toDataURL().split(',')[1]),x=>x.charCodeAt(0)));}
 try{
+await A.saveConfig({id:'custom',endpoint:'http://127.0.0.1:18766/v1',model:'research-fixture',vision:true},'fixture-only');view.session=null;await A.send(view,'Explain history fixture');
 check('composer contains no removed controls',!view.frame.querySelector('.pl-ai-context,.pl-ai-privacy,.pl-ai-composer input[type=checkbox],.pl-ai-composer [title="Attach current PDF page"]'));
 view.online=true;view.vision=true;view.input.value='Unsent draft';
 await view.history.show();await wait(200);const panel=view.frame.querySelector('.pl-ai-history');
@@ -22,6 +23,6 @@ search.value='';search.dispatchEvent(new win.Event('input'));await wait(200);con
 const beforeKey=view.history.state.selected,cell=panel.querySelector('[aria-pressed=true][data-date]');cell.dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));check('calendar keyboard navigation',view.history.state.selected!==beforeKey);
 nav.children[2].click();if(!panel.querySelector('.pl-ai-history-row'))panel.querySelector('.pl-ai-calendar-days button:not([data-level="0"])').click();
 const editRow=panel.querySelector('.pl-ai-history-row'),id=editRow.dataset.session,oldTitle=editRow.querySelector('.pl-ai-history-open').textContent;editRow.querySelector('.pl-ai-history-actions').firstChild.click();const renameForm=editRow.querySelector('form');renameForm.querySelector('input').value='Renamed native QA conversation';renameForm.querySelector('[type=submit]').click();await wait(250);check('rename saves persistently',panel.querySelector('[data-session="'+id+'"] .pl-ai-history-open').textContent==='Renamed native QA conversation');
-const count=panel.querySelectorAll('.pl-ai-history-row').length,deleteRow=panel.querySelector('[data-session="'+id+'"]');deleteRow.querySelector('.pl-ai-history-actions').lastChild.click();deleteRow.querySelector('form [type=submit]').click();await wait(250);check('delete removes record and refreshes list',!panel.querySelector('[data-session="'+id+'"]')&&panel.querySelectorAll('.pl-ai-history-row').length===count-1);
+const count=panel.querySelectorAll('.pl-ai-history-row').length,deleteRow=panel.querySelector('[data-session="'+id+'"]');deleteRow.querySelector('.pl-ai-history-actions').lastChild.click();deleteRow.querySelector('form [type=submit]').click();await wait(250);check('delete removes record and refreshes list',!panel.querySelector('[data-session="'+id+'"]')&&!(await IOUtils.exists(PathUtils.join(Zotero.DataDirectory.dir,'paper-loom','assistant',id+'.json'))));
 return {passed:true,checks};
 }catch(e){return {passed:false,error:String(e),stack:e.stack,checks};}

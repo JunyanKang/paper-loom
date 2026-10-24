@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.2 · 2026-10-24
+
+Names the research assistant Loom, with built-in guidance for paper reading, figure interpretation, evidence assessment and experimental design. Adds full-PDF keyword search and broader page coverage for cross-language questions.
+
+Fixes Europe PMC date sorting corrupting search queries, recognizes matching preprint and journal versions, and supports Chinese citation brackets. Tool progress stays separate from the final answer. Research limits now lead to a synthesis step; busy services receive bounded, cancellable retries.
+
+Fixes history-list jumps during editing and makes earlier questions from the same day searchable. Uses provider-specific request parameters for GLM and MiniMax. Answer accuracy and image support depend on the configured model.
+
 ## 1.2.1 · 2026-10-24
 
 Fixed update checks failing after Zotero windows are closed or reopened. Update and installation deadlines no longer depend on the startup window.

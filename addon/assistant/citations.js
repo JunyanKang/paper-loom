@@ -1,6 +1,6 @@
 /* Reuse the citation product, including abstracts and library actions. */
 Object.assign(LoomAssistant,{
- citationTokens(text,sources=[]){const known=new Map(sources.map(s=>[s.id,s]));return String(text).split(/(\[(?:[LP]\d+)(?:\s*[,;]\s*[LP]\d+)*\])/g).map(value=>{const ids=value.match(/^\[([LP]\d+(?:\s*[,;]\s*[LP]\d+)*)\]$/)?.[1]?.split(/\s*[,;]\s*/);return {text:value,sources:ids?.every(id=>known.has(id))?ids.map(id=>known.get(id)):null};});},
+ citationTokens(text,sources=[]){const known=new Map(sources.map(s=>[s.id,s])),pattern=/([\[【（(][LP]\d+(?:\s*[,;，；、]\s*[LP]\d+)*[\]】）)])/g;return String(text).split(pattern).map(value=>{const ids=value.match(/^[\[【（(]([LP]\d+(?:\s*[,;，；、]\s*[LP]\d+)*)[\]】）)]$/)?.[1]?.split(/\s*[,;，；、]\s*/);return {text:value,sources:ids?.every(id=>known.has(id))?ids.map(id=>known.get(id)):null};});},
  bindCitation(view,button,sources){
   const A=this,doc=view.doc,win=doc.defaultView,U=PaperLoom.referencesScope.CiteLensUI;
   const records=sources.filter(s=>s.record?.title).map(s=>s.record);if(!records.length)return;

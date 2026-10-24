@@ -1,4 +1,4 @@
-if(!/qa-profile-assistant120$/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
+if(!/qa-profile-assistant(?:120|122b)$/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
 const A=L.assistant,checks=[],check=(name,ok,detail)=>{checks.push({name,ok:!!ok,detail});if(!ok)throw Error(name);},wait=ms=>Zotero.Promise.delay(ms);
 try{
 let attachment=(await Zotero.Items.getAll(Zotero.Libraries.userLibraryID)).find(x=>x.isAttachment());const r=await Zotero.Reader.open(attachment.id);await r._initPromise;for(let i=0;i<200&&!L.references.readerReady(r);i++)await wait(100);L.qaReader=r;L.voice.ensurePanel(r);
