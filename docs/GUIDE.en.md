@@ -60,40 +60,8 @@ Scans need OCR first. Columns, equations, tables, and unusual encoding can affec
 
 ## Discuss research
 
-### Start from what you are reading
+When a question goes beyond translation, open Loom from the conversation icon beside a selection or reading controls to bring the current passage. Entering from the main panel associates the current paper. The assistant can retrieve relevant text, discuss figures, find literature and save useful answers as Zotero notes.
 
-The assistant icon beside a selection or reading caption carries its source text, translation and page into chat. The main assistant tab links the current paper. Configure its model in main Settings. Opening chat sends nothing; Send submits your question, relevant paper excerpts and required conversation history.
+Configure a separate assistant model in main Settings before your first conversation. Existing chats retain their original papers; start a new conversation to use different material.
 
-### Follow the sources
-
-You can follow up, stop generation, rename or delete conversations, and export Markdown. Literature research is available by default. After image support is confirmed in main Settings, the model can request PDF page images when needed. Page references navigate to the PDF. Hover over literature citations for the existing reference card, abstracts, abstract translation, saving and reading-list actions. Sources remain attached to saved conversations.
-
-References within a paper can also open cards. For a phrase such as “ref. 28, Muhar et al. 2018”, Loom checks the number, author and year against that paper’s bibliography. Ambiguous numbers across papers, conflicting author–year details, and unavailable bibliographies remain plain text. Initial recognition needs the source PDF open; matched references are saved with the conversation for later use in history.
-
-### Return to a conversation
-
-Browse history by calendar. The outer arrows change the year, the inner arrows change the month, and the center shows the selected full date and returns to today when clicked. Darker days mean more questions. A conversation spanning several days appears on each day with questions. Open a conversation and return to the same date. Search matches conversation titles, linked papers and the last-question preview for each day. Rename, delete confirmation and export feedback stay within the selected record.
-
-### Compare papers and keep useful answers
-
-The assistant detects context automatically: PDF, selection and reading entry points use the current paper; library entry uses the 1–8 selected papers. Multiple selections enable comparison prompts without a scope switch. The assistant can retrieve indexed text, annotations and notes when needed, keeping excerpts and personal comments distinct. Missing full text remains an explicit gap.
-
-Use the note icon beside an answer to preview it, choose a paper and save a child note with its sources. Saving the same answer again does not create another copy. Existing conversations retain their research context. Choose **New conversation** to detect the current selection again; earlier conversations remain in history.
-
-A comparison question from a PDF can use multiple library selections when they include the current paper. Select up to eight papers. An existing conversation keeps its original papers; choose **New conversation** to work with a different selection.
-
-Questions and answers have rounded borders, with sources and actions beneath each answer. For wider tables, choose 2× or 3× chat width on the Research assistant row in main Settings.
-
-### Compose with less clutter
-
-Choose **Aa** beside the input to reveal bold, italic, list, quote and code tools, then use the eye to preview. You can also type Markdown directly; Ctrl/Cmd+B and Ctrl/Cmd+I format the selection. Enter sends, Shift+Enter starts a new line, and confirming an IME candidate does not send. Questions and answers use subtly different theme tints.
-
-The Sources control stays in place when opened. External papers appear first; pages from the current paper share a compact row of links. Multiple papers remain separate.
-
-Use the image button or paste a PNG, JPEG or WebP image, one per message and up to 8 MB. Images are resized to a maximum edge of 1,600 pixels before sending. Enable vision for a compatible model. A thumbnail remains in history; click to enlarge and download.
-
-For text-to-image, enter an image model in main Settings → Research assistant model. It uses that provider’s assistant key and an OpenAI-compatible `/images/generations` endpoint; ordinary chat models and Anthropic Messages do not automatically support it. Describe an illustration and choose the sparkle button to generate one image. Provider charges may apply. The endpoint must return base64 image data; remote images in model replies are not downloaded automatically. Each conversation can retain up to 12 images. Generated illustrations can help discuss an idea, but are not experimental results.
-
-Markdown export and Zotero notes currently retain text and sources; download images separately.
-
-While waiting, paper-reading and retrieval progress appear inside that answer. Short activity summaries use muted text and fold when the answer finishes; reopen Activity to review them. These are operation summaries, not a transcript of hidden model reasoning. Text, tables and images remain inside their own message bubbles.
+See the dedicated [Loom assistant guide](ASSISTANT.en.md) for model setup, comparisons, images, source cards, calendar history and notes.

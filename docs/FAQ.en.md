@@ -38,10 +38,6 @@ Check the network and provider settings. Built-in services can be rate-limited; 
 
 The graph reflects the selected library and collection. Complete authors, years, and DOIs, and verify ORCID. A shared name alone does not establish identity.
 
-## Report a problem
-
-Use [Issues](https://github.com/JunyanKang/paper-loom/issues). Include OS, processor, Zotero and plugin versions, steps, and expected behavior. Prefer public samples and remove keys and private full text.
-
 ## Why do some references in an answer stay plain text?
 
 Page citations return to the PDF; confirmed literature citations open paper cards. A paper’s internal reference numbers need its bibliography, so open the source PDF and return to the conversation. Conflicting numbers across papers or mismatched author–year details stay as text. Ask for the full title, or find the reference in the paper list.
@@ -49,3 +45,9 @@ Page citations return to the PDF; confirmed literature citations open paper card
 ## How do I compare papers?
 
 Select 2–8 papers in the Zotero library, then open the assistant and start a new conversation. A PDF entry defaults to that paper; a selection entry focuses on the selected passage. Changing the library selection does not change an ongoing conversation.
+
+For model, image, source and context issues, see [Assistant troubleshooting](ASSISTANT.en.md#troubleshooting).
+
+## Report a problem
+
+Use [Issues](https://github.com/JunyanKang/paper-loom/issues). Include OS, processor, Zotero and plugin versions, steps, and expected behavior. Prefer public samples and remove keys and private full text.

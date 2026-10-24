@@ -1,4 +1,8 @@
-<h1 align="center">Paper Loom 科研助手</h1>
+<h1 align="center">科研助手 · 技术设计</h1>
+
+<p align="center"><a href="ASSISTANT.md">使用指南</a> · <a href="../CONTRIBUTING.md">参与开发</a></p>
+
+本文面向开发者，说明模块边界、数据流与资源管理。配置与日常操作请阅读独立使用指南。
 
 ## 使用路径
 

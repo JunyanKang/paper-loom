@@ -3,7 +3,7 @@
 <p align="center"><a href="../README.en.md">Home</a> · <a href="SETTINGS.md">简体中文</a></p>
 
 <p align="center">
-  <a href="images/appearance-en.png"><img src="images/appearance-en.png" alt="Complete settings page" width="384"></a>
+  <a href="images/appearance-en.png"><img src="images/appearance-en.png" alt="Paper Loom appearance and settings illustration" width="384"></a>
 </p>
 
 ## Appearance and interface language
@@ -32,10 +32,6 @@ Under **Speech environment**, the wrench installs or repairs voices and the shie
 
 Speed, reading modes, repeat counts, language, and voice live in the reading controls. See the [User guide](GUIDE.en.md).
 
-## At the bottom
-
-**Check, Guide, Privacy, and Feedback** stay at the bottom. Check changes to Update when a release is available. During download and installation, a progress bar replaces the version number; completion restores the new version and Check action. Settings and the paper list share a height; scroll to reach content in smaller windows.
-
 ## Research assistant
 
 Open Research assistant in the main settings. It uses the same provider picker, model fields and save/test controls as translation. The two configurations and credentials stay separate. Enable Vision only for a model that accepts images. Literature search needs no additional key; add a Brave Search API key for general web search.
@@ -45,3 +41,9 @@ There is no scope selector in chat. The entry point determines the paper or sele
 **1×, 2× and 3×** on the Research assistant row set the chat width. The default 1× matches Settings; wider chats are capped to fit the current window. The choice is remembered without changing the Settings width.
 
 The assistant’s optional Images field selects a model supporting the OpenAI-compatible Images API. It is separate from the chat model and shares the assistant provider endpoint and key. Translation settings stay independent. Leaving it blank prevents image-generation requests.
+
+See [Model setup](ASSISTANT.en.md#model-setup) for configuration, vision and search details.
+
+## At the bottom
+
+**Check, Guide, Privacy, and Feedback** stay at the bottom. Check changes to Update when a release is available. During download and installation, a progress bar replaces the version number; completion restores the new version and Check action. Settings and the paper list share a height; scroll to reach content in smaller windows.

@@ -49,7 +49,7 @@ Sending a message submits the question, needed conversation history, paper metad
 
 Conversations and source records stay in `paper-loom/assistant/` inside the Zotero data directory and do not automatically sync. Assistant and search credentials use the separate `Paper Loom Assistant API` login realm. The model cannot modify or delete library items. Saving papers or adding them to the reading list through citation cards remains a user action.
 
-The local calendar index also stores daily question counts and a short preview of the last question for date filtering and search.
+The local calendar index stores daily question counts and the last question summary; short question summaries also support local search.
 
 Selected-paper conversations send metadata and abstracts for the pinned papers. When needed, the model can request indexed text excerpts, annotations and child notes from those papers. Selecting papers or opening the assistant sends nothing; model requests begin when you send a question. Include only papers you intend to discuss.
 
@@ -58,3 +58,5 @@ Answers that you preview and save become ordinary Zotero child notes and follow 
 References within a paper are matched locally using bibliography data from open PDFs. Matched titles, authors, years and other citation details are saved locally with the conversation. Opening a card or abstract may still contact the bibliographic and translation services described above.
 
 An attached image is sent to the assistant provider with that question. Generate image sends only the description in the input, without automatically including the paper or conversation history, using the same assistant provider and key. Thumbnails and size-limited images are stored beside the conversation and removed when it is deleted. Remote images in model text do not load automatically; opening an external image link visits its website in the browser.
+
+See the [Loom assistant guide](ASSISTANT.en.md) for attachments, history, exports and usage.

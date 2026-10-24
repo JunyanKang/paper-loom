@@ -10,6 +10,10 @@ In Zotero, open **Tools → Plugins**, choose the gear, then **Install Plugin Fr
 
 Declared compatibility covers Zotero 10.x from 10.0.5-beta.1 and 11.x. Beta releases may change host interfaces; include your full Zotero version in a bug report.
 
+## Start using the assistant
+
+Connect your own model under **Research assistant** in main Settings, then open a PDF and start a conversation. Assistant and model-translation settings are separate; voices are not required. See [Model setup](ASSISTANT.en.md#model-setup) for chat, vision and optional web search.
+
 ## Install offline voices
 
 <p align="center">
