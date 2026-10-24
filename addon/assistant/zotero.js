@@ -3,7 +3,20 @@ var LoomAssistantZotero={
  maxPapers:8,
  parent(item){if(item?.parentItemID)item=Zotero.Items.get(item.parentItemID);return item&&!item.deleted&&(item.isRegularItem?.()||item.isAttachment?.()&&item.attachmentContentType==='application/pdf')?item:null;},
  paper(item){item=this.parent(item);if(!item)return null;const attachment=item.isAttachment?.()?item:item.getAttachments?.().map(id=>Zotero.Items.get(id)).find(a=>!a.deleted&&a.attachmentContentType==='application/pdf');return {...LoomAssistantTools.reference(item,'library'),itemID:item.id,attachmentID:attachment?.id,libraryID:item.libraryID,key:item.key,title:item.getField('title'),abstract:item.getField('abstractNote').slice(0,1400)};},
- selected(){const items=Zotero.getMainWindow().ZoteroPane.getSelectedItems(),papers=[...new Map(items.map(x=>this.paper(x)).filter(Boolean).map(x=>[x.itemID,x])).values()];if(!papers.length||papers.length>this.maxPapers)throw Error('scope');return papers;},
+ selected(){const items=Zotero.getMainWindow().ZoteroPane.getSelectedItems();return [...new Map(items.map(x=>this.paper(x)).filter(Boolean).map(x=>[x.itemID,x])).values()];},
+ comparison(question){return /比较|对比|异同|这些(?:论文|文献)|多篇|compare|comparison|contrast|these papers|these studies|across papers/i.test(String(question||''));},
+ resolve(reader,entry={},question=''){
+  const context=LoomAssistantContext.capture(reader,entry);
+  // Explicit passage/reading entry always takes precedence over library selection.
+  if(context.original||entry.kind&&!['paper','papers'].includes(entry.kind))return context;
+  const comparing=this.comparison(question);
+  if(reader?.itemID&&!comparing)return context;
+  const papers=this.selected();
+  if(reader?.itemID&&(!comparing||papers.length<2||!papers.some(p=>p.itemID===context.paper?.itemID)))return context;
+  if(papers.length>this.maxPapers)return {...context,scopeError:'scope'};
+  if(!papers.length)return context;
+  return {...context,kind:papers.length>1?'papers':'paper',researchScope:'selected',papers,paper:papers[0],original:'',translation:'',page:null};
+ },
  papers(context){return (context.papers||[context.paper]).filter(Boolean).slice(0,this.maxPapers);},
  item(context,id){if(!Number.isInteger(id)||!this.papers(context).some(p=>p.itemID===id))throw Error('scopeItem');const item=this.parent(Zotero.Items.get(id));if(!item||item.id!==id)throw Error('scopeItem');return item;},
  summary(run){return this.papers(run.context).map(p=>{const item=this.item(run.context,p.itemID),record=this.paper(item),source=LoomAssistantTools.source(run,{itemID:item.id,title:record.title,record,evidenceKey:'metadata'});return {itemID:item.id,sourceID:source.id,title:record.title,abstract:record.abstract,year:record.year,evidence:'metadata/abstract only; retrieve text, notes or annotations with read_research'};});},

@@ -413,4 +413,8 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .cl-settings .cl-llm-settings[data-task=assistant] .cl-llm-content{max-height:none!important;overflow:visible!important}
 .cl-settings .cl-llm-settings[data-task=assistant] .cl-setting-row:has(input[type=checkbox]){border-top:1px solid var(--pl-tab-line);margin-top:6px;padding-top:6px}
 
+.cl-settings .pl-ai-width-options{display:flex;flex:none;gap:0;border:1px solid var(--cl-line);border-radius:7px;overflow:hidden}
+.cl-settings .pl-ai-width-options>button{width:28px;min-width:28px;padding:1px 3px!important;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;color:var(--cl-muted)}
+.cl-settings .pl-ai-width-options>button+button{border-left:1px solid var(--cl-line)!important}
+.cl-settings .pl-ai-width-options>button[aria-pressed=true]{color:var(--cl-accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 `;

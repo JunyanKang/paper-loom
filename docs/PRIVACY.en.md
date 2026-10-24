@@ -43,7 +43,7 @@ Uninstalling preserves voice packages and local records so you can use them agai
 
 Remove keys, private full text, and personal information before sharing screenshots or logs. Report issues at [GitHub Issues](https://github.com/JunyanKang/paper-loom/issues).
 
-## Research assistant (1.2)
+## Research assistant
 
 Sending a message submits the question, needed conversation history, paper metadata and retrieved excerpts to the separately configured model. After image support is confirmed in Settings, the assistant may request and send relevant PDF page images. Literature search is available by default; when used, queries go to Europe PMC, Crossref or configured Brave Search; reading a public page contacts that site. Model providers handle content under their own policies.
 
@@ -51,6 +51,8 @@ Conversations and source records stay in `paper-loom/assistant/` inside the Zote
 
 The local calendar index also stores daily question counts and a short preview of the last question for date filtering and search.
 
-Selected-paper conversations send metadata and abstracts for the pinned papers. When needed, the model can request indexed text excerpts, annotations and child notes from those papers. Selecting a scope sends nothing; model requests begin when you send a question. Include only papers you intend to discuss.
+Selected-paper conversations send metadata and abstracts for the pinned papers. When needed, the model can request indexed text excerpts, annotations and child notes from those papers. Selecting papers or opening the assistant sends nothing; model requests begin when you send a question. Include only papers you intend to discuss.
 
 Answers that you preview and save become ordinary Zotero child notes and follow the library’s sync settings, unlike local-only chat history. Saving does not overwrite existing notes.
+
+References within a paper are matched locally using bibliography data from open PDFs. Matched titles, authors, years and other citation details are saved locally with the conversation. Opening a card or abstract may still contact the bibliographic and translation services described above.

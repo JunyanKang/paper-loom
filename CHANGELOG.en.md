@@ -2,6 +2,18 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.5 · 2026-10-24
+
+Removes the assistant’s manual scope buttons and paper-count row. PDF and selection entry points use the current paper automatically; library entry uses the selected paper or papers and offers comparison prompts for multiple selections.
+
+Existing conversations retain their research context when library selections change. New conversations detect context again, including after restoring a historical conversation.
+
+References within a paper, including numbered author–year phrases, now open the shared paper cards and abstract translation. Matching checks both number and author–year details, avoids ambiguous cross-paper links, and retains resolved references in history. Existing page and search-source links remain available.
+
+Refines Loom’s writing guidance toward direct scientific explanation, with citations and necessary qualifications beside the relevant claims. Updates the bilingual README, guide, settings, privacy and FAQ.
+
+Answers gain rounded borders with sources and actions below. Main Settings adds 1×, 2× and 3× chat widths. The default matches Settings, wider layouts fit the viewport, and the choice persists.
+
 ## 1.2.4 · 2026-10-24
 
 Pin 1–8 selected papers for a conversation and retrieve Zotero indexed text, annotations and notes as needed. Paper evidence stays distinct from personal comments, and conversation scope survives library selection changes. Identical page numbers in different PDFs retain distinct source identities.

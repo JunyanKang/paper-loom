@@ -36,6 +36,10 @@ Speed, reading modes, repeat counts, language, and voice live in the reading con
 
 **Check, Guide, Privacy, and Feedback** stay at the bottom. Check changes to Update when a release is available. During download and installation, a progress bar replaces the version number; completion restores the new version and Check action. Settings and the paper list share a height; scroll to reach content in smaller windows.
 
-## Research assistant (1.2)
+## Research assistant
 
 Open Research assistant in the main settings. It uses the same provider picker, model fields and save/test controls as translation. The two configurations and credentials stay separate. Enable Vision only for a model that accepts images. Literature search needs no additional key; add a Brave Search API key for general web search.
+
+There is no scope selector in chat. The entry point determines the paper or selected papers, and existing conversations keep their context. Start a new conversation after choosing a different paper or group.
+
+**1×, 2× and 3×** on the Research assistant row set the chat width. The default 1× matches Settings; wider chats are capped to fit the current window. The choice is remembered without changing the Settings width.

@@ -6,9 +6,15 @@
 
 Listen to a difficult passage. Inspect the paper behind a citation. Save the next question for later.
 
-**Paper Loom is a listening and literature companion for Zotero.** It brings offline speech, translation, reference previews, and author networks into your reading workflow.
+**Paper Loom is a listening and literature companion for Zotero.** It brings offline speech, translation, reference previews, author networks, and research conversations into your reading workflow.
 
-The research assistant connects questions to the current paper, selected passages and traceable literature sources. Find past conversations by date. Configure its model and optional web search separately in main Settings. [Guide](docs/GUIDE.en.md).
+## Read and reason with Loom
+
+What does this method establish? Why do two papers reach different conclusions? Open Loom in a PDF to discuss that paper, or select papers in the library to compare them. Enter from a selection or reading controls to bring the passage and its translation into the conversation.
+
+Follow page citations back to the PDF. Hover over references matched to the paper’s bibliography or search results to open a paper card, then read its abstract or translation. Preview a useful answer and save it as a Zotero note, or return to a conversation through the calendar.
+
+Configure the assistant’s model separately in main Settings. Image-capable models can inspect paper pages; literature search is available by default, with optional Brave web search. Results depend on the model and the material it can access. [Learn how →](docs/GUIDE.en.md#discuss-research)
 
 ## Start with this passage
 

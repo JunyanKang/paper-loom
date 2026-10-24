@@ -1,5 +1,6 @@
 PaperLoom.extendSettings=async function(ctx) {
   const {doc,reader,root,frame,tabs,panes,activate,cleanups,translation,data}=ctx;
+  for(const [i,lang] of ['en','ja','fr','de'].entries()){const label=['Chat width','チャット幅','Largeur du chat','Chatbreite'][i];this.referencesScope.CiteLensI18n.catalogs[lang]['对话宽度']=label;for(const scale of [1,2,3])this.referencesScope.CiteLensI18n.catalogs[lang]['对话宽度 '+scale+'×']=label+' '+scale+'×';}
   frame.classList.add('pl-settings');this.style(doc);
   const embedded=this.el(doc,'iframe');embedded.className='pl-settings-frame';embedded.setAttribute('title','听读设置');embedded.style.cssText='width:calc(100% + 12px);border:0;display:block;height:320px;background:transparent';
   await new Promise((resolve,reject)=>{
@@ -52,7 +53,8 @@ PaperLoom.extendSettings=async function(ctx) {
   ui.find=key=>typography[key]||originalFind(key);
   translation.append(fontRow,placementRow);data.prepend(translation);
   ui.root.querySelector('[data-settings-pane=translation]').hidden=true;
-  const aiRow=this.el(doc,'div',null,'cl-setting-row');aiRow.append(this.el(doc,'label',LoomAssistant.t('科研助手','Research assistant')));const aiSettings=this.referencesScope.CiteLensUI.iconButton(doc,'配置大模型','settings',()=>ctx.modelPages.assistant.open());aiSettings.dataset.assistantSettings='true';aiRow.append(aiSettings);translation.append(aiRow);ctx.modelPages.assistant=ctx.buildModelPage('assistant',aiSettings,'general',LoomAssistant.settingsAdapter());
+  const aiRow=this.el(doc,'div',null,'cl-setting-row');aiRow.append(this.el(doc,'label',LoomAssistant.t('科研助手','Research assistant')));const aiSettings=this.referencesScope.CiteLensUI.iconButton(doc,'配置大模型','settings',()=>ctx.modelPages.assistant.open());aiSettings.dataset.assistantSettings='true';const widths=this.el(doc,'div',null,'pl-ai-width-options');widths.setAttribute('role','group');widths.setAttribute('aria-label','对话宽度');
+  for(const scale of [1,2,3]){const button=this.button(doc,scale+'×',()=>LoomAssistant.setWidthScale(scale));button.dataset.assistantWidth=String(scale);button.setAttribute('aria-label','对话宽度 '+scale+'×');button.title='对话宽度 '+scale+'×';button.setAttribute('aria-pressed',String(LoomAssistant.widthScale()===scale));widths.append(button);}aiRow.append(widths,aiSettings);translation.append(aiRow);ctx.modelPages.assistant=ctx.buildModelPage('assistant',aiSettings,'general',LoomAssistant.settingsAdapter());
   const engine=this.enginePanel(doc);data.after(engine.node);cleanups.push(engine.dispose);
   const resize=()=>{if(embedded.isConnected&&!embedded.hidden){const h=ui.panel.getBoundingClientRect().height;if(h>0&&embedded.style.height!==Math.ceil(h)+'px')embedded.style.height=Math.ceil(h)+'px';}};
   const observer=new embedded.contentWindow.ResizeObserver(resize);observer.observe(ui.panel);
