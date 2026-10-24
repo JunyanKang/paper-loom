@@ -6,6 +6,14 @@
 
 Hover over the book to open Settings on first use, or return to your last workspace. The bottom navigation opens authors, papers, the research assistant, and settings. Moving away from both the book and workspace closes it after a brief delay; crossing the gap or moving back keeps it open. Press Esc to close it, or drag the book to move it. Switching workspaces does not interrupt audio.
 
+## Translate a selection
+
+<p align="center">
+  <a href="images/selection-translation-en.png"><img src="images/selection-translation-en.png" alt="Selection translation, scope controls, AI conversation and reading entry" width="320"></a>
+</p>
+
+Select text to see its translation. Use the flag to choose a target language and the scope icons to choose how much to translate. The conversation bubble brings the passage into Loom; the headphones start reading. Selecting text alone does not play audio.
+
 ## Choose how much to read
 
 Select text and click the headphones. Hover over the headphones to choose one of four modes. The default is one paragraph, read once; selecting text alone does not start playback.

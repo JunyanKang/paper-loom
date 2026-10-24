@@ -35,7 +35,7 @@ Declared compatibility is Zotero **10.x from 10.0.5-beta.1, and 11.x**. Automati
 ## Let the paper follow your pace
 
 <p align="center">
-  <a href="docs/images/caption-controls-en.png"><img src="docs/images/caption-controls-en.png" alt="Translation and listening controls beside the source" width="493"></a>
+  <a href="docs/images/caption-controls-en.png"><img src="docs/images/caption-controls-en.png" alt="Translation and listening controls with the assistant entry" width="493"></a>
 </p>
 
 Choose **Sentence** to hear a term in context, **Selection** for a passage you picked, **Paragraph** to keep the surrounding argument, or **Full text** to continue reading. The default is one paragraph, once. Repeat sentences and paragraphs independently, and choose a speed from 0.5× to 2×.
@@ -45,6 +45,10 @@ Hover over the current passage, translation or controls to pause at the end of t
 After installing the voice package, synthesis runs locally and works offline. There are 14 voices across English, Mandarin Chinese, Japanese and French, including US and UK English. Keep a translation beside the original or listen to the translation in a supported voice.
 
 ## Read a translation without losing the original
+
+<p align="center">
+  <a href="docs/images/selection-translation-en.png"><img src="docs/images/selection-translation-en.png" alt="Selection translation with the research assistant entry" width="320"></a>
+</p>
 
 Selections, reading captions and abstracts share a translation target. Compare an unfamiliar method with the original sentence, or switch an abstract between original, translated and bilingual views. Abstract titles are translated along with the text.
 
@@ -77,6 +81,11 @@ The graph reflects **the relationships covered by your collection**. Use it to f
 [Explore author networks →](docs/NETWORK.en.md)
 
 ## Loom: a conversation with the paper in view
+
+<p align="center">
+  <a href="docs/images/assistant-en.png"><img src="docs/images/assistant-en.png" alt="Loom conversation with a table, source page and in-message activity" width="384"></a>
+  <br><sub>Current interface with demonstration conversation content.</sub>
+</p>
 
 Loom is Paper Loom’s research assistant. It takes a question from your reading and keeps the answer connected to sources you can revisit.
 

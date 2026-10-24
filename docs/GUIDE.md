@@ -6,6 +6,14 @@
 
 鼠标移到小书上即可展开控制面板，首次打开进入设置，之后回到上次使用的面板。底部导航可进入作者网络、文献列表、科研助手和设置。移出小书与面板区域后短延迟收起，跨过中间间隙或重新移入时保持展开；也可按 Esc 收起。拖动小书可以调整位置。切换主窗口不打断正在播放的声音。
 
+## 划选后看译文
+
+<p align="center">
+  <a href="images/selection-translation-zh.png"><img src="images/selection-translation-zh.png" alt="划选译文、范围选择、AI 对话与朗读入口" width="320"></a>
+</p>
+
+选中文字后，在弹窗中看译文；顶部国旗切换目标语种，范围图标选择需要翻译的文字。对话气泡把当前内容带入织知，耳麦用于开始朗读。划选本身不会自动播放。
+
 ## 决定读多少
 
 划选文字后点击耳麦开始。悬停耳麦可直接选择四个模式，默认段落模式、读一次；划选本身不会触发朗读。
@@ -22,7 +30,7 @@
 ## 在原文旁控制播放
 
 <p align="center">
-  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="听读控制栏" width="493"></a>
+  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="带科研助手入口的听读控制栏" width="493"></a>
 </p>
 
 把鼠标移到正在读的原文、译文或其下方，出现两行按钮。上行控制句子、段落、暂停和停止；下行切换模式、语速、语种与译文显示。

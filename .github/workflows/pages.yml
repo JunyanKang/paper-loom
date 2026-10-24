@@ -24,7 +24,7 @@ jobs:
           cp addon/assets/loom.png _site/loom.png
           cp website/index.html _site/index.html
           mkdir _site/images
-          cp docs/images/hero-zh.png docs/images/caption-controls-zh.png docs/images/references-zh.png docs/images/network-zh.png _site/images/
+          cp docs/images/hero-zh.png docs/images/caption-controls-zh.png docs/images/selection-translation-zh.png docs/images/assistant-zh.png docs/images/references-zh.png docs/images/network-zh.png _site/images/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -4,6 +4,12 @@
 
 织知把对话放在 Zotero 的论文旁边。你可以请它解释一个术语、梳理实验逻辑、比较几篇研究，或寻找新的参考文献。回答中的页码和文献卡帮助你回到来源，有价值的讨论可以整理成 Zotero 笔记。
 
+
+<p align="center">
+  <a href="images/assistant-zh.png"><img src="images/assistant-zh.png" alt="织知当前对话界面" width="384"></a>
+  <br><sub>演示问答：表格和引用留在回复框内。</sub>
+</p>
+
 第一次使用，先完成下面的模型连接，再打开一篇 PDF，问一个具体问题。声音包不是使用助手的前提。
 
 | 想做什么 | 从这里开始 |
@@ -37,6 +43,16 @@
 生图模型与聊天模型分开填写。留空不影响文字问答和看图，也不会发起生图请求。连接测试通过后，仍建议用一个简短问题确认所选模型能够正常对话和调用所需工具。
 
 ## 选择讨论材料
+
+<p align="center">
+  <a href="images/selection-translation-zh.png"><img src="images/selection-translation-zh.png" alt="划选译文顶部的对话气泡带入当前上下文" width="320"></a>
+  <br><sub>从划选译文的对话气泡进入。</sub>
+</p>
+
+<p align="center">
+  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="朗读控件第二行的对话气泡进入助手" width="493"></a>
+  <br><sub>从朗读控件进入时，带入当前句段。</sub>
+</p>
 
 助手根据入口自动确定材料，不需要再选“当前论文”或“比较文献”。
 
@@ -113,6 +129,10 @@
 ## 留下阅读所得
 
 ### 日历找回对话
+
+<p align="center">
+  <a href="images/assistant-history-zh.png"><img src="images/assistant-history-zh.png" alt="按日期与提问次数查找演示对话" width="384"></a>
+</p>
 
 打开历史，用前后按钮调整年份与月份，选择日期查看当天的记录。当天提问越多，日历底色越深；跨天继续的对话会出现在各自有活动的日期。搜索可按标题、论文信息和已记录的问题摘要缩小范围。
 

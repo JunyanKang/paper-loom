@@ -4,6 +4,12 @@
 
 Loom puts a research conversation beside your papers in Zotero. Ask about a term, work through an experiment, compare studies, or find new references. Page links and literature cards lead back to the sources; useful answers can become Zotero notes.
 
+
+<p align="center">
+  <a href="images/assistant-en.png"><img src="images/assistant-en.png" alt="Current Loom conversation interface" width="384"></a>
+  <br><sub>Demo conversation: the table and citation remain inside the answer.</sub>
+</p>
+
 For a first conversation, connect a model below, open a PDF, and ask a specific question. You do not need the voice package to use the assistant.
 
 | What you want to do | Start here |
@@ -37,6 +43,16 @@ OpenAI-compatible interfaces and Anthropic Messages are supported. Provider pres
 The image model is separate from the chat model. Leaving it blank does not affect text or vision and prevents image-generation requests. After a successful connection test, ask a short question to check the conversation and tools you intend to use.
 
 ## Choose the material
+
+<p align="center">
+  <a href="images/selection-translation-en.png"><img src="images/selection-translation-en.png" alt="The conversation bubble carries selection context" width="320"></a>
+  <br><sub>Enter from the conversation bubble beside a selection.</sub>
+</p>
+
+<p align="center">
+  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Enter Loom from the second row of reading controls" width="493"></a>
+  <br><sub>The reading entry brings the current passage.</sub>
+</p>
 
 The entry point determines the material automatically; there is no separate current-paper or comparison selector.
 
@@ -113,6 +129,10 @@ The provider must support an OpenAI-compatible Images API and return base64 imag
 ## Keep what you learn
 
 ### Return through the calendar
+
+<p align="center">
+  <a href="images/assistant-history-en.png"><img src="images/assistant-history-en.png" alt="Find demonstration conversations by date and activity" width="384"></a>
+</p>
 
 Open History, adjust the year and month with the navigation buttons, and select a day. More questions give that day a darker background. A conversation continued across days appears on each day with activity. Search narrows records by title, paper information and recorded question summaries.
 

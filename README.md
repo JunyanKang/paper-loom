@@ -35,7 +35,7 @@ Paper Loom 是一个开源 Zotero 插件，把**离线朗读、对照翻译、�
 ## 让长论文按你的节奏展开
 
 <p align="center">
-  <a href="docs/images/caption-controls-zh.png"><img src="docs/images/caption-controls-zh.png" alt="原文旁的译文与听读控制栏" width="493"></a>
+  <a href="docs/images/caption-controls-zh.png"><img src="docs/images/caption-controls-zh.png" alt="带科研助手入口的译文与听读控制栏" width="493"></a>
 </p>
 
 四种朗读范围适合不同读法：用**单句**听清术语，用**划选**读自己挑出的文字，用**段落**保留上下文，用**全文**连续往下读。默认段落模式、读一遍；句子和段落可以各自选择重读次数，语速从 0.5× 到 2×。
@@ -45,6 +45,10 @@ Paper Loom 是一个开源 Zotero 插件，把**离线朗读、对照翻译、�
 安装声音包后，合成在本机完成，可离线使用英语、普通话、日语和法语，共 14 个音色，英语区分美音与英音。译文可以显示在原文旁，也可以切换为译文朗读；可发音的语种会显示对应声音。
 
 ## 看译文，也看得见原文
+
+<p align="center">
+  <a href="docs/images/selection-translation-zh.png"><img src="docs/images/selection-translation-zh.png" alt="划选翻译窗口与科研助手入口" width="320"></a>
+</p>
 
 划选内容、朗读字幕和文献摘要共用翻译目标语种。遇到不熟悉的方法，可以先对照翻译；需要核对术语，再回到原句。摘要支持原文、译文和双语视图，标题也随摘要一起翻译。
 
@@ -77,6 +81,11 @@ Paper Loom 是一个开源 Zotero 插件，把**离线朗读、对照翻译、�
 [了解作者网络 →](docs/NETWORK.md)
 
 ## 织知：带着论文一起讨论
+
+<p align="center">
+  <a href="docs/images/assistant-zh.png"><img src="docs/images/assistant-zh.png" alt="织知对话：表格、页码来源和消息框内的处理过程" width="384"></a>
+  <br><sub>当前界面，问答使用演示内容。</sub>
+</p>
 
 织知是 Paper Loom 的科研助手。它接住阅读中的问题，也把回答留在可以查回原文的地方。
 
