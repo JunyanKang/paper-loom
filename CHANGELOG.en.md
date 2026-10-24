@@ -2,6 +2,12 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.6 · 2026-10-24
+
+The research assistant icon now appears when opening the panel in a new paper, without first selecting text.
+
+Updating Paper Loom refreshes assistant styles in open documents, so the 1×, 2× and 3× chat widths work without restarting Zotero. Page closure and plugin shutdown release the associated style resources.
+
 ## 1.2.5 · 2026-10-24
 
 Removes the assistant’s manual scope buttons and paper-count row. PDF and selection entry points use the current paper automatically; library entry uses the selected paper or papers and offers comparison prompts for multiple selections.

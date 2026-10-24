@@ -39,5 +39,5 @@ var LoomAssistant={
  },
  toolLabel(name){const labels={search_paper:['定位相关原文…','Finding relevant passages…'],search_library:['搜索 Zotero 文献库…','Searching Zotero…'],read_paper:['读取原文页…','Reading PDF page…'],view_page:['查看文献图像…','Viewing PDF image…'],search_literature:['检索实时文献…','Searching current literature…'],read_url:['读取公开网页…','Reading public web page…'],search_web:['搜索网页…','Searching the web…']};return this.t(...(labels[name]||['检索证据…','Retrieving evidence…']));},
  cancel(){this.active?.abort.abort();},
- async stop(){this.dead=true;const active=this.active;this.cancel();await active?.done;for(const view of [...this.views.values()])view.dispose();this.views.clear();LoomAssistantContext.clear();await LoomAssistantStore.flush();}
+ async stop(){this.dead=true;const active=this.active;this.cancel();await active?.done;for(const view of [...this.views.values()])view.dispose();this.views.clear();this.releaseStyles();LoomAssistantContext.clear();await LoomAssistantStore.flush();}
 };

@@ -1,5 +1,5 @@
 /* Assistant surfaces inherit Paper Loom's theme, typography and dock geometry. */
-.pl-assistant {
+.cl-dialog.pl-assistant {
   width:calc(var(--pl-panel-width,360px) * var(--pl-ai-width-multiplier,1));
   height:680px;
   max-width:calc(100vw - 32px)!important;
