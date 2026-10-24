@@ -395,4 +395,22 @@ html.pl-settings-document,html.pl-settings-document body,.pl-embedded.pv-shell,.
 .pl-voice-welcome .pl-welcome-dismiss{position:absolute;top:12px;right:12px;display:flex;padding:5px;border:0;min-height:28px}.pl-welcome-actions{display:flex;align-items:stretch;gap:8px;justify-content:flex-end;margin-top:18px}.pl-welcome-actions button:last-child{background:var(--cl-soft);color:var(--cl-accent);border-color:transparent}
 .pl-welcome-guide{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--cl-line);border-radius:10px;padding:12px;margin-top:14px;font-size:12px}.pl-welcome-target{display:flex;padding:7px;border:2px solid var(--cl-accent);border-radius:10px;color:var(--cl-accent)}
 @keyframes pl-welcome-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.pl-voice-welcome{animation:none}}
+/* Both model editors share label, input and trailing-icon columns. */
+.cl-settings .cl-llm-content .cl-setting-row{grid-template-columns:5.5em minmax(0,1fr) 28px;min-height:30px;gap:8px;padding:1px 0;align-items:center}
+.cl-settings .cl-llm-content .cl-setting-row>div:first-child{width:auto;min-width:0}
+.cl-settings .cl-llm-content .cl-setting-row label{white-space:nowrap;overflow-wrap:normal}
+.cl-settings .cl-llm-content .cl-setting-row>input:not([type=checkbox]){grid-column:2 / -1;width:100%;min-width:0;padding:4px 0;background:transparent}
+.cl-settings .cl-llm-content .cl-setting-row:has(>.cl-icon-button)>input:not([type=checkbox]){grid-column:2}
+.cl-settings .cl-llm-content .cl-setting-row>.cl-select-trigger{grid-column:2 / -1;width:100%;max-width:none;text-align:left;justify-content:flex-start;padding:4px 0}
+.cl-settings .cl-llm-content .cl-select-value{min-width:0}
+.cl-settings .cl-llm-content .cl-setting-row>.cl-select-trigger .cl-select-value{justify-content:flex-start}
+.cl-settings .cl-llm-content .cl-model-combo{grid-column:2 / -1;width:100%;min-width:0;background:transparent}
+.cl-settings .cl-llm-content .cl-model-combo input{flex:1 1 0;width:0;min-width:0;padding:4px 0;background:transparent}
+.cl-settings .cl-llm-content .cl-model-combo .cl-model-toggle{flex:0 0 28px;width:28px;min-width:28px;max-width:28px;padding:0;justify-content:center}
+.cl-settings .cl-llm-content .cl-setting-row>.cl-icon-button{width:28px;min-width:28px;height:28px;padding:4px}
+.cl-settings .cl-llm-content .cl-setting-row>input[type=checkbox]{grid-column:3;justify-self:center;width:28px;min-width:28px;height:16px;padding:0}
+.cl-settings .cl-llm-settings[data-task=assistant]{max-height:none!important}
+.cl-settings .cl-llm-settings[data-task=assistant] .cl-llm-content{max-height:none!important;overflow:visible!important}
+.cl-settings .cl-llm-settings[data-task=assistant] .cl-setting-row:has(input[type=checkbox]){border-top:1px solid var(--pl-tab-line);margin-top:6px;padding-top:6px}
+
 `;

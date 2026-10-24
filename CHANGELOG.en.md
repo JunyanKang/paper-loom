@@ -2,6 +2,10 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+## 1.2.3 · 2026-10-24
+
+Aligned the research and translation model settings: centered provider logos, shared label widths, aligned fields and trailing controls. Fixed the model picker squeezing out the model name, incorrect vision-toggle sizing, and layouts changing after opening the assistant. Provider choices open upward in two rows; model choices open downward. Chinese and English labels remain on one line.
+
 ## 1.2.2 · 2026-10-24
 
 Names the research assistant Loom, with built-in guidance for paper reading, figure interpretation, evidence assessment and experimental design. Adds full-PDF keyword search and broader page coverage for cross-language questions.
