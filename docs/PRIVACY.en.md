@@ -56,3 +56,5 @@ Selected-paper conversations send metadata and abstracts for the pinned papers. 
 Answers that you preview and save become ordinary Zotero child notes and follow the library’s sync settings, unlike local-only chat history. Saving does not overwrite existing notes.
 
 References within a paper are matched locally using bibliography data from open PDFs. Matched titles, authors, years and other citation details are saved locally with the conversation. Opening a card or abstract may still contact the bibliographic and translation services described above.
+
+An attached image is sent to the assistant provider with that question. Generate image sends only the description in the input, without automatically including the paper or conversation history, using the same assistant provider and key. Thumbnails and size-limited images are stored beside the conversation and removed when it is deleted. Remote images in model text do not load automatically; opening an external image link visits its website in the browser.

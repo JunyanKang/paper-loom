@@ -16,6 +16,8 @@ Follow page citations back to the PDF. Hover over references matched to the pape
 
 Configure the assistant’s model separately in main Settings. Image-capable models can inspect paper pages; literature search is available by default, with optional Brave web search. Results depend on the model and the material it can access. [Learn how →](docs/GUIDE.en.md#discuss-research)
 
+Format a question, attach a figure, and keep images as compact thumbnails. Grouped page links make external sources easier to find. With a compatible image model configured, generate an illustration and click to enlarge or download it.
+
 ## Start with this passage
 
 <p align="center">

@@ -2,6 +2,17 @@
 
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
+
+## 1.2.7 · 2026-10-24
+
+Lighter conversations: long histories render on demand, completed responses reuse their DOM, and formatting previews run only when requested. Streaming avoids repeated scans; timed PDF caches no longer retain readers strongly.
+
+Sources stay anchored when expanded, with external papers first and local pages grouped together. Questions and answers have distinct, subtle theme tints. Formatting tools add italics, lists, quotes, links and tables.
+
+Images stay inside their message bubbles, with attachments, paste, thumbnails, enlargement and download. Configure an image model in main Settings to generate illustrations through a compatible Images API. Media is saved and removed with its conversation.
+
+Paper reading, retrieval and response progress now appear inside the answer in small muted text. Activity folds when the answer finishes and can be reopened. English and Chinese guidance and privacy notes have been updated.
+
 ## 1.2.6 · 2026-10-24
 
 The research assistant icon now appears when opening the panel in a new paper, without first selecting text.

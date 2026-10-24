@@ -46,7 +46,26 @@ Object.assign(LoomAssistant,{
   if(changed){message.paperCitations=saved;await LoomAssistantStore.save(session);}
  },
 
- citationTokens(text,sources=[]){const known=new Map(sources.map(s=>[s.id,s])),pattern=/([\[【（(][LP]\d+(?:\s*[,;，；、]\s*[LP]\d+)*[\]】）)])/g;return String(text).split(pattern).map(value=>{const ids=value.match(/^[\[【（(]([LP]\d+(?:\s*[,;，；、]\s*[LP]\d+)*)[\]】）)]$/)?.[1]?.split(/\s*[,;，；、]\s*/);return {text:value,sources:ids?.every(id=>known.has(id))?ids.map(id=>known.get(id)):null};});},
+ citationTokens(text,sources=[]){
+  const known=new Map(sources.map(s=>[s.id,s])),pattern=/([\[【（(][LP]\d+(?:\s*(?:[,;，；、]\s*[LP]\d+|[-–—]\s*[LP]?\d+))*[\]】）)])/g;
+  return String(text).split(pattern).map(value=>{if(!/^[\[【（(][LP]\d+/.test(value))return {text:value,sources:null};const ids=[];let valid=true;
+   for(const part of value.slice(1,-1).split(/\s*[,;，；、]\s*/)){const match=part.trim().match(/^([LP])(\d+)(?:\s*[-–—]\s*([LP])?(\d+))?$/);if(!match){valid=false;break;}const first=Number(match[2]),last=match[4]?Number(match[4]):first;if(last<first||last-first>50||match[3]&&match[3]!==match[1]){valid=false;break;}for(let n=first;n<=last;n++)ids.push(match[1]+n);}
+   return {text:value,sources:valid&&ids.length&&ids.every(id=>known.has(id))?[...new Set(ids)].map(id=>known.get(id)):null};
+  });
+ },
+ renderSources(view,footer,sources,message){
+  const doc=view.doc,t=(z,e)=>this.t(z,e),el=(tag,value,cls)=>PaperLoom.el(doc,tag,value,cls),list=el('div',null,'pl-ai-source-list');list.hidden=true;list.dataset.clContent='true';
+  const external=sources.filter(s=>s.record?.source!=='library'&&!s.evidenceKey&&!Number.isInteger(s.page)&&!s.attachmentID&&!s.itemID),internal=sources.filter(s=>!external.includes(s));
+  const toggle=PaperLoom.button(doc,t('查看来源','Sources')+' · '+sources.length,()=>{list.hidden=!list.hidden;toggle.setAttribute('aria-expanded',String(!list.hidden));if(!list.hidden&&!list.childElementCount)populate();});toggle.className='pl-ai-sources-toggle';toggle.setAttribute('aria-expanded','false');
+  const id='pl-ai-sources-'+(++this.sourceSequence|| (this.sourceSequence=1));list.id=id;toggle.setAttribute('aria-controls',id);
+  const populate=()=>{
+   for(const s of external){const row=el('div',null,'pl-ai-source-external');row.append(this.citationButton(view,s,'['+s.id+'] '+s.title));list.append(row);}
+   const messages=view.session?.messages||[],index=messages.indexOf(message),context=messages.slice(0,index).filter(m=>m.role==='user').at(-1)?.context||view.context,papers=context?.papers||[context?.paper||view.session?.paper].filter(Boolean),groups=new Map();
+   for(const s of internal){const paper=papers.find(p=>[p.itemID,p.attachmentID].includes(s.attachmentID||s.itemID)),key=paper?.itemID||s.attachmentID||s.itemID||s.title;let group=groups.get(key);if(!group){group={title:paper?.title||s.title,paper,sources:[]};groups.set(key,group);}group.sources.push(s);}
+   for(const group of groups.values()){const row=el('div',null,'pl-ai-source-pages');row.append(el('span',groups.size===1&&group.paper?t('本文','This paper'):group.title,'pl-ai-source-label'));for(const s of group.sources){const page=Number.isInteger(s.page)?s.page:s.annotationPage,label=Number.isInteger(page)?'p. '+(page+1):s.evidenceKey==='note'?t('笔记','Note'):s.evidenceKey==='annotation'?t('批注','Annotation'):s.evidenceKey==='indexed-text'?t('全文','Text'):t('条目','Item'),button=this.citationButton(view,s,label);button.title='['+s.id+'] '+s.title;row.append(button);}list.append(row);}
+  };
+  footer.prepend(toggle);footer.append(list);
+ },
  bindCitation(view,button,sources){
   const A=this,doc=view.doc,win=doc.defaultView,U=PaperLoom.referencesScope.CiteLensUI;
   const records=sources.filter(s=>s.record?.title).map(s=>s.record);if(!records.length)return;
@@ -70,5 +89,5 @@ Object.assign(LoomAssistant,{
   };
   button.addEventListener('pointerenter',open);button.addEventListener('focus',open);button.addEventListener('pointerleave',()=>view.citation?.defer());button.addEventListener('blur',()=>view.citation?.defer());button.addEventListener('click',e=>{e.preventDefault();open();});
  },
- citationButton(view,source,label){const button=PaperLoom.button(view.doc,label||'['+source.id+']',async()=>{if(source.record)return;if(source.attachmentID&&Number.isInteger(source.annotationPage)){const reader=await Zotero.Reader.open(source.attachmentID);await reader.navigate({pageIndex:source.annotationPage});}else if(source.page!==undefined&&source.itemID){const reader=await Zotero.Reader.open(source.itemID);await reader.navigate({pageIndex:source.page});}else if(source.url){try{Zotero.launchURL(LoomAssistantCore.publicURL(source.url));}catch(_){}}else if(source.itemID)Zotero.getMainWindow().ZoteroPane.selectItem(source.itemID);});button.classList.add('pl-ai-citation');this.bindCitation(view,button,[source]);return button;}
+ citationButton(view,source,label){const button=PaperLoom.button(view.doc,label||'['+source.id+']',async()=>{if(source.record)return;if(source.attachmentID&&Number.isInteger(source.annotationPage)){const reader=await Zotero.Reader.open(source.attachmentID)||Zotero.Reader._readers.find(r=>r.itemID===source.attachmentID);await reader?.navigate({pageIndex:source.annotationPage});}else if(source.page!==undefined&&source.itemID){const reader=await Zotero.Reader.open(source.itemID)||Zotero.Reader._readers.find(r=>r.itemID===source.itemID);await reader?.navigate({pageIndex:source.page});}else if(source.url){try{Zotero.launchURL(LoomAssistantCore.publicURL(source.url));}catch(_){}}else if(source.itemID)Zotero.getMainWindow().ZoteroPane.selectItem(source.itemID);});button.classList.add('pl-ai-citation');this.bindCitation(view,button,[source]);return button;}
 });

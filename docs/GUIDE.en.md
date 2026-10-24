@@ -83,3 +83,17 @@ Use the note icon beside an answer to preview it, choose a paper and save a chil
 A comparison question from a PDF can use multiple library selections when they include the current paper. Select up to eight papers. An existing conversation keeps its original papers; choose **New conversation** to work with a different selection.
 
 Questions and answers have rounded borders, with sources and actions beneath each answer. For wider tables, choose 2× or 3× chat width on the Research assistant row in main Settings.
+
+### Compose with less clutter
+
+Choose **Aa** beside the input to reveal bold, italic, list, quote and code tools, then use the eye to preview. You can also type Markdown directly; Ctrl/Cmd+B and Ctrl/Cmd+I format the selection. Enter sends, Shift+Enter starts a new line, and confirming an IME candidate does not send. Questions and answers use subtly different theme tints.
+
+The Sources control stays in place when opened. External papers appear first; pages from the current paper share a compact row of links. Multiple papers remain separate.
+
+Use the image button or paste a PNG, JPEG or WebP image, one per message and up to 8 MB. Images are resized to a maximum edge of 1,600 pixels before sending. Enable vision for a compatible model. A thumbnail remains in history; click to enlarge and download.
+
+For text-to-image, enter an image model in main Settings → Research assistant model. It uses that provider’s assistant key and an OpenAI-compatible `/images/generations` endpoint; ordinary chat models and Anthropic Messages do not automatically support it. Describe an illustration and choose the sparkle button to generate one image. Provider charges may apply. The endpoint must return base64 image data; remote images in model replies are not downloaded automatically. Each conversation can retain up to 12 images. Generated illustrations can help discuss an idea, but are not experimental results.
+
+Markdown export and Zotero notes currently retain text and sources; download images separately.
+
+While waiting, paper-reading and retrieval progress appear inside that answer. Short activity summaries use muted text and fold when the answer finishes; reopen Activity to review them. These are operation summaries, not a transcript of hidden model reasoning. Text, tables and images remain inside their own message bubbles.

@@ -83,12 +83,6 @@
 .pl-ai-table {overflow:auto;max-width:100%;margin:6px 0}
 .pl-ai-table table {width:100%;border-collapse:collapse;font-size:12px;line-height:1.5}
 .pl-ai-table td {border:1px solid var(--cl-line);padding:4px 6px;vertical-align:top}
-.pl-ai-sources {font-size:12px;color:var(--cl-muted);margin:0;min-width:0}
-.pl-ai-sources>summary {cursor:pointer;min-height:24px;line-height:24px}
-.pl-ai-sources>button {
-  display:block;width:100%;border:0;text-align:left;font-size:12px;line-height:1.5;
-  padding:5px 0;white-space:normal;background:transparent!important;box-shadow:none!important;
-}
 .pl-ai-composer {padding:8px 12px;border-top:1px solid var(--cl-line);flex:none;min-width:0}
 .pl-ai-context {display:flex;align-items:center;gap:4px;color:var(--cl-muted);font-size:11px;line-height:1.4;margin-bottom:5px}
 .pl-ai-context>span {flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -333,7 +327,54 @@ button.pl-ai-history-main,.pl-ai-history-main>button {
 /* Source disclosure and answer actions share a row until expanded. */
 .pl-ai-message-footer {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 6px;align-items:center;margin-top:4px}
 .pl-ai-message-footer>.pl-ai-message-actions {grid-column:2;grid-row:1}
-.pl-ai-message-footer>.pl-ai-sources[open] {grid-column:1/-1;grid-row:2}
 .pl-ai-message[data-role=user]>header {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .pl-assistant:has(.pl-ai-note-preview:not([hidden])) .pl-ai-header {display:none}
 .pl-ai-note-status:empty {display:none}
+
+/* Keep the disclosure and actions anchored; only its body occupies the next row. */
+.pl-ai-sources-toggle {grid-column:1;grid-row:1;justify-self:start;border:0!important;background:transparent!important;color:var(--cl-muted);font:12px/24px var(--pl-font,system-ui);padding:0!important;min-width:0}
+.pl-ai-sources-toggle::before {content:'›';display:inline-block;width:12px;transform-origin:4px 50%}
+.pl-ai-sources-toggle[aria-expanded=true]::before {transform:rotate(90deg)}
+.pl-ai-source-list {grid-column:1/-1;grid-row:2;max-height:180px;overflow:auto;overscroll-behavior:contain;font-size:12px;border-top:1px solid var(--cl-line);padding-top:3px}
+.pl-ai-source-external>button {border:0!important;background:transparent!important;box-shadow:none!important;color:var(--cl-ink);font:inherit;text-align:left;padding:4px 0!important;white-space:normal;overflow-wrap:anywhere}
+.pl-ai-source-pages {display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 6px;margin:3px 0}
+.pl-ai-source-label {color:var(--cl-muted);max-width:100%;overflow-wrap:anywhere}
+.pl-ai-source-pages button {border:1px solid var(--cl-line)!important;border-radius:5px;background:transparent!important;box-shadow:none!important;font:inherit;color:var(--cl-accent);padding:1px 5px!important;white-space:nowrap}
+.pl-ai-message[data-role=user] {background:color-mix(in srgb,var(--cl-accent) 8%,transparent)}
+.pl-ai-answer {background:color-mix(in srgb,var(--cl-ink) 3%,transparent)}
+.pl-ai-message-text {white-space:normal}
+.pl-ai-message-text :is(ul,ol) {margin:4px 0;padding-inline-start:22px}
+.pl-ai-message-text blockquote {border-left:2px solid var(--cl-accent);margin:5px 0;padding:1px 9px;color:var(--cl-muted)}
+.pl-ai-message-text a {color:var(--cl-accent);text-decoration:underline}
+.pl-ai-transcript {contain:layout style;overflow-anchor:none}
+.pl-ai-message {content-visibility:auto;contain-intrinsic-block-size:auto 120px}
+.pl-ai-composer {contain:layout style}
+.pl-ai-composer textarea {padding-right:70px!important}
+.pl-ai-format-toggle {font:600 12px/28px var(--pl-font,system-ui);min-width:28px;border:0!important;padding:0!important;background:transparent!important;color:var(--cl-muted)}
+.pl-ai-format-bar {display:flex;gap:3px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
+.pl-ai-format-bar>button {height:26px;min-width:26px;border:0!important;background:transparent!important;color:var(--cl-ink);padding:3px 5px!important;font:13px/20px var(--pl-font,system-ui)}
+.pl-ai-compose-preview {max-height:100px;overflow:auto;margin-bottom:4px;border:1px solid var(--cl-line);border-radius:7px;padding:6px 8px;font:13px/1.5 var(--pl-font,system-ui)}
+.pl-ai-compose-preview p {margin:0}
+.pl-ai-media {display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.pl-ai-media button {padding:0!important;border:1px solid var(--cl-line)!important;border-radius:8px;overflow:hidden;background:transparent!important;color:var(--cl-muted);width:80px;height:66px}
+.pl-ai-media img {width:100%;height:100%;object-fit:cover;display:block}
+.pl-ai-media-viewer {position:fixed;inset:8px;margin:auto;width:fit-content;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);padding:8px;border:1px solid var(--cl-line);border-radius:12px;background:var(--cl-bg,#fff);color:var(--cl-ink);box-shadow:0 8px 28px #0004}
+.pl-ai-media-viewer img {display:block;max-width:calc(100vw - 64px);max-height:calc(100vh - 110px);object-fit:contain}
+.pl-ai-media-viewer header {display:flex;align-items:center;gap:6px;justify-content:flex-end;font:12px/1.4 var(--pl-font,system-ui);margin-bottom:5px}
+.pl-ai-media-viewer header span {margin-right:auto;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-ai-media-viewer::backdrop {background:#0006}
+
+/* Progress belongs to its answer; finished activity folds into one quiet line. */
+.pl-ai-activity {color:var(--cl-muted);font:11px/1.5 var(--pl-font,system-ui);margin:2px 0 5px;min-width:0}
+.pl-ai-activity summary {cursor:pointer;display:flex;align-items:center;gap:5px;min-height:19px;list-style:none}
+.pl-ai-activity summary::before {content:'›';flex:none;width:9px;transform-origin:4px 50%}
+.pl-ai-activity[open] summary::before {transform:rotate(90deg)}
+.pl-ai-activity summary>span {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-ai-activity[data-running=true] summary::after {content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex:none;animation:pl-ai-pulse 1.2s ease-in-out infinite}
+.pl-ai-activity ol {margin:3px 0 0;padding-inline-start:20px;max-height:88px;overflow:auto;overscroll-behavior:contain}
+.pl-ai-activity li {margin:2px 0;overflow-wrap:anywhere}
+.pl-ai-answer>.pl-ai-media {margin-top:7px}
+.pl-ai-message-text[data-streaming]:empty {display:none}
+@keyframes pl-ai-pulse {50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.pl-ai-activity[data-running=true] summary::after {animation:none}}
+.pl-ai-activity ol:empty {display:none}
