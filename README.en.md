@@ -35,7 +35,7 @@ Declared compatibility is Zotero **10.x from 10.0.5-beta.1, and 11.x**. Automati
 ## Let the paper follow your pace
 
 <p align="center">
-  <a href="docs/images/caption-controls-en.png"><img src="docs/images/caption-controls-en.png" alt="Translation and listening controls with the assistant entry" width="493"></a>
+  <a href="docs/images/caption-controls-en.png"><img src="docs/images/caption-controls-en.png" alt="Translation and listening controls with the assistant entry" width="395"></a>
 </p>
 
 Choose **Sentence** to hear a term in context, **Selection** for a passage you picked, **Paragraph** to keep the surrounding argument, or **Full text** to continue reading. The default is one paragraph, once. Repeat sentences and paragraphs independently, and choose a speed from 0.5× to 2×.

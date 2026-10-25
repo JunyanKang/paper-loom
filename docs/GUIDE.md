@@ -30,7 +30,7 @@
 ## 在原文旁控制播放
 
 <p align="center">
-  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="带科研助手入口的听读控制栏" width="493"></a>
+  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="带科研助手入口的听读控制栏" width="395"></a>
 </p>
 
 把鼠标移到正在读的原文、译文或其下方，出现两行按钮。上行控制句子、段落、暂停和停止；下行切换模式、语速、语种与译文显示。

@@ -35,7 +35,7 @@ Paper Loom 是一个开源 Zotero 插件，把**离线朗读、对照翻译、�
 ## 让长论文按你的节奏展开
 
 <p align="center">
-  <a href="docs/images/caption-controls-zh.png"><img src="docs/images/caption-controls-zh.png" alt="带科研助手入口的译文与听读控制栏" width="493"></a>
+  <a href="docs/images/caption-controls-zh.png"><img src="docs/images/caption-controls-zh.png" alt="带科研助手入口的译文与听读控制栏" width="395"></a>
 </p>
 
 四种朗读范围适合不同读法：用**单句**听清术语，用**划选**读自己挑出的文字，用**段落**保留上下文，用**全文**连续往下读。默认段落模式、读一遍；句子和段落可以各自选择重读次数，语速从 0.5× 到 2×。

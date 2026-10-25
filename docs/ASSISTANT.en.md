@@ -49,7 +49,7 @@ After a successful connection test, ask a short question to check the conversati
 </p>
 
 <p align="center">
-  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Enter Loom from the second row of reading controls" width="493"></a>
+  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Enter Loom from the second row of reading controls" width="395"></a>
   <br><sub>The reading entry brings the current passage.</sub>
 </p>
 

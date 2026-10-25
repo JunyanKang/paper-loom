@@ -49,7 +49,7 @@
 </p>
 
 <p align="center">
-  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="朗读控件第二行的对话气泡进入助手" width="493"></a>
+  <a href="images/caption-controls-zh.png"><img src="images/caption-controls-zh.png" alt="朗读控件第二行的对话气泡进入助手" width="395"></a>
   <br><sub>从朗读控件进入时，带入当前句段。</sub>
 </p>
 

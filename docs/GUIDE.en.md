@@ -30,7 +30,7 @@ When audio starts, the launch popup and its original selection clear. A newer se
 ## Keep the controls beside the text
 
 <p align="center">
-  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Listening controls" width="493"></a>
+  <a href="images/caption-controls-en.png"><img src="images/caption-controls-en.png" alt="Listening controls" width="395"></a>
 </p>
 
 Hover over the current source passage, its translation, or the area below it. The first row controls sentences, paragraphs, pause, and stop. The second holds modes, speed, language, and translation visibility.
