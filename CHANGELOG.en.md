@@ -3,6 +3,12 @@
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
 
+## 1.2.9 · 2026-10-25
+
+Remove the assistant’s image-generation configuration and capability, including drawing-request routing and image-generation API calls. Upgrades remove retired image-model fields while preserving chat, translation and vision settings.
+
+Image attachments, paste, drag-and-drop, viewing and downloads remain available. Existing conversation images are retained. Settings and bilingual guides now reflect these capabilities.
+
 ## 1.2.8 · 2026-10-25
 
 Selection and reading entries show their source and page above the composer. Open the upward preview to review the original passage, translation and paper title. Reopening the same conversation keeps its passage; another entry supplies new context.

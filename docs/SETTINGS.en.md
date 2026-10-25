@@ -40,7 +40,6 @@ There is no scope selector in chat. The entry point determines the paper or sele
 
 **1×, 2× and 3×** on the Research assistant row set the chat width. The default 1× matches Settings; wider chats are capped to fit the current window. The choice is remembered without changing the Settings width.
 
-The assistant’s optional Images field selects a model supporting the OpenAI-compatible Images API. It is separate from the chat model and shares the assistant provider endpoint and key. Translation settings stay independent. Leaving it blank prevents image-generation requests.
 
 See [Model setup](ASSISTANT.en.md#model-setup) for configuration, vision and search details.
 

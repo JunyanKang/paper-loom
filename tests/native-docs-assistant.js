@@ -1,6 +1,6 @@
 // Current product surfaces with explicit demonstration content; no model request.
 const profile=Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path;
-if(!profile.endsWith('qa-profile-docs128'))throw Error('Dedicated documentation profile only');
+if(!profile.endsWith('qa-profile-docs129'))throw Error('Dedicated documentation profile only');
 const base=PathUtils.parent(profile),out=PathUtils.join(base,'docs','images'),wait=ms=>Zotero.Promise.delay(ms),V=L.voice,A=L.assistant,Q=L.referencesScope,U=Q.CiteLensUI,S=Q.CiteLensServices,H=Q.CiteLensThemes;
 let parent=(await Zotero.Items.getAll(Zotero.Libraries.userLibraryID)).find(i=>i.getField('title')==='Reading the developing retina');
 if(!parent){parent=new Zotero.Item('journalArticle');parent.setField('title','Reading the developing retina');parent.setField('publicationTitle','Paper Loom demonstration library');parent.setField('date','2026');await parent.saveTx();}

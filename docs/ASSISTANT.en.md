@@ -38,9 +38,8 @@ OpenAI-compatible interfaces and Anthropic Messages are supported. Provider pres
 | Chat model and key | Text questions, paper discussions and tool use |
 | Vision | Reading PDF pages as images or analyzing attachments; the model must support it |
 | Brave Search key | General web search; Europe PMC and Crossref literature searches need no extra search key |
-| Image model | Optional illustration generation through a compatible Images API on the assistant endpoint and key |
 
-The image model is separate from the chat model. Leaving it blank does not affect text or vision and prevents image-generation requests. After a successful connection test, ask a short question to check the conversation and tools you intend to use.
+After a successful connection test, ask a short question to check the conversation and tools you intend to use.
 
 ## Choose the material
 
@@ -124,14 +123,6 @@ For tiny axes, dense labels or multi-panel figures, attach the relevant area and
 
 **Earlier images remain visible in history but are not automatically resent with every follow-up.** To inspect an old image again, attach it again or ask Loom to reread the PDF page.
 
-### Draft an illustration
-
-After configuring an image model, explicitly ask for an illustration and send the message. No separate mode is needed. For example: “Draw a simple four-stage experimental workflow: sampling, grouping, treatment and imaging.” Generation normally submits only that description. If you explicitly refer to the current passage or previous answer, it also includes the entry passage, or otherwise the latest complete answer, falling back to the paper abstract; this reference is capped at 12,000 characters. It does not automatically send the full paper or entire history.
-
-The result is stored as a thumbnail inside an assistant message, with enlargement and download. This supports text-to-image, not editing an attached image. Remove any pending attachment before generating.
-
-The provider must support an OpenAI-compatible Images API and return base64 image data. Anthropic Messages or an ordinary chat endpoint does not automatically provide this capability. External image URLs in answers are not downloaded automatically. Illustrations can help express an idea; they are not experimental data. Check their labels and scientific relationships before use.
-
 ## Keep what you learn
 
 ### Return through the calendar
@@ -166,7 +157,6 @@ Chat does not automatically modify library items. The model provider receives th
 | The wrong paper informs an answer | The conversation may retain an earlier scope; select the material and start a new chat |
 | Only a title or abstract is available | PDF availability, extractable text or OCR; indexing and full-text access affect retrieval |
 | A citation has no hover card | Whether the source is identified and the PDF bibliography is available; look up its full title or DOI |
-| Image generation fails | Separate image-model configuration, endpoint and base64 support; a chat test does not test generation |
 | A long conversation forgets early details | Restate key constraints or begin a focused new chat; context has a length limit |
 
 If a problem remains, [report it](https://github.com/JunyanKang/paper-loom/issues) with the plugin version, model name, error and steps. Omit API keys and paper content you are not permitted to share.

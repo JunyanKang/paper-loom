@@ -1,4 +1,4 @@
-if(!/qa-profile-assistant128$/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
+if(!/qa-profile-assistant129$/.test(Services.dirsvc.get('ProfD',Components.interfaces.nsIFile).path))throw Error('QA only');
 const A=L.assistant,reader=Zotero.Reader._readers.find(r=>!r._isTabClosed),doc=reader._iframeWindow.document,checks=[],check=(name,value)=>{checks.push({name,ok:!!value});if(!value)throw Error(name);};
 const first=await A.open(reader,{});first.frame._clPage.destroy();const before={views:A.views.size,styles:A.styleDocuments.size,overlays:doc.querySelectorAll('.cl-overlay').length};
 for(let i=0;i<20;i++){const view=await A.open(reader,{kind:'selection',original:'A passage',page:0});view.frame.querySelector('.pl-ai-context-trigger').click();view.input.value='Unsent fixture';view.session={messages:[{role:'assistant',text:'A retained reply',status:'done',sources:[]}]};view.render();view.frame._clPage.destroy();if(!view.disposed||view.session||view.reader)throw Error('view retained');}

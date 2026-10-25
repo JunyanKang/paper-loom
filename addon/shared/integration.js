@@ -16,6 +16,7 @@ Object.assign(PaperLoom,{
     return this.starting=(async()=>{
       LoomVoiceWelcome.prepare(this);
       await LoomSettings.migrate();
+      LoomAssistant.removeRetiredImageConfig();
       const loaders=await (await Zotero.getMainWindow().fetch(this.rootURI+'module-loaders.json')).json();
       for(const name of ['voice','references']) {
         const scope={Zotero,ChromeUtils,Services,IOUtils,PathUtils,Components};
