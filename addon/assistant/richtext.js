@@ -27,18 +27,5 @@ Object.assign(LoomAssistant,{
    if(heading||quote){paragraph=null;const block=el(heading?'h4':'blockquote');inline(block,(heading||quote)[1]);node.append(block);continue;}
    if(!paragraph){paragraph=el('p');node.append(paragraph);}else paragraph.append(doc.createTextNode('\n'));inline(paragraph,line);
   }
- },
- composerTools(view,composer,options){
-  const A=this,doc=view.doc,input=view.input,t=(z,e)=>A.t(z,e),bar=PaperLoom.el(doc,'div',null,'pl-ai-format-bar'),preview=PaperLoom.el(doc,'div',null,'pl-ai-compose-preview');bar.hidden=preview.hidden=true;preview.dataset.clContent='true';
-  const keepBottom=run=>{const log=view.frame.querySelector('.pl-ai-transcript'),follow=log.scrollHeight-log.scrollTop-log.clientHeight<90;run();if(follow)doc.defaultView.requestAnimationFrame(()=>{if(!view.disposed)view.scrollToLatest();});};
-  const toggle=PaperLoom.button(doc,'Aa',()=>keepBottom(()=>{bar.hidden=!bar.hidden;toggle.setAttribute('aria-expanded',String(!bar.hidden));if(bar.hidden)preview.hidden=true;}));toggle.className='pl-ai-format-toggle';toggle.title=toggle.getAttribute('aria-label')||t('格式与图片','Formatting and images');toggle.setAttribute('aria-label',toggle.title);toggle.setAttribute('aria-expanded','false');options.prepend(toggle);
-  const insert=(before,after='')=>{const start=input.selectionStart,end=input.selectionEnd,selected=input.value.slice(start,end);if(input.value.length+before.length+after.length>input.maxLength)return;input.setRangeText(before+selected+after,start,end,'end');input.focus();input.setSelectionRange(start+before.length,end+before.length);preview.hidden=true;};
-  for(const [label,title,before,after]of [['B',t('粗体','Bold'),'**','**'],['I',t('斜体','Italic'),'*','*'],['≡',t('列表','List'),'\n- ',''],['❯',t('引用','Quote'),'\n> ',''],['<>',t('代码','Code'),'`','`']]){const button=PaperLoom.button(doc,label,()=>insert(before,after));button.title=title;button.setAttribute('aria-label',title);bar.append(button);}
-  bar.append(A.iconButton(doc,t('预览格式','Preview formatting'),'eye',()=>keepBottom(()=>{preview.hidden=!preview.hidden;if(!preview.hidden)A.renderText(doc,preview,input.value);})),A.iconButton(doc,t('添加图片','Attach image'),'image-plus',async()=>{try{await A.attachImage(view);}catch(e){view.notice(A.error(e));}}));
-  const generate=A.iconButton(doc,t('生成图片','Generate image'),'sparkles',async()=>{try{await A.generateImage(view,input.value);}catch(e){view.notice(A.error(e));}});bar.append(generate);generate.dataset.aiGenerate='true';composer.prepend(bar,preview);
-  input.addEventListener('input',()=>{preview.hidden=true;});
-  input.addEventListener('paste',e=>{const file=[...(e.clipboardData?.files||[])].find(f=>/^image\/(png|jpeg|webp)$/.test(f.type));if(file){e.preventDefault();A.attachImage(view,file).catch(err=>view.notice(A.error(err)));}});
-  input.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&!e.altKey&&['b','i'].includes(e.key.toLowerCase())){e.preventDefault();const mark=e.key.toLowerCase()==='b'?'**':'*';insert(mark,mark);}});
-  return {reset(){preview.hidden=true;},dispose(){preview.replaceChildren();}};
  }
 });

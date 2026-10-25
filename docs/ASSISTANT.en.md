@@ -69,6 +69,12 @@ A new comparison question entered from a PDF can also use multiple library selec
 
 Loom retrieves passages relevant to the question and can read further pages, indexed text, annotations or notes as needed. Opening the assistant does not upload the entire PDF. Sending a question submits the material needed to answer it. Long papers and conversations have context limits: associating a paper with a chat does not mean every page is read on every turn.
 
+From a selection or reading entry, **From selection / From reading · page** appears above the input. Click it to preview the original passage, translation and paper title above the composer; click outside or press Esc to close. The same conversation retains this passage until you enter from another selection or reading passage.
+
+<p align="center">
+  <a href="images/assistant-context-en.png"><img src="images/assistant-context-en.png" alt="Entry passage and translation above the composer" width="384"></a>
+</p>
+
 ## Ask a focused question
 
 A small question does not need a long prompt. For comparisons and experimental design, name the studies and the difference you care about.
@@ -106,13 +112,13 @@ For an important conclusion, follow the page link to the experiment and then ins
 
 ### Format without filling the screen
 
-Choose **Aa** beside the input for bold, italic, list, quote and code tools, then use the eye to preview. You can also type Markdown directly. Ctrl/Cmd+B and Ctrl/Cmd+I format selected text; Enter sends and Shift+Enter adds a line. Confirming an IME candidate does not send the message.
+Type Markdown or paste formatted text directly. Bold, italic, lists, quotations and tables render inside the sent message; there is no formatting toolbar to open. Ctrl/Cmd+B and Ctrl/Cmd+I format selected text; Enter sends and Shift+Enter adds a line. Confirming an IME candidate does not send the message.
 
 Questions and answers use slightly different theme tints. Text, tables, images and activity remain inside their own message bubbles. For wider tables, choose **1×, 2× or 3×** under **main Settings → Research assistant**. The default matches Settings; larger widths remain capped to the current window.
 
 ### Ask about a figure
 
-Use the image button or paste one PNG, JPEG or WebP per message, up to 8 MB. Before sending, its longest edge is reduced to at most 1,600 pixels. The message retains a thumbnail; click it to enlarge and download. A conversation can retain up to 12 images.
+Use **＋** at the lower left of the input, paste, or drag in one PNG, JPEG or WebP per message, up to 8 MB. Before sending, its longest edge is reduced to at most 1,600 pixels. The message retains a thumbnail; click it to enlarge and download. A conversation can retain up to 12 images.
 
 For tiny axes, dense labels or multi-panel figures, attach the relevant area and name the panel and question. With Vision enabled on a compatible model, you can also ask it to inspect a PDF page. A caption alone supports a discussion of its text, not claims about an unseen curve or an exact measurement.
 
@@ -120,7 +126,7 @@ For tiny axes, dense labels or multi-panel figures, attach the relevant area and
 
 ### Draft an illustration
 
-After configuring an image model, describe an illustration in the input and choose Generate image. For example: “Draw a simple four-stage experimental workflow: sampling, grouping, treatment and imaging.” Generation submits that description, without automatically including the full paper or chat history.
+After configuring an image model, explicitly ask for an illustration and send the message. No separate mode is needed. For example: “Draw a simple four-stage experimental workflow: sampling, grouping, treatment and imaging.” Generation normally submits only that description. If you explicitly refer to the current passage or previous answer, it also includes the entry passage, or otherwise the latest complete answer, falling back to the paper abstract; this reference is capped at 12,000 characters. It does not automatically send the full paper or entire history.
 
 The result is stored as a thumbnail inside an assistant message, with enlargement and download. This supports text-to-image, not editing an attached image. Remove any pending attachment before generating.
 

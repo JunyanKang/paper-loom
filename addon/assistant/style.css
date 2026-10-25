@@ -290,18 +290,18 @@ button.pl-ai-history-main,.pl-ai-history-main>button {
 /* One input surface: the send control sits inside the reserved right gutter. */
 .pl-ai-composer {position:relative;padding:8px 12px;border-top:0}
 .pl-ai-composer textarea {
-  min-height:60px;height:72px;max-height:120px;resize:none;
-  padding:9px 44px 9px 10px!important;
+  min-height:82px;height:82px;max-height:140px;resize:none;
+  padding:9px 10px 37px!important;
 }
 .pl-ai-composer-tools {
-  position:absolute;right:19px;bottom:15px;display:flex;align-items:center;
-  min-height:28px;margin:0;gap:0;
+  position:absolute;left:19px;right:19px;bottom:15px;display:flex;align-items:center;flex-wrap:nowrap;
+  min-height:28px;margin:0;gap:6px;
 }
-.pl-ai-composer-tools>[data-ai-send] {margin:0;border:0!important}
+.pl-ai-composer-tools>[data-ai-send] {margin:0 0 0 auto;border:0!important}
 @container (max-height:450px) {
   .pl-ai-composer {padding-block:4px}
-  .pl-ai-composer textarea {min-height:48px;height:48px;max-height:78px;padding-top:7px!important;padding-bottom:7px!important}
-  .pl-ai-composer-tools {bottom:13px}
+  .pl-ai-composer textarea {min-height:78px;height:78px;max-height:110px;padding-top:7px!important}
+  .pl-ai-composer-tools {bottom:11px}
   .pl-ai-history .pl-ai-history-row {padding-block:4px}
 }
 /* Long conversation and paper titles stay inside the fixed action-column layout. */
@@ -349,12 +349,19 @@ button.pl-ai-history-main,.pl-ai-history-main>button {
 .pl-ai-transcript {contain:layout style;overflow-anchor:none}
 .pl-ai-message {content-visibility:auto;contain-intrinsic-block-size:auto 120px}
 .pl-ai-composer {contain:layout style}
-.pl-ai-composer textarea {padding-right:70px!important}
-.pl-ai-format-toggle {font:600 12px/28px var(--pl-font,system-ui);min-width:28px;border:0!important;padding:0!important;background:transparent!important;color:var(--cl-muted)}
-.pl-ai-format-bar {display:flex;gap:3px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
-.pl-ai-format-bar>button {height:26px;min-width:26px;border:0!important;background:transparent!important;color:var(--cl-ink);padding:3px 5px!important;font:13px/20px var(--pl-font,system-ui)}
-.pl-ai-compose-preview {max-height:100px;overflow:auto;margin-bottom:4px;border:1px solid var(--cl-line);border-radius:7px;padding:6px 8px;font:13px/1.5 var(--pl-font,system-ui)}
-.pl-ai-compose-preview p {margin:0}
+/* The source stays outside the writing surface; attachments stay inside it. */
+.pl-ai-context-row {display:flex;align-items:center;margin:0 0 5px;min-width:0}
+.pl-ai-context-trigger {border:0!important;background:transparent!important;box-shadow:none!important;color:var(--cl-muted);font:12px/22px var(--pl-font,system-ui);padding:0!important;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-ai-context-trigger::before {content:'↳';margin-right:5px;color:var(--cl-accent)}
+.pl-ai-context-trigger::after {content:'⌃';margin-left:7px}
+.pl-ai-context-trigger[aria-expanded=true] {color:var(--cl-accent)}
+.pl-ai-input-hint {font:11px/20px var(--pl-font,system-ui);color:var(--cl-muted);white-space:nowrap;pointer-events:none}
+.pl-ai-context-popover {position:fixed;inset:auto;margin:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--cl-line);border-radius:12px;background:var(--cl-bg,#fff);color:var(--cl-ink);box-shadow:0 5px 20px #0003;overflow:auto;overscroll-behavior:contain;font:13px/1.6 var(--pl-font,system-ui)}
+.pl-ai-context-popover header {display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pl-ai-context-popover header strong {font-size:12px;font-weight:600}
+.pl-ai-context-popover h4 {margin:8px 0 3px;font-size:11px;font-weight:500;color:var(--cl-muted)}
+.pl-ai-context-popover p {margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.pl-ai-context-popover .pl-ai-context-paper {font-size:11px;color:var(--cl-muted);margin-top:2px}
 .pl-ai-media {display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
 .pl-ai-media button {padding:0!important;border:1px solid var(--cl-line)!important;border-radius:8px;overflow:hidden;background:transparent!important;color:var(--cl-muted);width:80px;height:66px}
 .pl-ai-media img {width:100%;height:100%;object-fit:cover;display:block}

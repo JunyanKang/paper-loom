@@ -3,6 +3,14 @@
 <p align="center"><a href="README.en.md">Home</a> · <a href="CHANGELOG.md">简体中文</a></p>
 
 
+## 1.2.8 · 2026-10-25
+
+Selection and reading entries show their source and page above the composer. Open the upward preview to review the original passage, translation and paper title. Reopening the same conversation keeps its passage; another entry supplies new context.
+
+An always-visible attachment button accepts file selection, pasted images and drag-and-drop. Type Markdown or paste formatted text without opening a toolbar. Explicit drawing requests use the configured image model when sent, with no separate generation mode. Images remain in their message bubbles and can be enlarged or downloaded.
+
+Notices survive progress refreshes, configuration failures retain drafts, and attachments are no longer cleared before successful message storage. Bilingual guides and current UI illustrations have been refreshed.
+
 ## 1.2.7 · 2026-10-24
 
 Lighter conversations: long histories render on demand, completed responses reuse their DOM, and formatting previews run only when requested. Streaming avoids repeated scans; timed PDF caches no longer retain readers strongly.

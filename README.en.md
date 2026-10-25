@@ -95,7 +95,7 @@ Loom is Paper Loom’s research assistant. It takes a question from your reading
 
 **Bring the answer back into your work.** Page links return to the PDF, while confirmed literature citations open reference cards on hover. External sources appear first and local page links are grouped by paper. Ask follow-up questions, preview an answer before saving it as a Zotero child note, or return to a conversation through the calendar.
 
-Text, tables, images and short activity updates stay inside their message bubbles. Use Markdown and formatting previews, keep figures as thumbnails, and click to enlarge or download. A separately selected compatible image model can draft illustrations. Choose 2× or 3× chat width for wider tables.
+Text, tables, images and short activity updates stay inside their message bubbles. Type Markdown or paste formatted text and attach images, keep figures as thumbnails, and click to enlarge or download. A separately selected compatible image model can draft illustrations. Choose 2× or 3× chat width for wider tables.
 
 Answers depend on the model, accessible text and image clarity. Reading excerpts is not the same as reading the whole paper; retrieving an abstract does not verify a conclusion. Use Loom to develop understanding and questions, then check important judgments against the sources.
 
@@ -119,7 +119,7 @@ Appearance, interface language, shortcuts, translation typography, citation styl
 | Translation | Text goes to your selected translation provider |
 | Paper, abstract and author queries | Relevant query information goes to the online source |
 | Research chat and vision | After Send, needed context and images go to the separately configured assistant model |
-| Text-to-image | After an explicit click, the description goes to the configured image model |
+| Text-to-image | An explicit drawing request is sent to the configured image model |
 
 Paper Loom requires no plugin account and adds no telemetry or usage analytics. Model providers may require an account, API key and payment. Local conversations and images do not automatically sync with Zotero. See [Privacy & data](docs/PRIVACY.en.md).
 
